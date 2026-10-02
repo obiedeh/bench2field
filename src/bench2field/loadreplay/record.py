@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 import time
 from dataclasses import asdict, dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -33,7 +33,7 @@ class LoadProfile:
     samples: list[dict[str, float]]
     targets: dict[str, float] = field(default_factory=dict)  # p50 of each target channel
     soak_temp_c: float | None = None                         # p50 of the hottest sensor
-    recorded_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    recorded_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     notes: str = ""
 
     def save(self, path: str | Path) -> Path:

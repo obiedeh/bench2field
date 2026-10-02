@@ -12,7 +12,7 @@ import platform
 import socket
 import uuid
 from dataclasses import asdict, dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -75,7 +75,7 @@ class RunReport:
     platform: dict[str, Any] = field(default_factory=dict)
     accuracy: dict[str, float] = field(default_factory=dict)
     run_id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
-    created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     schema_version: str = SCHEMA_VERSION
 
     def tier(self, target_hz: float) -> TierResult:
