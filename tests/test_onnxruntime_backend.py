@@ -73,13 +73,8 @@ def test_gpu_libraries_are_preloaded_for_nvidia_providers_only():
     assert not preload_gpu_libraries(old_ort, "CUDAExecutionProvider")
 
 
-def test_cuda_provider_runs_a_conv(tmp_path):
-    """Real hardware only. A Conv needs cuDNN, which is what a pip-installed
-    onnxruntime-gpu fails to find unless its libraries are preloaded."""
-    import onnxruntime as ort
-
-    if "CUDAExecutionProvider" not in ort.get_available_providers():
-        pytest.skip("this onnxruntime build has no CUDA provider")
+@pytest.fixture
+def conv_model(tmp_path):
     w = numpy_helper.from_array(np.ones((4, 3, 3, 3), dtype=np.float32), "w")
     g = helper.make_graph([helper.make_node("Conv", ["x", "w"], ["y"], pads=[1, 1, 1, 1])], "conv",
                           [helper.make_tensor_value_info("x", TensorProto.FLOAT, [1, 3, 16, 16])],
@@ -87,14 +82,27 @@ def test_cuda_provider_runs_a_conv(tmp_path):
     m = helper.make_model(g, opset_imports=[helper.make_opsetid("", 17)])
     m.ir_version = 8
     onnx.save(m, tmp_path / "conv.onnx")
+    return str(tmp_path / "conv.onnx")
+
+
+def test_cuda_provider_runs_a_conv(conv_model):
+    """Real hardware only. A Conv needs cuDNN, which is what a pip-installed
+    onnxruntime-gpu fails to find unless its libraries are preloaded."""
+    import onnxruntime as ort
+
+    if "CUDAExecutionProvider" not in ort.get_available_providers():
+        pytest.skip("this onnxruntime build has no CUDA provider")
     try:
-        be = OnnxRuntimeBackend(str(tmp_path / "conv.onnx"), OrtOptions(provider="cuda"))
+        be = OnnxRuntimeBackend(conv_model, OrtOptions(provider="cuda"))
     except Exception as exc:  # GPU build installed on a machine with no usable GPU
         pytest.skip(f"CUDA session could not be created: {exc}")
     if be.provider() != "CUDAExecutionProvider":
         pytest.skip("onnxruntime fell back to CPU: no usable GPU")
-    (y,) = be.infer(be.synthetic_input())
+    feeds = be.synthetic_input()
+    (y,) = be.infer(feeds)
     assert y.shape == (1, 4, 16, 16)
+    # All-ones 3x3 kernels: an interior output is the sum of its 3x3x3 input patch.
+    assert y[0, 0, 5, 5] == pytest.approx(feeds["x"][0, :, 4:7, 4:7].sum(), rel=1e-4, abs=1e-4)
 
 
 def test_silent_fallback_to_cpu_is_an_error(tiny_model, monkeypatch):
@@ -111,3 +119,4 @@ def test_silent_fallback_to_cpu_is_an_error(tiny_model, monkeypatch):
                         real_session(path, sess_options=sess_options, providers=["CPUExecutionProvider"]))
     with pytest.raises(RuntimeError, match="asked for TensorrtExecutionProvider but .* fell back to CPU"):
         OnnxRuntimeBackend(tiny_model, OrtOptions(provider="tensorrt", precision="fp16"))
+
