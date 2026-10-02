@@ -1,0 +1,102 @@
+{
+  "variant": {
+    "model": "tiny_conv",
+    "backend": "onnxruntime",
+    "provider": "CUDAExecutionProvider",
+    "precision": "fp32",
+    "technique": "baseline",
+    "notes": ""
+  },
+  "environment": "bench-replay:synth-gpu50+gpu",
+  "tiers": [
+    {
+      "target_hz": 30.0,
+      "actual_hz": 30.032684112984242,
+      "duration_s": 29.967351456638426,
+      "deadline_ms": 33.3,
+      "deadline_misses": 0,
+      "latency": {
+        "n": 900,
+        "p50_ms": 0.509878620505333,
+        "p95_ms": 1.0436157230287788,
+        "p99_ms": 1.1101568909361959,
+        "max_ms": 1.7332341521978378,
+        "mean_ms": 0.632037463494473
+      },
+      "telemetry": {
+        "n_samples": 60,
+        "gpu_mem_used_mb": {
+          "p50": 2719.5,
+          "peak": 2719.5
+        },
+        "gpu_mem_util_pct": {
+          "p50": 1.0,
+          "peak": 1.0
+        },
+        "gpu_util_pct": {
+          "p50": 50.0,
+          "peak": 51.0
+        },
+        "power_gpu_w": {
+          "p50": 369.961,
+          "peak": 375.626
+        },
+        "sm_clock_mhz": {
+          "p50": 2872.0,
+          "peak": 2872.0
+        },
+        "temp_gpu_c": {
+          "p50": 61.5,
+          "peak": 65.0
+        }
+      },
+      "response": {
+        "n": 900,
+        "p50_ms": 0.696107279509306,
+        "p95_ms": 1.1866115499287841,
+        "p99_ms": 1.2837808812037108,
+        "max_ms": 3.483800683170557,
+        "mean_ms": 0.7915524988331728
+      },
+      "dropped": 0,
+      "drop_late": false
+    }
+  ],
+  "platform": {
+    "host": "bench-5090",
+    "machine": "x86_64",
+    "system": "Linux",
+    "kernel": "6.17.0-22-generic",
+    "python": "3.12.3",
+    "telemetry": "nvml",
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "driver": "580.178.04",
+    "backend": "onnxruntime",
+    "onnxruntime": "1.30.0",
+    "provider_active": "CUDAExecutionProvider",
+    "precision": "fp32",
+    "intra_op_threads": "default",
+    "inter_op_threads": "default",
+    "allow_spinning": true,
+    "replay_profile": "synth-gpu50",
+    "replay_stressors": [
+      "gpu"
+    ],
+    "replay_thermal_soak": false,
+    "replay_soak_reached_c": null,
+    "replay_calibration": {
+      "gpu": {
+        "channel": "gpu_util_pct",
+        "target_pct": 50.0,
+        "duty": 0.5,
+        "achieved_pct": 50.0,
+        "steered": true,
+        "converged": true
+      }
+    }
+  },
+  "accuracy": {},
+  "run_id": "0970b5b8fa4f",
+  "created_at": "2026-10-02T11:33:06.908476+00:00",
+  "schema_version": "1.1"
+}
