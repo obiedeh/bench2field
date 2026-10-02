@@ -141,3 +141,4 @@ def test_verdict_go_nogo_and_no_data():
 def test_budget_yaml_loads():
     b = Budget.from_yaml("configs/budgets/rover_perception.yaml")
     assert b.target_hz == 30 and b.p99_ms == 25.0
+    assert b.power_channel == "power_board_w"  # never a sub-rail or a GPU-only reading
