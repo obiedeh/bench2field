@@ -200,6 +200,7 @@ def calibrate(
     tol_pct: float = 2.0,
     hold: int = 3,
     verify_steps: int = 5,
+    source: str | None = None,
 ) -> dict[str, dict[str, Any]]:
     """Steer each stressor to its target with the model idle, then freeze.
 
@@ -208,6 +209,11 @@ def calibrate(
     within `tol_pct` points of target for `hold` consecutive readings, or
     after `max_steps`. The duty cycles are then left alone for `verify_steps`
     more readings, whose median is the utilisation the frozen duty achieves.
+
+    `source` names the sampler the readings came from and is recorded with
+    every stressor it observed. It matters when comparing machines: NVML's GPU
+    utilisation and tegrastats' GR3D load are different quantities (see
+    docs/METHODOLOGY.md), so a target met on one is not the same load on the other.
     """
     stressors = list(stressors)
 
@@ -250,6 +256,7 @@ def calibrate(
             "target_pct": s.target_pct,
             "duty": float(s.duty.value),
             "achieved_pct": achieved,
+            "source": source if (s.name in steered or achieved is not None) else None,
             "steered": s.name in steered,
             "converged": achieved is not None and abs(achieved - s.target_pct) <= tol_pct,
         }
@@ -294,6 +301,7 @@ class Replay:
             self.stressors, self.sampler.read_once,
             wait=lambda: time.sleep(self.calibrate_step_s),
             max_steps=self.calibrate_steps,
+            source=self.sampler.name,
         )
         return self
 

@@ -46,7 +46,17 @@ def test_calibrate_leaves_unobserved_channel_open_loop():
     cal = calibrate([cpu, membw], plant.read_once, wait=lambda: None)
     assert cal["cpu"]["converged"] and cal["cpu"]["duty"] == pytest.approx(0.32, abs=0.03)
     assert cal["membw"] == {"channel": "emc_util_pct", "target_pct": 30.0, "duty": 0.30,
-                            "achieved_pct": None, "steered": False, "converged": False}
+                            "achieved_pct": None, "source": None, "steered": False,
+                            "converged": False}
+
+
+def test_calibration_records_which_sampler_the_utilisation_came_from():
+    cpu = FakeStressor("cpu", "cpu_util_mean_pct", 40.0)
+    membw = FakeStressor("membw", "emc_util_pct", 30.0)
+    plant = Plant([cpu, membw], {"cpu": 1.0})
+    cal = calibrate([cpu, membw], plant.read_once, wait=lambda: None, source="nvml")
+    assert cal["cpu"]["source"] == "nvml"
+    assert cal["membw"]["source"] is None  # never observed, so no source to name
 
 
 def test_calibrate_reports_a_target_it_cannot_reach():
@@ -79,5 +89,6 @@ def test_replay_freezes_duty_while_the_model_runs(monkeypatch):
         assert not hasattr(rp, "_steer")  # nothing left running that could react to it
         d = rp.describe()
     assert cpu.duty.value == frozen == d["replay_calibration"]["cpu"]["duty"]
+    assert d["replay_calibration"]["cpu"]["source"] == plant.name
     assert d["replay_calibration"]["cpu"]["achieved_pct"] == pytest.approx(40.0, abs=2.0)
     assert cpu.started and cpu.stopped
