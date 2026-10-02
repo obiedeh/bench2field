@@ -1,8 +1,10 @@
 # Handoff
 
-State of the hardware bring-up and case study 01 phase 1. Work is on the `hardware-bringup` branch; `master` is still the v0.1 commit. Nothing has been pushed or merged and no GitHub repo exists yet.
+State of the hardware bring-up and case study 01 phase 1. Work is on the `hardware-bringup` branch; `master` is still the v0.1 commit and has not been merged into or pushed.
 
-Last updated 2026-10-02. Steps 1 and 2 (5090 and Thor) are done. The Orin has not been reached. Step 4 (case study 01 phase 1) has not started.
+The GitHub repo exists: `github.com/obiedeh/bench2field`, **private**, with only `hardware-bringup` pushed (the owner's choice). CI has not run yet, because the workflow triggers on `master`/`main` and on pull requests. Before making the repo public, note that this file and `bringup/` name the owner's hosts and a LAN address.
+
+Last updated 2026-10-02. Steps 1 and 2 (5090 and Thor) are done. The Orin is switched off; the owner will say when it is back. `b2f sweep` is built. Step 4 (case study 01 phase 1) is waiting on the detector pick.
 
 ## Done
 
@@ -37,7 +39,13 @@ Last updated 2026-10-02. Steps 1 and 2 (5090 and Thor) are done. The Orin has no
 - CUDA and TensorRT fp16 runs of the tiny model both work.
 - Replay steering, 60 s, CPU target 40%: duty frozen at 0.342, 42.4% measured with the model idle, 41.9% median during the run. Memory-bandwidth target 30%: not measurable on the Thor, ran open-loop.
 
-**Step 3, parts 1 and 2**: `LICENSE` (Apache-2.0), `CONTRIBUTING.md`, and `.github/workflows/ci.yml` (pytest on CPU, Python 3.10 and 3.12).
+**Step 3**: `LICENSE` (Apache-2.0), `CONTRIBUTING.md`, `.github/workflows/ci.yml` (pytest on CPU, Python 3.10 and 3.12), and the private GitHub repo.
+
+**Start of step 4: repeats and `b2f sweep`** (the deferred methodology work, built before any baseline run)
+
+- `field_retention` and `b2f retention` take the repeats of each run: speedups from medians, each group's range printed, warnings for fewer than three repeats or a gain no larger than the spread. They refuse runs with different deadlines or drop-late policies, repeats that differ in variant, environment or power mode, and a baseline and optimized run in different power modes. Bench and field in different power modes is a warning, because they may be different boards.
+- `b2f sweep <config.yaml> --out-dir <dir>` runs the repeats of several variants alternately, one process and one report per run, with a manifest of the order. Checked on the 5090: `bringup/rtx5090/sweep_tiny/`.
+- Attribution and replay validity still take one run each; they are phase 5 work.
 
 ## What broke on real hardware, and the fix
 
@@ -56,13 +64,12 @@ Last updated 2026-10-02. Steps 1 and 2 (5090 and Thor) are done. The Orin has no
 
 ## Blocked, waiting on the owner
 
-1. **Orin (rest of step 2).** `field-orin` (192.0.2.10, user `jetson`) does not answer: no ping, `ssh` reports no route to host, and no `.local` name resolves. It needs powering on or a current address. Still to do there: the same checks under `bringup/orin/`, its JetPack and Python version (the Python 3.10 case), and confirming its total-power rail so `power_board_w` can be mapped for it.
-2. **Detector choice (step 4.1)** and **creating/pushing the GitHub repo (step 3.3)**.
+1. **Orin (rest of step 2).** `field-orin` (192.0.2.10, user `jetson`) is switched off; the owner will say when it is back. Still to do there: the same checks under `bringup/orin/`, its JetPack and Python version (the Python 3.10 case), and confirming its total-power rail so `power_board_w` can be mapped for it.
+2. **Detector choice (step 4.1).** Two options were proposed to the owner: YOLOX (s as student, l as teacher) and RT-DETRv2 (S as student, L as teacher), both Apache-2.0. No pick yet.
 
 ## Deferred by decision
 
 - **Thermal hold** (fix before phase 5). `--only thermal` soaks and then stops heating, so the device cools during the tiers. On a discrete GPU the soak heats the CPU but reads GPU temperature, so it would run to its 600 s timeout.
-- **`b2f sweep`** (build at the start of step 4, before the baseline runs): repeats, A/B alternation, median and spread, and checks that power mode and deadline match across runs compared by retention.
 
 ## Open questions
 
@@ -72,6 +79,8 @@ Last updated 2026-10-02. Steps 1 and 2 (5090 and Thor) are done. The Orin has no
 - **What the power budget means.** `rover_perception.yaml` describes `max_power_w: 15.0` as perception's share of the Orin NX envelope, but the gate compares it with total board power. Either the limit or the comment needs to change before a verdict on power means anything.
 - **Orin NX board-power rail.** Not mapped until confirmed against real output (expected `VDD_IN`). Until then the power gate on the rover reports no data.
 - **TensorRT minor version.** ONNX Runtime's docs do not say which 10.x minor 1.30.0 was built against (the table stops at 1.22). 10.16.1.11 loads and runs fp16 correctly on the 5090.
+
+- **Models with integer inputs.** `OnnxRuntimeBackend.synthetic_input` fills every input with random floats. RT-DETR's export has a second, int64 input (`orig_target_sizes`), which that would get wrong. Fix it if RT-DETR is picked.
 
 ## Ignored on purpose
 
