@@ -4,11 +4,19 @@ Each stressor reproduces one kind of background load and can run alone, which
 is what makes gap attribution possible: idle, then +thermal, +cpu, +membw,
 +gpu one at a time, then all together.
 
-Stressors are duty-cycled to hit the profile's median utilisation. When the
-sampler reports the same channel (tegrastats on Jetson reports CPU, GPU and
-EMC load), a proportional controller closes the loop; otherwise the duty
-cycle is open-loop and the replay must be checked with replay_validity()
-before its results are trusted.
+Stressors are duty-cycled to hit the profile's median utilisation. The
+profile was recorded without the model under test, so the duty cycles are
+calibrated the same way: before the benchmark starts, with the model idle, a
+proportional controller steers each stressor until the sampler reports the
+profile's target, and the duty cycles are then frozen for the run. Steering
+during the run would count the model's own load towards the target and back
+the stressors off by that much.
+
+Where the sampler does not report a stressor's channel (NVML has no CPU or
+memory-controller load), the duty cycle stays at its open-loop starting value
+and the replay must be checked with replay_validity() before its results are
+trusted. Either way the calibrated duty and the utilisation it achieved are
+recorded in the report.
 """
 
 from __future__ import annotations
@@ -16,7 +24,7 @@ from __future__ import annotations
 import multiprocessing as mp
 import threading
 import time
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from typing import Any
 
 import numpy as np
@@ -161,22 +169,89 @@ def build_stressors(profile: LoadProfile, only: Iterable[str] | None = None) -> 
     return out
 
 
+def calibrate(
+    stressors: Iterable[Stressor],
+    read: Callable[[], dict[str, float]],
+    wait: Callable[[], None],
+    max_steps: int = 30,
+    tol_pct: float = 2.0,
+    hold: int = 3,
+    verify_steps: int = 5,
+) -> dict[str, dict[str, Any]]:
+    """Steer each stressor to its target with the model idle, then freeze.
+
+    Each step waits, takes one reading and adjusts every stressor whose
+    channel the reading contains. Steering stops once all of them have been
+    within `tol_pct` points of target for `hold` consecutive readings, or
+    after `max_steps`. The duty cycles are then left alone for `verify_steps`
+    more readings, whose median is the utilisation the frozen duty achieves.
+    """
+    stressors = list(stressors)
+
+    def reading() -> dict[str, float]:
+        wait()
+        try:
+            return read()
+        except Exception:
+            return {}
+
+    steered: set[str] = set()
+    in_tol = 0
+    for _ in range(max_steps):
+        r = reading()
+        live = [s for s in stressors if s.channel and s.channel in r]
+        if not live:
+            break
+        steered |= {s.name for s in live}
+        if all(abs(r[s.channel] - s.target_pct) <= tol_pct for s in live):
+            in_tol += 1
+            if in_tol >= hold:
+                break
+            continue
+        in_tol = 0
+        for s in live:
+            s.adjust(r[s.channel])
+
+    seen: dict[str, list[float]] = {s.name: [] for s in stressors}
+    for _ in range(verify_steps if steered else 0):
+        r = reading()
+        for s in stressors:
+            if s.channel and s.channel in r:
+                seen[s.name].append(r[s.channel])
+
+    out: dict[str, dict[str, Any]] = {}
+    for s in stressors:
+        achieved = float(np.median(seen[s.name])) if seen[s.name] else None
+        out[s.name] = {
+            "channel": s.channel,
+            "target_pct": s.target_pct,
+            "duty": float(s.duty.value),
+            "achieved_pct": achieved,
+            "steered": s.name in steered,
+            "converged": achieved is not None and abs(achieved - s.target_pct) <= tol_pct,
+        }
+    return out
+
+
 class Replay:
     """Context manager: start the stressors, optionally pre-soak to the
-    profile's temperature, keep steering while the benchmark runs."""
+    profile's temperature, calibrate the duty cycles with the model idle, then
+    hold them fixed while the benchmark runs."""
 
     def __init__(self, profile: LoadProfile, sampler: TelemetrySampler | None = None,
                  only: Iterable[str] | None = None, thermal_soak: bool = True,
-                 soak_timeout_s: float = 600.0) -> None:
+                 soak_timeout_s: float = 600.0, calibrate_steps: int = 30,
+                 calibrate_step_s: float = 1.0) -> None:
         self.profile = profile
         self.sampler = sampler or NullSampler()
         self.only = None if only is None else list(only)
         self.thermal_soak = thermal_soak and (self.only is None or "thermal" in self.only)
         self.soak_timeout_s = soak_timeout_s
+        self.calibrate_steps = calibrate_steps
+        self.calibrate_step_s = calibrate_step_s
         self.stressors: list[Stressor] = []
-        self._steer_stop = threading.Event()
-        self._steer: threading.Thread | None = None
         self.soak_reached_c: float | None = None
+        self.calibration: dict[str, dict[str, Any]] = {}
 
     def __enter__(self) -> Replay:
         only = None if self.only is None else [s for s in self.only if s != "thermal"]
@@ -185,8 +260,11 @@ class Replay:
             s.start()
         if self.thermal_soak and self.profile.soak_temp_c is not None:
             self.soak_reached_c = self._soak(self.profile.soak_temp_c)
-        self._steer = threading.Thread(target=self._steer_loop, daemon=True)
-        self._steer.start()
+        self.calibration = calibrate(
+            self.stressors, self.sampler.read_once,
+            wait=lambda: time.sleep(self.calibrate_step_s),
+            max_steps=self.calibrate_steps,
+        )
         return self
 
     def _soak(self, target_c: float) -> float | None:
@@ -204,18 +282,7 @@ class Replay:
             heater.stop()
         return temp
 
-    def _steer_loop(self) -> None:
-        while not self._steer_stop.wait(1.0):
-            try:
-                reading = self.sampler.read_once()
-            except Exception:
-                continue
-            for s in self.stressors:
-                if s.channel and s.channel in reading:
-                    s.adjust(reading[s.channel])
-
     def __exit__(self, *exc: object) -> None:
-        self._steer_stop.set()
         for s in self.stressors:
             s.stop()
 
@@ -225,4 +292,7 @@ class Replay:
             "replay_stressors": [s.name for s in self.stressors],
             "replay_thermal_soak": self.thermal_soak,
             "replay_soak_reached_c": self.soak_reached_c,
+            # Per stressor: the frozen duty cycle and the utilisation it
+            # achieved with the model idle (None if the sampler has no channel).
+            "replay_calibration": self.calibration,
         }

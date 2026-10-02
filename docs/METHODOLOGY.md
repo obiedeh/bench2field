@@ -43,7 +43,7 @@ Recorded on the robot with its normal workload running and the model under test 
 
 ## 7. Replay validity
 
-A replay stands in for the field only if, for the baseline variant, replayed response p95 is within 10% of field response p95 at the same tier (`b2f validity`). Results that rely on replay alone state which profile was used and its validity error. Where the sampler reports a stressor's channel (tegrastats reports CPU, GPU and EMC load), replay steers the stressor's duty cycle to the profile target; elsewhere the duty cycle is open-loop and validity is the only check.
+A replay stands in for the field only if, for the baseline variant, replayed response p95 is within 10% of field response p95 at the same tier (`b2f validity`). Results that rely on replay alone state which profile was used and its validity error. Stressor duty cycles are calibrated before the benchmark starts, with the model idle as it was when the profile was recorded: where the sampler reports a stressor's channel (tegrastats reports CPU, GPU and EMC load), replay steers the duty cycle to the profile target, then freezes it for the run so the model's own load is not counted towards the target. Elsewhere the duty cycle is open-loop and validity is the only check. The frozen duty and the utilisation it achieved are recorded in the report.
 
 ## 8. Gap attribution
 
