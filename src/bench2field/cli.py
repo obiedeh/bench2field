@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import glob
 import json
 import sys
 from pathlib import Path
@@ -81,11 +82,23 @@ def _cmd_record(a: argparse.Namespace) -> int:
 def _cmd_retention(a: argparse.Namespace) -> int:
     from .metrics import field_retention
 
-    r = field_retention(*(RunReport.load(p) for p in
+    r = field_retention(*(_load_group(spec) for spec in
                           (a.bench_base, a.bench_opt, a.field_base, a.field_opt)),
                         target_hz=a.hz, stat=a.stat)
     print(r.summary())
     return 0
+
+
+def _load_group(spec: str) -> list[RunReport]:
+    """Reports named by one argument: a file, a glob, or a comma-separated
+    list of either. More than one report means repeats of the same run."""
+    paths: list[str] = []
+    for part in spec.split(","):
+        part = part.strip()
+        paths += sorted(glob.glob(part)) if glob.has_magic(part) else [part]
+    if not paths:
+        raise ValueError(f"no reports match {spec!r}")
+    return [RunReport.load(p) for p in paths]
 
 
 def _cmd_attribute(a: argparse.Namespace) -> int:
@@ -169,7 +182,7 @@ def main(argv: list[str] | None = None) -> int:
         s.set_defaults(fn=fn)
         if cmd == "retention":
             for x in ("bench_base", "bench_opt", "field_base", "field_opt"):
-                s.add_argument(x)
+                s.add_argument(x, help="report file, glob, or comma-separated list (repeats)")
         elif cmd == "attribute":
             s.add_argument("idle")
             s.add_argument("field")

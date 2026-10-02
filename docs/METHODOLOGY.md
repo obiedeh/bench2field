@@ -25,6 +25,8 @@ Before each tier the runner can wait until the hottest sensor is at or below a s
 
 Run each comparison at least three times, alternating variants (A, B, A, B, A, B) rather than in blocks, so slow drift such as warming or background jobs does not favour one variant. Report the median across repeats and the spread. A difference smaller than the spread between repeats is not a finding.
 
+`b2f retention` takes the repeats of each run (a glob or a comma-separated list), computes speedups from the medians, prints each group's range, and warns when there are fewer than three repeats or when a gain is no larger than the spread. It refuses to compare runs whose deadline or drop-late policy differ, repeats that differ in variant, environment or power mode, and a baseline and optimized run taken in different power modes. A bench and a field run in different power modes are allowed with a warning, since they may be different boards.
+
 ## 5. Field retention
 
 For an optimization O over baseline B at load tier h, using latency statistic s (response p95 by default):
