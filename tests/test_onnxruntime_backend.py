@@ -10,6 +10,7 @@ from bench2field.backends.onnxruntime import (  # noqa: E402
     OnnxRuntimeBackend,
     OrtOptions,
     preload_gpu_libraries,
+    preload_tensorrt_libraries,
 )
 
 
@@ -120,3 +121,60 @@ def test_silent_fallback_to_cpu_is_an_error(tiny_model, monkeypatch):
     with pytest.raises(RuntimeError, match="asked for TensorrtExecutionProvider but .* fell back to CPU"):
         OnnxRuntimeBackend(tiny_model, OrtOptions(provider="tensorrt", precision="fp16"))
 
+
+def test_tensorrt_preload_is_a_no_op_without_the_pip_package(monkeypatch):
+    import importlib.util
+
+    monkeypatch.setattr(importlib.util, "find_spec", lambda name: None)
+    assert preload_tensorrt_libraries() == []
+
+
+def test_tensorrt_preload_loads_libnvinfer_first_and_globally(tmp_path, monkeypatch):
+    import ctypes
+    import importlib.util
+    import types
+
+    for name in ("libnvonnxparser.so.10", "libnvinfer.so.10", "libnvinfer_builder_resource_sm120.so.10.16.1"):
+        (tmp_path / name).write_bytes(b"")
+    monkeypatch.setattr(importlib.util, "find_spec", lambda name: types.SimpleNamespace(
+        submodule_search_locations=[str(tmp_path)]))
+    calls = []
+    monkeypatch.setattr(ctypes, "CDLL", lambda path, mode=0: calls.append((path, mode)))
+    loaded = preload_tensorrt_libraries()
+    # The plugin library is absent here and skipped; builder resources are left to libnvinfer.
+    assert loaded == [str(tmp_path / "libnvinfer.so.10"), str(tmp_path / "libnvonnxparser.so.10")]
+    assert calls == [(p, ctypes.RTLD_GLOBAL) for p in loaded]
+
+
+def test_tensorrt_library_that_will_not_load_is_a_clear_error(tmp_path, monkeypatch):
+    import importlib.util
+    import types
+
+    (tmp_path / "libnvinfer.so.10").write_bytes(b"not an ELF file")
+    monkeypatch.setattr(importlib.util, "find_spec", lambda name: types.SimpleNamespace(
+        submodule_search_locations=[str(tmp_path)]))
+    with pytest.raises(RuntimeError, match="could not load TensorRT library"):
+        preload_tensorrt_libraries()
+
+
+def test_tensorrt_provider_runs_a_conv_in_fp16(conv_model, tmp_path):
+    """Real hardware only: needs a TensorRT-enabled onnxruntime and TensorRT 10."""
+    import ctypes
+    import importlib.util
+
+    import onnxruntime as ort
+
+    if "TensorrtExecutionProvider" not in ort.get_available_providers():
+        pytest.skip("this onnxruntime build has no TensorRT provider")
+    if importlib.util.find_spec("tensorrt_libs") is None:
+        try:
+            ctypes.CDLL("libnvinfer.so.10")
+        except OSError:
+            pytest.skip("TensorRT 10 is not installed")
+    be = OnnxRuntimeBackend(conv_model, OrtOptions(provider="tensorrt", precision="fp16",
+                                                   trt_cache_dir=str(tmp_path / "trt")))
+    assert be.provider() == "TensorrtExecutionProvider"
+    feeds = be.synthetic_input()
+    (y,) = be.infer(feeds)
+    assert y.shape == (1, 4, 16, 16)
+    assert y[0, 0, 5, 5] == pytest.approx(feeds["x"][0, :, 4:7, 4:7].sum(), rel=2e-2, abs=2e-2)

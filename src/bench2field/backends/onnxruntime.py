@@ -10,7 +10,10 @@ not a hidden default.
 
 from __future__ import annotations
 
+import ctypes
+import importlib.util
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -42,6 +45,36 @@ def preload_gpu_libraries(ort: Any, provider: str) -> bool:
     return True
 
 
+# Load order matters: the parser and plugin libraries depend on libnvinfer.
+TENSORRT_LIBRARIES = ("libnvinfer.so.10", "libnvinfer_plugin.so.10", "libnvonnxparser.so.10")
+
+
+def preload_tensorrt_libraries() -> list[str]:
+    """Load pip-installed TensorRT so onnxruntime's TensorRT provider finds it.
+
+    `pip install tensorrt-cu13` puts the libraries in site-packages/tensorrt_libs,
+    off the loader path, and onnxruntime.preload_dlls() does not cover
+    TensorRT. Loading them here by full path satisfies the provider's
+    dependency on their sonames. Returns the paths loaded: empty when the pip
+    package is absent, as on a Jetson, where TensorRT is a system library.
+    """
+    spec = importlib.util.find_spec("tensorrt_libs")
+    if spec is None or not spec.submodule_search_locations:
+        return []
+    libdir = Path(next(iter(spec.submodule_search_locations)))
+    loaded: list[str] = []
+    for name in TENSORRT_LIBRARIES:
+        path = libdir / name
+        if not path.exists():
+            continue
+        try:
+            ctypes.CDLL(str(path), mode=ctypes.RTLD_GLOBAL)
+        except OSError as exc:
+            raise RuntimeError(f"could not load TensorRT library {path}: {exc}") from exc
+        loaded.append(str(path))
+    return loaded
+
+
 @dataclass
 class OrtOptions:
     provider: str = "cpu"
@@ -68,6 +101,8 @@ class OnnxRuntimeBackend:
             raise RuntimeError(f"{prov} not available; this build has {available}")
 
         preload_gpu_libraries(ort, prov)
+        if prov == "TensorrtExecutionProvider":
+            preload_tensorrt_libraries()
 
         so = ort.SessionOptions()
         if opts.intra_op_threads:
