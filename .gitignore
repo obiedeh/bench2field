@@ -5,7 +5,7 @@ __pycache__/
 .trt_cache/
 build/
 dist/
-runs/
+/runs/
 profiles/*.json
 !profiles/.gitkeep
 models/*.onnx
