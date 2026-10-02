@@ -24,6 +24,24 @@ PROVIDER_ALIASES = {
 }
 
 
+NVIDIA_PROVIDERS = ("CUDAExecutionProvider", "TensorrtExecutionProvider")
+
+
+def preload_gpu_libraries(ort: Any, provider: str) -> bool:
+    """Load CUDA and cuDNN before an NVIDIA session is created.
+
+    `pip install onnxruntime-gpu[cuda,cudnn]` puts those libraries under
+    site-packages/nvidia/, which is not on the loader path, so without this the
+    CUDA provider loads and then fails on its first cuDNN call ("dlopen failed
+    for libcudnn.so"). onnxruntime.preload_dlls() (1.21+) finds them there and
+    falls back to the system copies. Returns whether a preload was attempted.
+    """
+    if provider not in NVIDIA_PROVIDERS or not hasattr(ort, "preload_dlls"):
+        return False
+    ort.preload_dlls()
+    return True
+
+
 @dataclass
 class OrtOptions:
     provider: str = "cpu"
@@ -48,6 +66,8 @@ class OnnxRuntimeBackend:
         available = ort.get_available_providers()
         if prov not in available:
             raise RuntimeError(f"{prov} not available; this build has {available}")
+
+        preload_gpu_libraries(ort, prov)
 
         so = ort.SessionOptions()
         if opts.intra_op_threads:
