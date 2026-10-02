@@ -82,16 +82,20 @@ def test_no_warmup_means_no_warmup_calls():
 
 
 def test_nvml_sampler_on_real_hardware():
-    """Runs only where NVML works: every channel present and physically sane."""
+    """Runs only where NVML works: the channels the device supports are
+    present and physically sane. Memory and clock are optional (Jetson Thor
+    does not report them)."""
     if not NvmlSampler.available():
         pytest.skip(f"NVML unavailable: {NvmlSampler.unavailable_reason()}")
     s = NvmlSampler()
     try:
         r = s.read_once()
-        assert set(r) == NVML_CHANNELS and all(isinstance(v, float) for v in r.values())
+        required = {"power_gpu_w", "temp_gpu_c", "gpu_util_pct", "gpu_mem_util_pct"}
+        assert required <= set(r) <= NVML_CHANNELS
+        assert all(isinstance(v, float) for v in r.values())
         assert 1 < r["power_gpu_w"] < 1000 and 0 < r["temp_gpu_c"] < 110
         assert 0 <= r["gpu_util_pct"] <= 100 and 0 <= r["gpu_mem_util_pct"] <= 100
-        assert r["gpu_mem_used_mb"] > 0 and r["sm_clock_mhz"] > 0
+        assert r.get("gpu_mem_used_mb", 1) > 0 and r.get("sm_clock_mhz", 1) > 0
         d = s.describe()
         assert isinstance(d["gpu"], str) and d["gpu"] and isinstance(d["driver"], str)
         assert s.read_max_temp_c() == pytest.approx(r["temp_gpu_c"], abs=5)

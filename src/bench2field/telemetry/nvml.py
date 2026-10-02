@@ -44,16 +44,28 @@ class NvmlSampler(TelemetrySampler):
 
     def read_once(self) -> dict[str, float]:
         nv, h = self._nv, self._h
-        util = nv.nvmlDeviceGetUtilizationRates(h)
-        mem = nv.nvmlDeviceGetMemoryInfo(h)
-        return {
-            "power_gpu_w": nv.nvmlDeviceGetPowerUsage(h) / 1000.0,
-            "temp_gpu_c": float(nv.nvmlDeviceGetTemperature(h, nv.NVML_TEMPERATURE_GPU)),
-            "gpu_util_pct": float(util.gpu),
-            "gpu_mem_util_pct": float(util.memory),
-            "gpu_mem_used_mb": mem.used / 2**20,
-            "sm_clock_mhz": float(nv.nvmlDeviceGetClockInfo(h, nv.NVML_CLOCK_SM)),
-        }
+        unsupported = getattr(nv, "NVMLError_NotSupported", ())
+        out: dict[str, float] = {}
+
+        def read(channels) -> None:
+            # A device may not implement every query: Jetson Thor's NVML has no
+            # memory info and no clock info. Leave those channels out and keep
+            # the rest; any other NVML error still propagates.
+            try:
+                out.update(channels())
+            except unsupported:
+                pass
+
+        def utilisation() -> dict[str, float]:
+            util = nv.nvmlDeviceGetUtilizationRates(h)
+            return {"gpu_util_pct": float(util.gpu), "gpu_mem_util_pct": float(util.memory)}
+
+        read(lambda: {"power_gpu_w": nv.nvmlDeviceGetPowerUsage(h) / 1000.0})
+        read(lambda: {"temp_gpu_c": float(nv.nvmlDeviceGetTemperature(h, nv.NVML_TEMPERATURE_GPU))})
+        read(utilisation)
+        read(lambda: {"gpu_mem_used_mb": nv.nvmlDeviceGetMemoryInfo(h).used / 2**20})
+        read(lambda: {"sm_clock_mhz": float(nv.nvmlDeviceGetClockInfo(h, nv.NVML_CLOCK_SM))})
+        return out
 
     def describe(self) -> dict[str, Any]:
         nv, h = self._nv, self._h

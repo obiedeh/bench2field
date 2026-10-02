@@ -29,6 +29,9 @@ def fake_pynvml(calls=None):
     m.nvmlDeviceGetTemperature = lambda h, sensor: 51
     m.nvmlDeviceGetClockInfo = lambda h, clock: 2400
     m.nvmlDeviceGetName = lambda h: b"Fake GPU"
+    m.NVMLError = type("NVMLError", (Exception,), {})
+    m.NVMLError_NotSupported = type("NVMLError_NotSupported", (m.NVMLError,), {})
+    m.NVMLError_GpuIsLost = type("NVMLError_GpuIsLost", (m.NVMLError,), {})
     m.nvmlSystemGetDriverVersion = lambda: "1.2.3"
     return m
 
@@ -77,6 +80,33 @@ def test_nvml_power_is_gpu_power_and_close_shuts_nvml_down(monkeypatch):
     assert s.describe() == {"telemetry": "nvml", "gpu": "Fake GPU", "driver": "1.2.3"}
     s.close()
     assert calls[-1] == "shutdown"
+
+
+def test_nvml_channels_a_device_does_not_support_are_left_out(monkeypatch):
+    """Jetson AGX Thor: NVML answers power, temperature and utilisation but
+    raises NotSupported for memory info and clock info
+    (bringup/thor/nvml_supported_calls.txt)."""
+    nv = fake_pynvml()
+
+    def not_supported(*args):
+        raise nv.NVMLError_NotSupported()
+
+    nv.nvmlDeviceGetMemoryInfo = nv.nvmlDeviceGetClockInfo = not_supported
+    monkeypatch.setitem(sys.modules, "pynvml", nv)
+    r = NvmlSampler().read_once()
+    assert set(r) == {"power_gpu_w", "temp_gpu_c", "gpu_util_pct", "gpu_mem_util_pct"}
+
+
+def test_other_nvml_errors_are_not_swallowed(monkeypatch):
+    nv = fake_pynvml()
+
+    def lost(*args):
+        raise nv.NVMLError_GpuIsLost()
+
+    nv.nvmlDeviceGetPowerUsage = lost
+    monkeypatch.setitem(sys.modules, "pynvml", nv)
+    with pytest.raises(nv.NVMLError_GpuIsLost):
+        NvmlSampler().read_once()
 
 
 def test_record_load_closes_its_sampler(monkeypatch, tmp_path):
