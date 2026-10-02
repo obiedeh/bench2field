@@ -95,3 +95,19 @@ def test_cuda_provider_runs_a_conv(tmp_path):
         pytest.skip("onnxruntime fell back to CPU: no usable GPU")
     (y,) = be.infer(be.synthetic_input())
     assert y.shape == (1, 4, 16, 16)
+
+
+def test_silent_fallback_to_cpu_is_an_error(tiny_model, monkeypatch):
+    """Seen on the RTX 5090 with no TensorRT libraries installed: the
+    provider is listed as available, session creation logs an error and
+    comes back on CPU, and the run would have gone ahead."""
+    import onnxruntime as ort
+
+    real_session = ort.InferenceSession
+    monkeypatch.setattr(ort, "get_available_providers",
+                        lambda: ["TensorrtExecutionProvider", "CPUExecutionProvider"])
+    monkeypatch.setattr(ort, "preload_dlls", lambda: None, raising=False)
+    monkeypatch.setattr(ort, "InferenceSession", lambda path, sess_options=None, providers=None:
+                        real_session(path, sess_options=sess_options, providers=["CPUExecutionProvider"]))
+    with pytest.raises(RuntimeError, match="asked for TensorrtExecutionProvider but .* fell back to CPU"):
+        OnnxRuntimeBackend(tiny_model, OrtOptions(provider="tensorrt", precision="fp16"))

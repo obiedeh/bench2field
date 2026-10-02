@@ -100,6 +100,15 @@ class OnnxRuntimeBackend:
         if prov != "CPUExecutionProvider":
             providers.append("CPUExecutionProvider")  # fallback for unsupported ops
         self.session = ort.InferenceSession(model_path, sess_options=so, providers=providers)
+        # If a provider's libraries are missing, onnxruntime prints an error,
+        # retries on CPU and carries on. A benchmark must not: a "TensorRT"
+        # run that quietly measured the CPU is worse than no run.
+        active = self.session.get_providers()[0]
+        if active != prov:
+            raise RuntimeError(
+                f"asked for {prov} but onnxruntime fell back to {active}; "
+                "its libraries failed to load (see the onnxruntime error above)"
+            )
         self.model_path = model_path
         self._inputs = self.session.get_inputs()
 
