@@ -15,9 +15,12 @@ BASE = Variant("det", "onnxruntime", "TensorrtExecutionProvider", "fp32")
 OPT = Variant("det", "onnxruntime", "TensorrtExecutionProvider", "int8", "ptq")
 
 
-def report(variant, env, p95, hz=30.0, misses=0, telemetry=None, accuracy=None):
-    lat = latency_stats([p95 * 0.8] * 94 + [p95] * 6)
-    return RunReport(variant, env, [TierResult(hz, hz, 10.0, 33.3, misses, lat, telemetry or {})],
+def report(variant, env, p95, hz=30.0, misses=0, telemetry=None, accuracy=None, service_p95=None):
+    """A one-tier report whose response p95 is `p95` (service time too, unless given)."""
+    resp = latency_stats([p95 * 0.8] * 94 + [p95] * 6)
+    svc = resp if service_p95 is None else latency_stats([service_p95 * 0.8] * 94 + [service_p95] * 6)
+    return RunReport(variant, env,
+                     [TierResult(hz, hz, 10.0, 33.3, misses, svc, telemetry or {}, response=resp)],
                      accuracy=accuracy or {})
 
 

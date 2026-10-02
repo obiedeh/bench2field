@@ -16,6 +16,7 @@ import json
 import sys
 from pathlib import Path
 
+from .metrics import DEFAULT_STAT
 from .schema import ENV_BENCH_IDLE, ENV_REPLAY_PREFIX, RunReport, Variant
 
 
@@ -45,15 +46,17 @@ def _cmd_run(a: argparse.Namespace) -> int:
     variant = Variant(model=a.name or Path(a.model).stem, backend=be.name,
                       provider=be.provider(), precision=a.precision, technique=a.technique)
     cfg = RunConfig(tiers_hz=[float(x) for x in a.tiers.split(",")], duration_s=a.duration,
-                    warmup_s=a.warmup, deadline_ms=a.deadline_ms, cooldown_max_c=a.cooldown_c)
+                    warmup_s=a.warmup, deadline_ms=a.deadline_ms, cooldown_max_c=a.cooldown_c,
+                    drop_late=a.drop_late)
     with replay_ctx as rc:
         if rc is not None:
             extra |= rc.describe()
         report = run(variant, env, be.infer, lambda i: feeds, cfg, sampler, extra)
     out = report.save(a.out or f"reports/{report.run_id}.json")
     for t in report.tiers:
-        print(f"{t.target_hz:>7g} Hz  p50 {t.latency.p50_ms:.3f}  p95 {t.latency.p95_ms:.3f}  "
-              f"p99 {t.latency.p99_ms:.3f} ms  misses {t.deadline_misses}")
+        print(f"{t.target_hz:>7g} Hz  response p50 {t.response.p50_ms:.3f}  p95 {t.response.p95_ms:.3f}  "
+              f"p99 {t.response.p99_ms:.3f} ms  (service p95 {t.latency.p95_ms:.3f} ms)  "
+              f"misses {t.deadline_misses}  dropped {t.dropped}")
     print(f"wrote {out}")
     return 0
 
@@ -125,6 +128,9 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--duration", type=float, default=60.0)
     r.add_argument("--warmup", type=float, default=5.0)
     r.add_argument("--deadline-ms", type=float, default=33.3)
+    r.add_argument("--drop-late", action="store_true",
+                   help="skip a frame already past its deadline when it would start "
+                        "(camera-style); drops are counted separately from misses")
     r.add_argument("--batch", type=int, default=1)
     r.add_argument("--intra-threads", type=int, default=0)
     r.add_argument("--inter-threads", type=int, default=0)
@@ -150,7 +156,9 @@ def main(argv: list[str] | None = None) -> int:
                               ("validity", _cmd_validity, "check a replay against the field")):
         s = sub.add_parser(cmd, help=helptext)
         s.add_argument("--hz", type=float, required=True)
-        s.add_argument("--stat", default="p95_ms")
+        s.add_argument("--stat", default=DEFAULT_STAT,
+                       help="response_{p50,p95,p99,max,mean}_ms (arrival to completion) "
+                            "or {p50,p95,p99,max,mean}_ms (service time)")
         s.set_defaults(fn=fn)
         if cmd == "retention":
             for x in ("bench_base", "bench_opt", "field_base", "field_opt"):

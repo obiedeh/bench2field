@@ -17,7 +17,7 @@ Bench2Field measures that loss directly. Every optimization is run twice, once o
 | **Replay validity** | Does a recorded field load, replayed on the bench, reproduce field latency closely enough to stand in for the robot? |
 | **Readiness verdict** | GO / NO-GO / INCOMPLETE against a deployment budget written before testing: loop deadline, miss rate, power, temperature, accuracy floor. |
 
-Latency is measured open-loop at fixed request rates, the way camera frames arrive. A frame misses its deadline when it finishes late relative to when it arrived, so queueing behind a slow frame counts.
+Latency is measured open-loop at fixed request rates, the way camera frames arrive. Each tier reports response time (arrival to completion, queueing included) and service time (inference alone); comparisons use response p95. A frame misses its deadline when it finishes late relative to when it arrived, and `--drop-late` skips frames that are already stale, counting them separately.
 
 ## How it works
 

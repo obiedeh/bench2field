@@ -20,7 +20,13 @@ import numpy as np
 
 from .schema import LatencyStats, RunReport
 
-STATS = ("p50_ms", "p95_ms", "p99_ms", "max_ms", "mean_ms")
+# Service-time stats, and the same stats on response time (scheduled arrival
+# to completion). Comparisons default to response p95: it is what the robot's
+# control loop experiences, and it includes queueing behind slow frames.
+SERVICE_STATS = ("p50_ms", "p95_ms", "p99_ms", "max_ms", "mean_ms")
+RESPONSE_PREFIX = "response_"
+STATS = tuple(RESPONSE_PREFIX + s for s in SERVICE_STATS) + SERVICE_STATS
+DEFAULT_STAT = "response_p95_ms"
 
 
 def latency_stats(samples_ms: Sequence[float]) -> LatencyStats:
@@ -41,10 +47,18 @@ def latency_stats(samples_ms: Sequence[float]) -> LatencyStats:
 def _stat(report: RunReport, target_hz: float, stat: str) -> float:
     if stat not in STATS:
         raise ValueError(f"stat must be one of {STATS}")
-    return float(getattr(report.tier(target_hz).latency, stat))
+    tier = report.tier(target_hz)
+    if not stat.startswith(RESPONSE_PREFIX):
+        return float(getattr(tier.latency, stat))
+    if tier.response is None:
+        raise ValueError(
+            f"run {report.run_id} (schema {report.schema_version}) has no response-time "
+            f"stats; re-run it, or compare service time with --stat {stat[len(RESPONSE_PREFIX):]}"
+        )
+    return float(getattr(tier.response, stat[len(RESPONSE_PREFIX):]))
 
 
-def speedup(baseline: RunReport, optimized: RunReport, target_hz: float, stat: str = "p95_ms") -> float:
+def speedup(baseline: RunReport, optimized: RunReport, target_hz: float, stat: str = DEFAULT_STAT) -> float:
     """Latency speedup of `optimized` over `baseline` at one load tier (>1 is faster)."""
     return _stat(baseline, target_hz, stat) / _stat(optimized, target_hz, stat)
 
@@ -72,7 +86,7 @@ def field_retention(
     field_baseline: RunReport,
     field_optimized: RunReport,
     target_hz: float,
-    stat: str = "p95_ms",
+    stat: str = DEFAULT_STAT,
 ) -> Retention:
     """Share of an optimization's bench gain that survives in the field.
 
@@ -130,7 +144,7 @@ def attribute_gap(
     field: RunReport,
     single_stressor_runs: Iterable[tuple[str, RunReport]],
     target_hz: float,
-    stat: str = "p95_ms",
+    stat: str = DEFAULT_STAT,
 ) -> Attribution:
     """Split the idle-bench to field slowdown across causes.
 
@@ -167,7 +181,7 @@ class ReplayValidity:
 
 def replay_validity(
     replay: RunReport, field: RunReport, target_hz: float,
-    stat: str = "p95_ms", tolerance: float = 0.10,
+    stat: str = DEFAULT_STAT, tolerance: float = 0.10,
 ) -> ReplayValidity:
     """A load profile may stand in for the field only if replaying it reproduces
     field latency within `tolerance` (relative). Check this before trusting any
