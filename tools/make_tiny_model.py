@@ -3,7 +3,7 @@
 Not a real model: four 3x3 conv+ReLU layers and a global pool on a
 1x3x224x224 input, with fixed random weights. It is just big enough to put
 measurable load on a GPU, and small enough to build a TensorRT engine in
-seconds. Needs `onnx`.
+seconds. Needs `onnx`: pip install -e ".[tools]".
 
     python tools/make_tiny_model.py models/tiny_conv.onnx
 """
