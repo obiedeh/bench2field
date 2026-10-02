@@ -48,10 +48,13 @@ def _cmd_run(a: argparse.Namespace) -> int:
     cfg = RunConfig(tiers_hz=[float(x) for x in a.tiers.split(",")], duration_s=a.duration,
                     warmup_s=a.warmup, deadline_ms=a.deadline_ms, cooldown_max_c=a.cooldown_c,
                     drop_late=a.drop_late)
-    with replay_ctx as rc:
-        if rc is not None:
-            extra |= rc.describe()
-        report = run(variant, env, be.infer, lambda i: feeds, cfg, sampler, extra)
+    try:
+        with replay_ctx as rc:
+            if rc is not None:
+                extra |= rc.describe()
+            report = run(variant, env, be.infer, lambda i: feeds, cfg, sampler, extra)
+    finally:
+        sampler.close()
     out = report.save(a.out or f"reports/{report.run_id}.json")
     for t in report.tiers:
         print(f"{t.target_hz:>7g} Hz  response p50 {t.response.p50_ms:.3f}  p95 {t.response.p95_ms:.3f}  "
@@ -65,7 +68,11 @@ def _cmd_record(a: argparse.Namespace) -> int:
     from .loadreplay import record
     from .telemetry import auto_sampler
 
-    prof = record(a.name, auto_sampler(a.interval), a.duration, a.notes)
+    sampler = auto_sampler(a.interval)
+    try:
+        prof = record(a.name, sampler, a.duration, a.notes)
+    finally:
+        sampler.close()
     print(json.dumps(prof.targets | {"soak_temp_c": prof.soak_temp_c}, indent=2))
     print(f"wrote {prof.save(a.out or f'profiles/{a.name}.json')}")
     return 0

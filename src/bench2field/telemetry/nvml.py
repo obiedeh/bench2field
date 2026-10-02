@@ -1,4 +1,9 @@
-"""Discrete NVIDIA GPU telemetry via NVML (RTX 5090 and similar)."""
+"""Discrete NVIDIA GPU telemetry via NVML (RTX 5090 and similar).
+
+NVML reports the GPU's own power draw only, so the channel is `power_gpu_w`.
+It is not board power and must not be compared with a Jetson's
+`power_board_w`, which covers the whole module.
+"""
 
 from __future__ import annotations
 
@@ -11,14 +16,23 @@ class NvmlSampler(TelemetrySampler):
     name = "nvml"
 
     @staticmethod
-    def available() -> bool:
+    def unavailable_reason() -> str | None:
+        """None if NVML can be used, otherwise why not."""
         try:
             import pynvml  # type: ignore
-
+        except ImportError:
+            return "pynvml is not installed (pip install 'bench2field[nvml]')"
+        try:
             pynvml.nvmlInit()
-            return pynvml.nvmlDeviceGetCount() > 0
-        except Exception:
-            return False
+            if pynvml.nvmlDeviceGetCount() == 0:
+                return "NVML reports no GPUs"
+        except Exception as exc:
+            return f"NVML failed to initialise ({exc!r})"
+        return None
+
+    @classmethod
+    def available(cls) -> bool:
+        return cls.unavailable_reason() is None
 
     def __init__(self, interval_s: float = 0.5, index: int = 0) -> None:
         super().__init__(interval_s)
@@ -49,3 +63,9 @@ class NvmlSampler(TelemetrySampler):
             "gpu": name.decode() if isinstance(name, bytes) else name,
             "driver": str(nv.nvmlSystemGetDriverVersion()),
         }
+
+    def close(self) -> None:
+        try:
+            self._nv.nvmlShutdown()
+        except Exception:
+            pass

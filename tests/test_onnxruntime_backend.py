@@ -36,3 +36,20 @@ def test_cpu_backend_runs_with_thread_options(tiny_model):
 def test_missing_provider_is_a_clear_error(tiny_model):
     with pytest.raises(RuntimeError, match="not available"):
         OnnxRuntimeBackend(tiny_model, OrtOptions(provider="migraphx"))
+
+
+def test_b2f_run_closes_the_sampler_even_when_the_run_fails(tiny_model, tmp_path, monkeypatch):
+    from bench2field import cli
+    from bench2field.telemetry import NullSampler
+
+    closed = []
+
+    class Sampler(NullSampler):
+        def close(self):
+            closed.append(True)
+
+    monkeypatch.setattr("bench2field.telemetry.auto_sampler", lambda interval_s=0.5: Sampler())
+    args = ["run", tiny_model, "--tiers", "50", "--duration", "0.1", "--warmup", "0"]
+    assert cli.main([*args, "--out", str(tmp_path / "r.json")]) == 0
+    assert cli.main([*args, "--environment", "lab"]) == 2  # rejected label
+    assert closed == [True, True]
