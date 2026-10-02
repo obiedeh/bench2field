@@ -1,0 +1,86 @@
+{
+  "variant": {
+    "model": "tiny_conv",
+    "backend": "onnxruntime",
+    "provider": "TensorrtExecutionProvider",
+    "precision": "fp16",
+    "technique": "baseline",
+    "notes": ""
+  },
+  "environment": "bench-idle",
+  "tiers": [
+    {
+      "target_hz": 30.0,
+      "actual_hz": 30.032955799093227,
+      "duration_s": 29.967080364003778,
+      "deadline_ms": 33.3,
+      "deadline_misses": 0,
+      "latency": {
+        "n": 900,
+        "p50_ms": 0.23471401073038578,
+        "p95_ms": 0.4078464349731801,
+        "p99_ms": 0.4996277671307325,
+        "max_ms": 0.7352209649980068,
+        "mean_ms": 0.2525177039206028
+      },
+      "telemetry": {
+        "n_samples": 60,
+        "gpu_mem_used_mb": {
+          "p50": 1982.9375,
+          "peak": 1982.9375
+        },
+        "gpu_mem_util_pct": {
+          "p50": 0.0,
+          "peak": 0.0
+        },
+        "gpu_util_pct": {
+          "p50": 1.0,
+          "peak": 2.0
+        },
+        "power_gpu_w": {
+          "p50": 68.6625,
+          "peak": 69.15
+        },
+        "sm_clock_mhz": {
+          "p50": 2460.0,
+          "peak": 2475.0
+        },
+        "temp_gpu_c": {
+          "p50": 45.0,
+          "peak": 45.0
+        }
+      },
+      "response": {
+        "n": 900,
+        "p50_ms": 0.41304086335003376,
+        "p95_ms": 0.5985518451780081,
+        "p99_ms": 0.7176460977643727,
+        "max_ms": 1.0376921854913235,
+        "mean_ms": 0.42037875805464053
+      },
+      "dropped": 0,
+      "drop_late": false
+    }
+  ],
+  "platform": {
+    "host": "bench-5090",
+    "machine": "x86_64",
+    "system": "Linux",
+    "kernel": "6.17.0-22-generic",
+    "python": "3.12.3",
+    "telemetry": "nvml",
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "driver": "580.178.04",
+    "backend": "onnxruntime",
+    "onnxruntime": "1.30.0",
+    "provider_active": "TensorrtExecutionProvider",
+    "precision": "fp16",
+    "intra_op_threads": "default",
+    "inter_op_threads": "default",
+    "allow_spinning": true
+  },
+  "accuracy": {},
+  "run_id": "30569bb02ea7",
+  "created_at": "2026-10-02T11:55:54.234735+00:00",
+  "schema_version": "1.1"
+}
