@@ -13,6 +13,8 @@ RTX 5090, driver 580.178.04 (CUDA 13.0), Python 3.12.3, onnxruntime-gpu 1.30.0, 
 | `run_trt_fp16_30hz.json` | 30 s at 30 Hz, TensorRT provider in fp16, idle bench. | `b2f run models/tiny_conv.onnx --provider tensorrt --precision fp16 --tiers 30 --duration 30` |
 | `run_cuda_fp32_30hz_replay_gpu50.json` | The same 30 Hz run with `synth_gpu50.json` replayed (GPU stressor only). | `b2f run models/tiny_conv.onnx --provider cuda --replay bringup/synth_gpu50.json --only gpu --tiers 30 --duration 30` |
 
+| `sweep_tiny/` | `b2f sweep` check: three alternating repeats of CUDA fp32 and TensorRT fp16, 10 s at 30 Hz each, with the manifest. | `b2f sweep configs/sweeps/bringup_tiny.yaml --out-dir bringup/rtx5090/sweep_tiny` |
+
 `run_cuda_fp32_30hz.json` was recorded with cuDNN 9.27.0.42; installing PyTorch afterwards moved the environment to cuDNN 9.19.0.56, which the other two files used.
 
 `synth_gpu50.json` is a hand-written profile with one target (`gpu_util_pct: 50`). It is not a field recording.

@@ -1,0 +1,92 @@
+{
+  "variant": {
+    "model": "tiny_conv",
+    "backend": "onnxruntime",
+    "provider": "TensorrtExecutionProvider",
+    "precision": "fp16",
+    "technique": "baseline",
+    "notes": ""
+  },
+  "environment": "bench-idle",
+  "tiers": [
+    {
+      "target_hz": 30.0,
+      "actual_hz": 30.09912376802063,
+      "duration_s": 9.967067556921393,
+      "deadline_ms": 33.3,
+      "deadline_misses": 0,
+      "latency": {
+        "n": 300,
+        "p50_ms": 0.2820321824401617,
+        "p95_ms": 0.41787440422922373,
+        "p99_ms": 0.5798628227785227,
+        "max_ms": 0.7039792835712433,
+        "mean_ms": 0.29232730468114215
+      },
+      "telemetry": {
+        "n_samples": 20,
+        "gpu_mem_used_mb": {
+          "p50": 1985.8125,
+          "peak": 1985.8125
+        },
+        "gpu_mem_util_pct": {
+          "p50": 0.0,
+          "peak": 0.0
+        },
+        "gpu_util_pct": {
+          "p50": 1.0,
+          "peak": 1.0
+        },
+        "power_gpu_w": {
+          "p50": 67.592,
+          "peak": 68.001
+        },
+        "sm_clock_mhz": {
+          "p50": 2467.0,
+          "peak": 2482.0
+        },
+        "temp_gpu_c": {
+          "p50": 43.0,
+          "peak": 43.0
+        }
+      },
+      "response": {
+        "n": 300,
+        "p50_ms": 0.4520774818956852,
+        "p95_ms": 0.5880946526303888,
+        "p99_ms": 0.72126233484596,
+        "max_ms": 0.8804877288639545,
+        "mean_ms": 0.4567491915076971
+      },
+      "dropped": 0,
+      "drop_late": false
+    }
+  ],
+  "platform": {
+    "host": "bench-5090",
+    "machine": "x86_64",
+    "system": "Linux",
+    "kernel": "6.17.0-22-generic",
+    "python": "3.12.3",
+    "telemetry": "nvml",
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "driver": "580.178.04",
+    "backend": "onnxruntime",
+    "onnxruntime": "1.30.0",
+    "provider_active": "TensorrtExecutionProvider",
+    "precision": "fp16",
+    "intra_op_threads": "default",
+    "inter_op_threads": "default",
+    "allow_spinning": true,
+    "sweep": {
+      "name": "bringup-tiny",
+      "label": "trt_fp16",
+      "repeat": 2,
+      "order": 4
+    }
+  },
+  "accuracy": {},
+  "run_id": "6cf062c6042b",
+  "created_at": "2026-10-02T13:01:37.678608+00:00",
+  "schema_version": "1.1"
+}
