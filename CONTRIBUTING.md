@@ -8,7 +8,7 @@ Bench2Field reports numbers people will make deployment decisions on, so the rul
 2. **No fabricated numbers.** Nothing goes into the README, docs or a commit message as a result unless it came from a committed run JSON on named hardware. Until then the placeholder says "pending".
 3. **One concern per commit**, with a message that says what changed and why.
 4. **No new dependencies without a stated reason.** Optional ones go in an extra in `pyproject.toml`.
-5. **A hardware bug gets a hardware fixture.** When real output from tegrastats, NVML or rocm-smi breaks a parser or an assumption, commit the captured output under `tests/fixtures/` with a test that reads it.
+5. **A hardware bug gets a hardware fixture.** When real output from tegrastats, NVML or rocm-smi breaks a parser or an assumption, commit the captured output under `bringup/<machine>/` (or `tests/fixtures/`) with a test that reads it.
 6. **Follow `docs/METHODOLOGY.md`.** A run that breaks one of its rules is not reported.
 
 ## Tests
