@@ -1,6 +1,7 @@
 """Command line: b2f <command>.
 
   b2f run          benchmark an ONNX model (optionally under a replayed field load)
+  b2f sweep        repeats of several variants, run alternately (A, B, A, B, ...)
   b2f record-load  record a field-load profile on the robot
   b2f retention    field retention of an optimization (4 reports)
   b2f attribute    split the bench-to-field gap across stressors
@@ -44,6 +45,9 @@ def _cmd_run(a: argparse.Namespace) -> int:
         suffix = "" if only is None else "+" + "+".join(sorted(only))
         env = f"{ENV_REPLAY_PREFIX}{prof.name}{suffix}"
 
+    if a.sweep:
+        extra["sweep"] = {"name": a.sweep, "label": a.sweep_label, "repeat": a.repeat, "order": a.order}
+
     variant = Variant(model=a.name or Path(a.model).stem, backend=be.name,
                       provider=be.provider(), precision=a.precision, technique=a.technique)
     cfg = RunConfig(tiers_hz=[float(x) for x in a.tiers.split(",")], duration_s=a.duration,
@@ -62,6 +66,16 @@ def _cmd_run(a: argparse.Namespace) -> int:
               f"p99 {t.response.p99_ms:.3f} ms  (service p95 {t.latency.p95_ms:.3f} ms)  "
               f"misses {t.deadline_misses}  dropped {t.dropped}")
     print(f"wrote {out}")
+    return 0
+
+
+def _cmd_sweep(a: argparse.Namespace) -> int:
+    from .sweep import SweepConfig, run_sweep, summarize
+
+    cfg = SweepConfig.from_yaml(a.config)
+    manifest = run_sweep(cfg, a.out_dir, resume=a.resume, config_file=a.config)
+    print(summarize(cfg, a.out_dir, a.stat))
+    print(f"wrote {len(manifest['runs'])} runs and sweep_{cfg.name}.json to {a.out_dir}")
     return 0
 
 
@@ -133,7 +147,7 @@ def _cmd_verdict(a: argparse.Namespace) -> int:
     return 0 if v.passed else 1
 
 
-def main(argv: list[str] | None = None) -> int:
+def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="b2f", description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -161,7 +175,18 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--only", help="replay only these stressors: thermal,cpu,membw,gpu")
     r.add_argument("--no-telemetry", action="store_true")
     r.add_argument("--out")
+    r.add_argument("--sweep", help="set by b2f sweep: the sweep this run belongs to")
+    r.add_argument("--sweep-label")
+    r.add_argument("--repeat", type=int)
+    r.add_argument("--order", type=int, help="set by b2f sweep: position in the sweep's run order")
     r.set_defaults(fn=_cmd_run)
+
+    sw = sub.add_parser("sweep", help="repeats of several variants, run alternately")
+    sw.add_argument("config", help="sweep YAML: name, variants, repeats, tiers (see configs/sweeps/)")
+    sw.add_argument("--out-dir", required=True, help="one report per run plus the sweep manifest")
+    sw.add_argument("--resume", action="store_true", help="keep reports already there, run the rest")
+    sw.add_argument("--stat", default=DEFAULT_STAT, help="statistic for the summary table")
+    sw.set_defaults(fn=_cmd_sweep)
 
     rec = sub.add_parser("record-load", help="record a field-load profile on the robot")
     rec.add_argument("name")
@@ -197,7 +222,11 @@ def main(argv: list[str] | None = None) -> int:
     v.add_argument("budget")
     v.set_defaults(fn=_cmd_verdict)
 
-    a = p.parse_args(argv)
+    return p
+
+
+def main(argv: list[str] | None = None) -> int:
+    a = build_parser().parse_args(argv)
     try:
         return a.fn(a)
     except (KeyError, ValueError, RuntimeError) as exc:

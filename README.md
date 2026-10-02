@@ -39,6 +39,9 @@ pytest
 b2f run models/detector_fp32.onnx --provider tensorrt --precision fp32 --tiers 10,30,100 --out runs/bench_fp32.json
 b2f run models/detector_fp32.onnx --provider tensorrt --precision int8 --technique ptq --out runs/bench_int8.json
 
+# or: three alternating repeats of both variants in one go, one report per run
+b2f sweep configs/sweeps/bringup_tiny.yaml --out-dir runs/sweep_tiny
+
 # on the robot, without the model running: record the background load
 b2f record-load rover-slam --duration 300
 
@@ -92,6 +95,7 @@ src/bench2field/
   runner.py        open-loop tiers, deadline accounting, cooldown gating
   metrics.py       field retention, gap attribution, replay validity
   verdict.py       readiness gates against a deployment budget
+  sweep.py         repeats of several variants, run alternately, with a manifest of the order
   telemetry/       tegrastats, NVML, rocm-smi samplers
   backends/        ONNX Runtime (CPU, CUDA, TensorRT, MIGraphX, ROCm)
   loadreplay/      record a field-load profile; replay it as CPU, memory-bandwidth, GPU and thermal stressors
