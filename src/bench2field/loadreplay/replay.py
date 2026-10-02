@@ -22,7 +22,6 @@ recorded in the report.
 from __future__ import annotations
 
 import multiprocessing as mp
-import threading
 import time
 from collections.abc import Callable, Iterable
 from typing import Any
@@ -33,6 +32,14 @@ from ..telemetry.base import NullSampler, TelemetrySampler
 from .record import LoadProfile
 
 PERIOD_S = 0.05  # duty-cycle window
+
+# Every stressor runs in its own spawned process. Spawn, not fork: the
+# benchmark process already holds runtime thread pools and usually a CUDA
+# context by the time replay starts, and neither survives a fork. It also
+# means the GPU stressor gets a CUDA context of its own, so the GPU
+# time-slices between it and the model the way it does between two processes
+# on the robot, and the stressor never holds the benchmark's GIL.
+_CTX = mp.get_context("spawn")
 
 
 def _duty_loop(work, duty: Any, stop: Any) -> None:  # runs in a worker process
@@ -67,14 +74,33 @@ def _cpu_worker(duty: Any, stop: Any) -> None:
     _duty_loop(_cpu_work, duty, stop)
 
 
+def _gpu_worker(duty: Any, stop: Any, size: int, conn: Any) -> None:
+    try:
+        import torch
+
+        if not torch.cuda.is_available():
+            raise RuntimeError("this PyTorch build has no usable CUDA or ROCm device")
+        a = torch.randn(size, size, device="cuda", dtype=torch.float16)
+
+        def work() -> None:
+            (a @ a).sum().item()  # .item() waits for the GPU, so duty is real busy time
+
+        work()
+        conn.send(("ready", torch.cuda.get_device_name(0)))
+    except BaseException as exc:  # report to the parent instead of dying silently
+        conn.send(("error", f"{type(exc).__name__}: {exc}"))
+        return
+    _duty_loop(work, duty, stop)
+
+
 class Stressor:
     """One duty-cycled load, optionally steered by a telemetry channel."""
 
     def __init__(self, name: str, channel: str | None, target_pct: float) -> None:
         self.name, self.channel, self.target_pct = name, channel, target_pct
-        self.duty = mp.Value("d", target_pct / 100.0)
-        self.stop_evt = mp.Event()
-        self.procs: list[mp.Process] = []
+        self.duty = _CTX.Value("d", target_pct / 100.0)
+        self.stop_evt = _CTX.Event()
+        self.procs: list[Any] = []
 
     def start(self) -> None:
         raise NotImplementedError
@@ -97,7 +123,7 @@ class CpuStressor(Stressor):
         self.workers = workers or mp.cpu_count()
 
     def start(self) -> None:
-        self.procs = [mp.Process(target=_cpu_worker, args=(self.duty, self.stop_evt), daemon=True)
+        self.procs = [_CTX.Process(target=_cpu_worker, args=(self.duty, self.stop_evt), daemon=True)
                       for _ in range(self.workers)]
         for p in self.procs:
             p.start()
@@ -109,49 +135,46 @@ class MemBwStressor(Stressor):
         self.workers, self.buffer_mb = workers, buffer_mb
 
     def start(self) -> None:
-        self.procs = [mp.Process(target=_membw_worker, args=(self.duty, self.stop_evt, self.buffer_mb),
-                                 daemon=True) for _ in range(self.workers)]
+        self.procs = [_CTX.Process(target=_membw_worker, args=(self.duty, self.stop_evt, self.buffer_mb),
+                                   daemon=True) for _ in range(self.workers)]
         for p in self.procs:
             p.start()
 
 
 class GpuStressor(Stressor):
-    """Duty-cycled matmuls on the GPU. Needs PyTorch with CUDA or ROCm (HIP
-    builds expose the same torch.cuda API)."""
+    """Duty-cycled matmuls on the GPU, in a process of its own with its own
+    CUDA context. Needs PyTorch with CUDA or ROCm (HIP builds expose the same
+    torch.cuda API). start() returns once the worker has run its first matmul,
+    and raises if it could not."""
 
-    def __init__(self, target_pct: float, size: int = 4096) -> None:
+    def __init__(self, target_pct: float, size: int = 4096, start_timeout_s: float = 120.0) -> None:
         super().__init__("gpu", "gpu_util_pct", target_pct)
         self.size = size
-        self._thread: threading.Thread | None = None
-        self._stop_t = threading.Event()
+        self.start_timeout_s = start_timeout_s
+        self.device: str | None = None
 
     def start(self) -> None:
-        import torch
-
-        if not torch.cuda.is_available():
-            raise RuntimeError("GpuStressor needs a CUDA or ROCm build of PyTorch")
-        a = torch.randn(self.size, self.size, device="cuda", dtype=torch.float16)
-
-        def work() -> None:
-            (a @ a).sum().item()
-
-        def loop() -> None:
-            while not self._stop_t.is_set():
-                d = min(max(self.duty.value, 0.0), 1.0)
-                t0 = time.perf_counter()
-                while time.perf_counter() < t0 + d * PERIOD_S:
-                    work()
-                rest = PERIOD_S - (time.perf_counter() - t0)
-                if rest > 0:
-                    time.sleep(rest)
-
-        self._thread = threading.Thread(target=loop, daemon=True)
-        self._thread.start()
-
-    def stop(self) -> None:
-        self._stop_t.set()
-        if self._thread:
-            self._thread.join(timeout=5)
+        parent, child = _CTX.Pipe(duplex=False)
+        proc = _CTX.Process(target=_gpu_worker, args=(self.duty, self.stop_evt, self.size, child),
+                            daemon=True)
+        proc.start()
+        child.close()
+        try:
+            if not parent.poll(self.start_timeout_s):
+                raise RuntimeError(f"GPU stressor did not start within {self.start_timeout_s:g} s")
+            try:
+                status, detail = parent.recv()
+            except EOFError:
+                raise RuntimeError("GPU stressor process died while starting") from None
+            if status != "ready":
+                raise RuntimeError(f"GPU stressor could not start: {detail}")
+        except RuntimeError:
+            proc.terminate()
+            proc.join(timeout=5)
+            raise
+        finally:
+            parent.close()
+        self.procs, self.device = [proc], detail
 
 
 def build_stressors(profile: LoadProfile, only: Iterable[str] | None = None) -> list[Stressor]:
@@ -256,8 +279,15 @@ class Replay:
     def __enter__(self) -> Replay:
         only = None if self.only is None else [s for s in self.only if s != "thermal"]
         self.stressors = build_stressors(self.profile, only)
-        for s in self.stressors:
-            s.start()
+        started: list[Stressor] = []
+        try:
+            for s in self.stressors:
+                s.start()
+                started.append(s)
+        except BaseException:
+            for s in started:  # do not leave earlier stressors loading the machine
+                s.stop()
+            raise
         if self.thermal_soak and self.profile.soak_temp_c is not None:
             self.soak_reached_c = self._soak(self.profile.soak_temp_c)
         self.calibration = calibrate(
