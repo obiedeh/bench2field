@@ -67,11 +67,17 @@ def run_tier(
     sampler = sampler or NullSampler()
     period = 1.0 / target_hz
 
-    warm_end = clock() + warmup_s
-    i = 0
-    while clock() < warm_end:
+    # Warm up at the tier's own rate, never flat out. A back-to-back burst
+    # leaves the device in a state the tier does not produce (on an RTX 5090,
+    # NVML power read 350 W for a 70 W tier and took ~3 s to settle), and that
+    # transient would be measured as part of the tier.
+    next_start = clock()
+    for i in range(max(1, int(round(warmup_s * target_hz))) if warmup_s > 0 else 0):
+        now = clock()
+        if now < next_start:
+            sleep(next_start - now)
+        next_start = clock() + period
         infer(make_input(i))
-        i += 1
 
     n_requests = max(1, int(round(duration_s * target_hz)))
     latencies: list[float] = []
