@@ -1,0 +1,14 @@
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.venv/
+.trt_cache/
+build/
+dist/
+runs/
+profiles/*.json
+!profiles/.gitkeep
+models/*.onnx
+models/*.engine
+*.nsys-rep
+*.ncu-rep

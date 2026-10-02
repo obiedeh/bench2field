@@ -1,0 +1,12 @@
+# Deployment budget for the rover's perception model (case study 01).
+# Written BEFORE testing. Values are starting assumptions to confirm against
+# the rover's real control loop, not measured results.
+name: rover-perception-30hz
+target_hz: 30            # camera frame rate the detector must keep up with
+p99_ms: 25.0             # leaves headroom inside the 33.3 ms frame period
+max_miss_rate: 0.001     # at most 1 late frame in 1,000
+max_power_w: 15.0        # share of the Orin NX power envelope given to perception
+power_channel: power_vin_sys_5v0_w   # confirm the rail name from tegrastats on the rover
+max_temp_c: 85.0
+min_accuracy:
+  map50: 0.0             # set once the baseline mAP on rover frames is measured

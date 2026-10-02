@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bench2field"
+version = "0.1.0"
+description = "Measure how much of a model optimization survives contact with the robot, and why."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Obinna Edeh" }]
+dependencies = ["numpy>=1.24", "pyyaml>=6"]
+
+[project.optional-dependencies]
+ort = ["onnxruntime>=1.18"]          # install onnxruntime-gpu / the Jetson wheel / ROCm build per platform
+nvml = ["nvidia-ml-py>=12"]
+gpu-stress = ["torch>=2.2"]
+dev = ["pytest>=8"]
+
+[project.scripts]
+b2f = "bench2field.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
