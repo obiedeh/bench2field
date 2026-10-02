@@ -58,6 +58,20 @@ b2f attribute runs/bench_fp32.json runs/field_fp32.json --hz 30 --stressor therm
 b2f verdict runs/field_int8.json configs/budgets/rover_perception.yaml
 ```
 
+## Development setup
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -e ".[dev,tools,nvml]"     # add gpu-stress for the GPU stressor (PyTorch)
+.venv/bin/pytest
+```
+
+Install the ONNX Runtime build that matches the machine instead of the `ort` extra: `onnxruntime-gpu[cuda,cudnn]` on a discrete NVIDIA GPU (plus `tensorrt-cu13` for the TensorRT provider), the Jetson wheel on a Jetson. The exact versions validated on each machine are listed under `bringup/`.
+
+**If the shell has ROS 2 sourced, unset `PYTHONPATH` first.** ROS exports a `PYTHONPATH` that puts its own Python packages ahead of the venv's, and a venv does not override it. Prefix every command with `env -u PYTHONPATH`, for example `env -u PYTHONPATH .venv/bin/pytest`, or run from a shell that has not sourced ROS.
+
+Tests that need onnxruntime, a GPU, NVML or PyTorch skip on machines without them.
+
 ## Platforms
 
 One report schema across vendors, so results compare directly.

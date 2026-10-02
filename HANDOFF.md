@@ -34,7 +34,9 @@ Last updated 2026-10-02, part-way through: step 1 is done except TensorRT, steps
 | CUDA provider loaded, then failed on the first Conv: `dlopen failed for libcudnn.so`. The pip-installed cuDNN is under `site-packages/nvidia/`, off the loader path. | `e46d27f`: the backend calls `onnxruntime.preload_dlls()` for CUDA and TensorRT. |
 | NVML kept reporting the flat-out warmup for about 3 s into the tier, so a 70 W tier was summarised with a 354 W peak. Real capture: `tests/fixtures/nvml_5090_after_flatout_warmup.json`. | `e468e64`: warmup runs at the tier's own rate. |
 | With no TensorRT libraries, `--provider tensorrt` logged an error, fell back to CPU and exited 0. | `8440572`: the backend raises if the active provider is not the one requested. |
-| This host exports a ROS 2 `PYTHONPATH`, which leaks ROS's Python packages into any venv. | Not a code change: run with `env -u PYTHONPATH`. |
+| This host exports a ROS 2 `PYTHONPATH`, which leaks ROS's Python packages into any venv. | Not a code change: run with `env -u PYTHONPATH` (see below and the README's development setup). |
+
+**Every command on the 5090 host must be run as `env -u PYTHONPATH .venv/bin/<command>`.** The host's shell sources ROS 2 Jazzy, whose `PYTHONPATH` takes precedence over the venv; without unsetting it, pytest picks up ROS's plugins and fails on import.
 
 ## Blocked, waiting on the owner
 
@@ -54,6 +56,10 @@ Last updated 2026-10-02, part-way through: step 1 is done except TensorRT, steps
 - **Verdict percentile.** The rover budget sets `p99_ms`, so the verdict gates response p99. `p95_ms` is available as a budget key but the budget file was not changed.
 - **Miss gate and drops.** The verdict's miss gate counts late plus dropped frames against `max_miss_rate`, so `--drop-late` cannot turn failures into passes.
 - **Exact TensorRT minor version** onnxruntime 1.30.0 was built against is not published in its docs (the table stops at 1.22). The provider links the `.so.10` major, so any 10.x should load; to be confirmed by the fp16 run.
+
+## Ignored on purpose
+
+- An external automated review was offered during this session; the owner chose not to run it. Nothing in this repo has been through one.
 
 ## Commands to start phase 2
 
