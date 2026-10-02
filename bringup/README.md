@@ -16,6 +16,32 @@ RTX 5090, driver 580.178.04 (CUDA 13.0), Python 3.12.3, onnxruntime-gpu 1.30.0, 
 
 `synth_gpu50.json` is a hand-written profile with one target (`gpu_util_pct: 50`). It is not a field recording.
 
-## thor/
+## thor/ (host `bench-thor`, 2026-10-02)
+
+Jetson AGX Thor, L4T R38.4.0, driver 580.00 (CUDA 13.0), system TensorRT 10.13.3.9 and cuDNN 9.12.0.46, Python 3.12.3. Power mode `120W` (nvpmodel mode 1, the board's default), left as found. Package versions are in `pip_freeze.txt`.
+
+The board was not idle: the `urban-edge-vllm` container was loaded (about 42 GB of RAM in use) and one CPU core sat near 28%. That is fine for checking the tooling and would not be for a baseline.
+
+**ONNX Runtime wheel:** `onnxruntime-gpu==1.24.0` from the Jetson AI Lab index (`https://pypi.jetson-ai-lab.io/sbsa/cu130`), which has the CUDA and TensorRT providers. The PyPI `onnxruntime-gpu==1.30.0` aarch64 wheel was tried first and does not work on the Thor: it has no TensorRT provider, and its CUDA provider fails on the first Relu with `cudaErrorNoKernelImageForDevice`. So the Thor runs ONNX Runtime 1.24.0 and the 5090 runs 1.30.0.
+
+| File | What it is |
+|---|---|
+| `tegrastats_idle.txt` | 20 lines at 500 ms, nothing of ours running. |
+| `tegrastats_cuda_load.txt`, `tegrastats_trt_load.txt` | 20 lines each during the 30 Hz CUDA and TensorRT runs. |
+| `nvpmodel.txt` | `nvpmodel -q` output. |
+| `nvml_supported_calls.txt` | Which NVML queries the Thor answers. Memory info and clock info are not supported. |
+| `run_cuda_fp32_30hz.json` | `b2f run models/tiny_conv.onnx --provider cuda --tiers 30 --duration 30` |
+| `run_trt_fp16_30hz.json` | `b2f run models/tiny_conv.onnx --provider tensorrt --precision fp16 --tiers 30 --duration 30` |
+| `run_trt_fp16_30hz_replay_cpu40_emc30.json` | The TensorRT run for 60 s with `synth_cpu40_emc30.json` replayed. |
+
+What the captures show:
+
+- **Total board power is the `VIN` rail** (reported as `power_board_w`). It reads 20 to 24 W here and is larger than `VDD_GPU`, `VDD_CPU_SOC_MSS` and `VIN_SYS_5V0` combined.
+- **tegrastats on the Thor prints no `GR3D_FREQ` and no `EMC_FREQ`**, idle or under GPU load, with or without `--readall`. So there is no GPU-load or memory-controller channel to steer a stressor with.
+- **Replay steering, CPU target 40%:** calibration froze the duty at 0.342 and measured 42.4% with the model idle; the tier then ran at a median of 41.9%. The memory-bandwidth stressor ran open-loop at a duty of 0.30 with nothing to measure it against.
+
+`synth_cpu40_emc30.json` is a hand-written profile, not a field recording.
+
+## orin/
 
 Pending.
