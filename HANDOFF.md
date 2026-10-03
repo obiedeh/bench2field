@@ -6,7 +6,7 @@ The GitHub repo exists: `github.com/obiedeh/bench2field`, **private**, with only
 
 **Before the repo goes public:** scrub hostnames (`bench-5090`, `bench-thor`, `field-orin`) and the LAN address (`192.0.2.10`) from this file and from `bringup/` (the README, `versions.txt` files and the `host` field in every run JSON). Not done; logged here so it is not forgotten.
 
-Last updated 2026-10-02. Steps 1 and 2 (5090, Thor and Orin) are done. `b2f sweep` is built. Step 4: YOLOX chosen, YOLOX-s exported and on all three machines; the baseline sweeps have not been run (they take about 20 minutes per machine and need the owner's OK).
+Last updated 2026-10-02 (evening). Steps 1 to 4 are done: bring-up on all three machines, publish (private repo, PR open), and case study 01 phase 1 (baselines on the 5090 and the Thor, end-to-end profile, nsys capture, `PHASE1_FINDINGS.md`). Phase 2 has not started.
 
 ## Done
 
@@ -57,14 +57,21 @@ Last updated 2026-10-02. Steps 1 and 2 (5090, Thor and Orin) are done. `b2f swee
 - Every report records what else the machine was doing (`platform.background`: running containers, the five busiest processes, load average) and what was stopped for the run (`b2f run --stopped ...`, or `stopped:` in a sweep config).
 - Synthetic inputs follow each input's dtype, so RT-DETR's int64 input would work.
 
-**Step 3**: `LICENSE` (Apache-2.0), `CONTRIBUTING.md`, `.github/workflows/ci.yml` (pytest on CPU, Python 3.10 and 3.12), and the private GitHub repo.
+**Step 3**: `LICENSE` (Apache-2.0), `CONTRIBUTING.md`, `.github/workflows/ci.yml` (pytest on CPU, Python 3.10 and 3.12), the private GitHub repo, and a PR from `hardware-bringup` to `master` so CI runs (opened at the end of phase 1; link in the PR section below).
 
 **Step 4.1 and 4.2: detector and export**
 
 - YOLOX (Apache-2.0), pinned to commit `6ddff482`. YOLOX-s is the student, YOLOX-l the teacher (not yet exported; `export_yolox.py l` does it).
 - `models/yolox_s.onnx`: static 1x3x640x640, opset 11, decoding in the graph, NMS outside. Provenance (weights and ONNX SHA-256, versions, PyTorch agreement check) in `case_studies/01_perception_detector/exports.json`; the choices and why in that folder's README.
 - The same file is on the 5090, the Thor and the Orin (`models/`), same hash on all three.
-- `case_studies/01_perception_detector/sweeps/phase1_baseline.yaml` is the baseline sweep, ready to run.
+- `case_studies/01_perception_detector/sweeps/phase1_baseline.yaml` is the baseline sweep.
+
+**Step 4.3 and 4.4: baselines, profile, findings** (all under `case_studies/01_perception_detector/`)
+
+- `runs/bench_5090/` and `runs/bench_thor/`: six reports plus manifest each, TensorRT fp32 alternated with CUDA fp32, 10/30/100 Hz, three repeats.
+- `runs/profile_5090_*.json`: the pipeline profile on rover camera frames (720p, 480p) and a busy scene (640), plus the 720p run with `--no-spin`. `runs/nsys/`: the `nsys stats` summaries; the `.nsys-rep` is at `~/bench2field_profiles/phase1_5090_rover720p.nsys-rep`, outside git.
+- `PHASE1_FINDINGS.md`: the write-up. Headlines: request rate changes latency 2.5x on the Thor (GPU power states); preprocessing rivals inference and exceeds it at 720p; onnxruntime's spin-waiting thread pool puts a 40 ms p95 on preprocess that `--no-spin` removes; copies are a third of inference on the 5090; "fp32" in TensorRT on the 5090 is TF32.
+- Frame sets live under `data/` (ignored) on the 5090 host and the Orin, with a hash manifest each; `tools/capture_frames.py` and `tools/frames_from_video.py` regenerate them.
 
 **Start of step 4: repeats and `b2f sweep`** (the deferred methodology work, built before any baseline run)
 
@@ -84,13 +91,18 @@ Last updated 2026-10-02. Steps 1 and 2 (5090, Thor and Orin) are done. `b2f swee
 | Thor | NVML on the Thor raises `NotSupported` for memory info and clock info, so the NVML sampler failed outright. | `044bf15`: unsupported channels are left out, other NVML errors still propagate. |
 | Thor | The PyPI `onnxruntime-gpu==1.30.0` aarch64 wheel has no TensorRT provider, and its CUDA provider fails on the first Relu with `cudaErrorNoKernelImageForDevice`. | Use the Jetson AI Lab wheel (1.24.0). No code change. |
 | Thor | tegrastats prints no `GR3D_FREQ` and no `EMC_FREQ`, idle or under load. | Documented and pinned by a test; see open questions. |
+| Thor | `docker stop physical-ai-vllm` for the baseline sweep **destroyed the container**: it runs with `--rm`. The Safety Observability API (`uvicorn api.main:app`, port 8081, under the user's systemd) re-created it three minutes later, so the sweep ran with it up and idle. | Not fixable from here. The reports' `background` snapshots record the truth; the findings say so. Do not `docker stop` that container again; ask the owner how the API should be told to stand down. |
+| 5090 | Preprocess p95 of 40 ms in the pipeline profile. | Not a bug in the profiler: onnxruntime's spin-waiting intra-op threads compete with OpenCV. `--no-spin` on the profiler and on `b2f run` removes it; phase 2 should run with spinning off everywhere. |
 
 **Every command on the 5090 host must be run as `env -u PYTHONPATH .venv/bin/<command>`.** The host's shell sources ROS 2 Jazzy, whose `PYTHONPATH` takes precedence over the venv; without unsetting it, pytest picks up ROS's plugins and fails on import. The Thor's shell does not set `PYTHONPATH`, so plain `.venv/bin/<command>` works there.
 
+## Git history note
+
+Commit `236aefc` (`b2f sweep --stopped`) accidentally includes two in-progress run files from the 5090 sweep (`runs/bench_5090/trt_fp32_r1.json`, identical to its final content, and a partial sweep manifest, superseded in `aad717a`). A rewritten history without them exists locally as branch `hardware-bringup-clean-history`; the force-push needed to publish it was not permitted, so the pushed branch keeps the untidy commit. Harmless; fix only if the owner wants to force-push the clean branch.
+
 ## Blocked, waiting on the owner
 
-1. **Phase 1 baseline sweeps (step 4.3)**: about 20 minutes per machine, so they need the owner's OK before starting. On the Thor the `urban-edge-vllm` container may be stopped for them (owner's permission) and must be restarted afterwards; when last checked the container up was `physical-ai-vllm`, which that permission does not cover.
-2. **The end-to-end profile and `nsys` capture (step 4.4)** follow the baselines.
+Nothing for phase 1. Phase 2 needs the decisions under open questions (TF32, spinning, the kernel's output scale) before its first variant is measured.
 
 ## Deferred by decision
 
@@ -99,6 +111,14 @@ Last updated 2026-10-02. Steps 1 and 2 (5090, Thor and Orin) are done. `b2f swee
 - **Orin replay drift (explain before trusting replay validity, phase 5).** On the Orin, the CPU stressor was calibrated to a 40% target with the model idle: duty frozen at 0.118, 41.7% measured. During the 60 s tier that followed, CPU utilisation had a median of 35.5% with the duty unchanged. The rover's own services were still settling after boot, so the background load the calibration absorbed was not steady. Until this is explained (and the recording rule "steady-state background load" is enforced or checked), a replay's validity number should not be trusted on its own. No fix now.
 
 ## Open questions
+
+- **TF32 in the fp32 baseline.** TensorRT runs the fp32 graph with TF32 tensor-core kernels on the 5090 by default (76% of GPU kernel time in the nsys capture). Phase 2's fp16 and INT8 gains will be measured against TF32, not true fp32. Keep that (it is what a deployment gets), or also build a TF32-off engine (`trt_builder_optimization_level`/`TF32` flags via `extra_provider_options`) for the write-up? The Thor's kernels were not profiled.
+- **Spinning off by default?** `allow_spinning=True` is onnxruntime's default and so Bench2Field's. Phase 1 shows it costs the host stages dearly. Proposal: run every phase 2 variant with `--no-spin` and say so in the variant notes, rather than changing the default silently.
+- **Request-rate dependence.** Latency at 10 and 30 Hz is far worse than at 100 Hz on both machines because the GPU drops power states between frames. Retention at 30 Hz will therefore compare numbers dominated by clock ramp, not by the model. Options for the owner: accept (it is what the robot sees), add `jetson_clocks`/locked clocks as a recorded setting (changes the board, so not without asking), or report both tiers. Nothing changed.
+- **Kernel spec versus the model.** `kernels/README.md` says the fused preprocessing kernel scales pixels to [0, 1]; YOLOX takes raw 0..255. The kernel's scale (and BGR/RGB order) should match `export_yolox.py`'s input convention before phase 3.
+- **Postprocess cost.** NumPy NMS over all 8400 candidates costs 1.0 ms per frame even with no detections. Thresholding before decoding would make it near zero. Left as is so phase 2 measures against the same baseline; worth fixing in the pipeline before phase 5.
+- **Copies and pinned memory.** Host-device copies run at pageable speed (21 GB/s) on the 5090. Pinned host memory and, on Jetson, unified memory belong to the phase 3 kernel work and are not in `b2f run`.
+- **Frames looking at a wall.** The rover camera frames used for the profile show a blank wall, so decode and NMS are at their cheapest. Re-capture with the rover in its working environment before accuracy work.
 
 - **ONNX Runtime versions differ between machines.** The 5090 runs 1.30.0 (TensorRT 10.16.1.11) and the Thor runs 1.24.0 (system TensorRT 10.13.3.9), because no 1.30.0 wheel works on the Thor. Latency on the two is not a same-runtime comparison. Options: accept and record it, pin the 5090 to 1.24.0, or build 1.30.0 from source on the Thor (well over 15 minutes).
 - **Memory-controller load is not measurable on either Jetson** (no `EMC_FREQ` on the Thor or the Orin NX), so the memory-bandwidth stressor is always open-loop there. GPU load: the Orin reports `GR3D_FREQ`; the Thor does not, though NVML on the Thor does report GPU utilisation, so the Jetson sampler could take that one channel from NVML. Not built; needs a decision.
@@ -110,6 +130,29 @@ Last updated 2026-10-02. Steps 1 and 2 (5090, Thor and Orin) are done. `b2f swee
 
 - An external automated review was offered during this session; the owner chose not to run it. Nothing in this repo has been through one.
 
+## Pull request
+
+`hardware-bringup` -> `master`, opened so CI runs; see the link printed when it was created (also `gh pr list` in the repo). Merging is the owner's call. `master` is still the v0.1 commit until then.
+
 ## Commands to start phase 2
 
-Pending: phase 1 has not been run.
+On the 5090 host, from `~/github/bench2field` (prefix everything with `env -u PYTHONPATH`); on the Jetsons, from the same path without the prefix.
+
+```bash
+# 1. Export the teacher (weights download once):
+.venv/bin/python case_studies/01_perception_detector/export_yolox.py l
+rsync -a models/yolox_l.onnx bench-thor:github/bench2field/models/ ; rsync -a models/yolox_l.onnx field-orin:github/bench2field/models/
+
+# 2. First rung of the ladder, fp16 TensorRT, same sweep shape as the baseline. Copy
+#    sweeps/phase1_baseline.yaml to sweeps/phase2_fp16.yaml with a trt_fp16 variant
+#    (precision: fp16) alongside trt_fp32, and decide on --no-spin (see open questions).
+.venv/bin/b2f sweep case_studies/01_perception_detector/sweeps/phase2_fp16.yaml --out-dir case_studies/01_perception_detector/runs/p2_fp16_5090
+
+# 3. Accuracy for every variant from here on (methodology rule 9): needs the COCO val
+#    subset and labelled rover frames; nothing for this exists in the repo yet.
+
+# 4. Compare at the rover's tier, with the repeats:
+.venv/bin/b2f retention "runs/.../trt_fp32_r*.json" "runs/.../trt_fp16_r*.json" "<field fp32>" "<field fp16>" --hz 30
+```
+
+Do not stop the Thor's `physical-ai-vllm` container; see the hardware table. Keep `PHASE1_FINDINGS.md` as the reference for what the frame costs around the model.
