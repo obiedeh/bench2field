@@ -1,0 +1,56 @@
+{
+  "yolox_s": {
+    "size": "s",
+    "exp": "yolox-s",
+    "depth": 0.33,
+    "width": 0.5,
+    "num_classes": 80,
+    "weights": {
+      "file": "yolox_s.pth",
+      "url": "https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/yolox_s.pth",
+      "sha256": "f55ded7181e1b0c13285c56e7790b8f0e8f8db590fe4edb37f0b7f345c913a30"
+    },
+    "onnx": {
+      "file": "models/yolox_s.onnx",
+      "sha256": "00b70c44385bb5567e784b0c1efae213c4f2ec06efacfc8e3f52eca333356205",
+      "bytes": 35972353,
+      "opset": 11,
+      "ir_version": 6,
+      "exporter": "torchscript (dynamo=False)",
+      "input": {
+        "images": [
+          1,
+          3,
+          640,
+          640
+        ],
+        "dtype": "float32",
+        "layout": "NCHW BGR 0..255"
+      },
+      "output": {
+        "output": [
+          1,
+          8400,
+          85
+        ],
+        "fields": "cx, cy, w, h, objectness, 80 class scores"
+      },
+      "decode_in_inference": true,
+      "nms_in_graph": false,
+      "onnxsim": false
+    },
+    "check": {
+      "max_abs_diff_vs_pytorch": 0.0042724609375,
+      "input_seed": 0
+    },
+    "versions": {
+      "python": "3.12.3",
+      "torch": "2.11.0+cu130",
+      "onnx": "1.23.1",
+      "onnxruntime": "1.30.0",
+      "yolox": null
+    },
+    "exported_at": "2026-10-03T00:24:19.474641+00:00",
+    "host": "bench-5090"
+  }
+}
