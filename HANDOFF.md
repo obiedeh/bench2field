@@ -157,7 +157,7 @@ Logged by the owner's instruction; not to be built until case study 01 is done.
 
 ## Ignored on purpose
 
-- An external automated review was offered during this session; the owner chose not to run it. Nothing in this repo has been through one.
+- An external, billed, multi-agent cloud code review was offered by the development tooling during this work. The owner chose not to run it. Nothing in this repo has been through an external review.
 
 ## Pull request
 
