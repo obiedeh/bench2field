@@ -97,22 +97,26 @@ What the Orin shows:
 
 ## 2. End-to-end pipeline profile, RTX 5090
 
-`profile_pipeline.py`: one frame at a time through decode (`cv2.imdecode`), preprocess (letterbox to 640, HWC to CHW, float32: the unfused baseline), host-to-device copy, inference (TensorRT fp32, inputs and outputs bound on the GPU), device-to-host copy, and postprocess (score threshold 0.3, per-class NMS 0.45, NumPy, YOLOX's own `multiclass_nms` code). 300 frames after 30 of warmup; p50 and p95 per stage in ms. The 5090 columns are spin-on unless marked; the Orin column is `--no-spin`, rover stack off, the same 480p frame set (same manifest hash) as the 5090's 480p column.
+`profile_pipeline.py`: one frame at a time through decode (`cv2.imdecode`), preprocess (letterbox to 640, HWC to CHW, float32: the unfused baseline), host-to-device copy, inference (TensorRT fp32, inputs and outputs bound on the GPU), device-to-host copy, and postprocess (score threshold 0.3, per-class NMS 0.45, NumPy, YOLOX's own `multiclass_nms` code). 300 frames after 30 of warmup; p50 and p95 per stage in ms. The 5090 columns are spin-on unless marked; the Thor and Orin columns are `--no-spin` on the same 480p frame set (same manifest hash) as the 5090's 480p column. The Thor ran with the Safety Observability API and its idle vLLM container up, recorded in the JSON; the Orin with its rover stack off.
 
 Frame sets: 300 frames from the rover's own camera (Orbbec DaBai DCW2, MJPEG as the camera encodes it) at 1280x720 and 640x480, captured with `tools/capture_frames.py` while the camera happened to be looking at a blank wall (no detections, small JPEGs, so decode and NMS are at their cheapest), and 300 frames of a busy indoor scene at 640x640 cut from a video with `tools/frames_from_video.py` (1.1 detections per frame).
 
-| stage | 5090, rover 720p | 5090, rover 720p, no spin | 5090, rover 480p | 5090, scene 640 | **Orin NX, rover 480p, no spin** |
-|---|---|---|---|---|---|
-| decode | 1.579 / 1.771 | 1.565 / 1.634 | 0.562 / 0.623 | 0.449 / 0.470 | 4.320 / 5.189 |
-| preprocess | 3.286 / **39.985** | 1.974 / 2.230 | 1.508 / 1.998 | 1.421 / 1.627 | 3.001 / 3.486 |
-| h2d copy | 0.295 / 0.419 | 0.258 / 0.297 | 0.265 / 0.333 | 0.246 / 0.278 | 1.227 / 1.366 |
-| inference | 1.122 / 1.393 | 1.110 / 1.224 | 1.118 / 1.310 | 1.106 / 1.274 | 24.828 / 25.104 |
-| d2h copy | 0.248 / 0.297 | 0.229 / 0.268 | 0.229 / 0.302 | 0.222 / 0.256 | 1.195 / 1.322 |
-| postprocess | 0.970 / 1.199 | 0.962 / 1.031 | 0.992 / 1.297 | 0.976 / 1.052 | 9.533 / 11.676 |
-| **total per frame** | 7.536 / 44.748 | 6.088 / 6.584 | 4.686 / 5.667 | 4.409 / 4.829 | **43.851 / 47.826** |
-| share of total p50 that is inference | 15% | 18% | 24% | 25% | 56% |
+| stage | 5090, rover 720p | 5090, rover 720p, no spin | 5090, rover 480p | 5090, scene 640 | **Thor, rover 480p, no spin** | **Orin NX, rover 480p, no spin** |
+|---|---|---|---|---|---|---|
+| decode | 1.579 / 1.771 | 1.565 / 1.634 | 0.562 / 0.623 | 0.449 / 0.470 | 3.415 / 3.443 | 4.320 / 5.189 |
+| preprocess | 3.286 / **39.985** | 1.974 / 2.230 | 1.508 / 1.998 | 1.421 / 1.627 | 1.689 / 1.722 | 3.001 / 3.486 |
+| h2d copy | 0.295 / 0.419 | 0.258 / 0.297 | 0.265 / 0.333 | 0.246 / 0.278 | 0.629 / 0.663 | 1.227 / 1.366 |
+| inference | 1.122 / 1.393 | 1.110 / 1.224 | 1.118 / 1.310 | 1.106 / 1.274 | 5.469 / 5.681 | 24.828 / 25.104 |
+| d2h copy | 0.248 / 0.297 | 0.229 / 0.268 | 0.229 / 0.302 | 0.222 / 0.256 | 0.252 / 0.316 | 1.195 / 1.322 |
+| postprocess | 0.970 / 1.199 | 0.962 / 1.031 | 0.992 / 1.297 | 0.976 / 1.052 | 4.465 / 4.505 | 9.533 / 11.676 |
+| **total per frame** | 7.536 / 44.748 | 6.088 / 6.584 | 4.686 / 5.667 | 4.409 / 4.829 | **15.899 / 16.217** | **43.851 / 47.826** |
+| share of total p50 that is inference | 15% | 18% | 24% | 25% | 34% | 56% |
 
-Files: `runs/profile_5090_rover_frames_720p.json`, `..._720p_nospin.json`, `..._480p.json`, `runs/profile_5090_scene_frames_640.json`, `runs/profile_orin_rover_frames_480p.json`.
+Files: `runs/profile_5090_rover_frames_720p.json`, `..._720p_nospin.json`, `..._480p.json`, `runs/profile_5090_scene_frames_640.json`, `runs/profile_thor_rover_frames_480p.json`, `runs/profile_orin_rover_frames_480p.json`.
+
+### The full frame on the Thor: 15.9 ms p50, 16.2 ms p95
+
+Same frames, TensorRT fp32, `--no-spin`, with the Safety Observability API and its idle vLLM container up (`VLLM::EngineCore` is the busiest process in the snapshot, at idle). The frame fits the 33.3 ms deadline twice over, but **host-side work is 9.6 ms, 60% of the frame**: decode 3.4 ms, postprocess 4.5 ms (the same NumPy NMS that costs 1.0 ms on the 5090 and 9.5 ms on the Orin), preprocess 1.7 ms. Inference is 5.5 ms inside the frame against 3.2 ms back to back and 10.5 ms p50 in the 26 Hz sweep: as on the Orin, the GPU's clock state follows how busy the host keeps it, and here the host's 10 ms between inferences leaves the GPU clocked higher than the sweep's 38 ms gaps do. Copies are 0.9 ms. Board power 22.4 W p50, junction 37.6 °C. These are the blank-wall frames too, so decode and NMS are at their cheapest.
 
 ### The full frame on the Orin does not fit the 33.3 ms deadline
 
