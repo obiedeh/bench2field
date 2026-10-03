@@ -75,6 +75,46 @@ def preload_tensorrt_libraries() -> list[str]:
     return loaded
 
 
+def _decode_nv_version(v: int) -> str:
+    """TensorRT, cuDNN 9 and the CUDA runtime all encode major*10000 + minor*100 + patch
+    (TensorRT 10.16.1 -> 101601; cuDNN 9.19.0 -> 91900; CUDA 13.0 -> 13000)."""
+    return f"{v // 10000}.{v // 100 % 100}.{v % 100}"
+
+
+def loaded_nvidia_library_versions() -> dict[str, str | None]:
+    """Versions of the TensorRT, cuDNN and CUDA runtime libraries this process
+    has loaded, asked of the libraries themselves, so a report says which
+    copies actually ran. None for a library that is not loaded (there is no
+    TensorRT in a CUDA-provider run) or that cannot be asked.
+
+    dlopen by soname returns a library that is already loaded rather than
+    searching for another, so this reports the copies the provider is using.
+    """
+    out: dict[str, str | None] = {}
+    queries = (
+        ("tensorrt", "libnvinfer.so.10", "getInferLibVersion", ctypes.c_int32),
+        ("cudnn", "libcudnn.so.9", "cudnnGetVersion", ctypes.c_size_t),
+    )
+    for key, soname, symbol, restype in queries:
+        try:
+            fn = getattr(ctypes.CDLL(soname), symbol)
+            fn.restype = restype
+            out[key] = _decode_nv_version(int(fn()))
+        except (OSError, AttributeError):
+            out[key] = None
+    out["cuda_runtime"] = None
+    for soname in ("libcudart.so.13", "libcudart.so.12"):
+        try:
+            lib = ctypes.CDLL(soname)
+        except OSError:
+            continue
+        v = ctypes.c_int()
+        if lib.cudaRuntimeGetVersion(ctypes.byref(v)) == 0:
+            out["cuda_runtime"] = f"{v.value // 1000}.{v.value % 1000 // 10}"
+        break
+    return out
+
+
 @dataclass
 class OrtOptions:
     provider: str = "cpu"
@@ -169,9 +209,12 @@ class OnnxRuntimeBackend:
 
     def describe(self) -> dict[str, Any]:
         o = self.options
+        libs = (loaded_nvidia_library_versions() if self.provider() in NVIDIA_PROVIDERS
+                else {"tensorrt": None, "cudnn": None, "cuda_runtime": None})
         return {
             "backend": self.name,
             "onnxruntime": self._ort.__version__,
+            **libs,
             "provider_active": self.provider(),
             "precision": o.precision,
             "intra_op_threads": o.intra_op_threads or "default",

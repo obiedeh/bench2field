@@ -9,6 +9,8 @@ from onnx import TensorProto, helper, numpy_helper  # noqa: E402
 from bench2field.backends.onnxruntime import (  # noqa: E402
     OnnxRuntimeBackend,
     OrtOptions,
+    _decode_nv_version,
+    loaded_nvidia_library_versions,
     preload_gpu_libraries,
     preload_tensorrt_libraries,
 )
@@ -36,6 +38,7 @@ def test_cpu_backend_runs_with_thread_options(tiny_model):
     np.testing.assert_allclose(y, feeds["x"], rtol=1e-6)
     d = be.describe()
     assert d["provider_active"] == "CPUExecutionProvider" and d["allow_spinning"] is False
+    assert (d["tensorrt"], d["cudnn"], d["cuda_runtime"]) == (None, None, None)  # not an NVIDIA run
 
 
 def test_missing_provider_is_a_clear_error(tiny_model):
@@ -178,3 +181,22 @@ def test_tensorrt_provider_runs_a_conv_in_fp16(conv_model, tmp_path):
     (y,) = be.infer(feeds)
     assert y.shape == (1, 4, 16, 16)
     assert y[0, 0, 5, 5] == pytest.approx(feeds["x"][0, :, 4:7, 4:7].sum(), rel=2e-2, abs=2e-2)
+    d = be.describe()  # the libraries that ran are named in the report
+    assert d["tensorrt"].startswith("10.") and d["cudnn"].startswith("9.") and d["cuda_runtime"]
+
+
+def test_nvidia_version_encoding():
+    # Values read on real machines: TensorRT 10.16.1 and cuDNN 9.19.0 on the 5090,
+    # TensorRT 10.13.3 and cuDNN 9.12.0 on the Thor.
+    assert _decode_nv_version(101601) == "10.16.1" and _decode_nv_version(91900) == "9.19.0"
+    assert _decode_nv_version(101303) == "10.13.3" and _decode_nv_version(91200) == "9.12.0"
+
+
+def test_library_versions_are_none_when_nothing_is_loaded(monkeypatch):
+    import ctypes
+
+    def no_such_library(name, mode=0):
+        raise OSError(f"{name}: cannot open shared object file")
+
+    monkeypatch.setattr(ctypes, "CDLL", no_such_library)
+    assert loaded_nvidia_library_versions() == {"tensorrt": None, "cudnn": None, "cuda_runtime": None}
