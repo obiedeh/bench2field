@@ -2,13 +2,38 @@
 
 Every number here comes from a file under `runs/` in this folder; `summarize_phase1.py` regenerates the tables. Model: `models/yolox_s.onnx` (provenance in `exports.json`), FP32, one frame per request. Dates: 2026-10-02.
 
+## 0. The rover's camera rate: 26 Hz, not 30
+
+Before trusting any tier, the rate the rover's camera topic actually delivers was measured on the Orin with the rover's stack running (micro-ROS agent, `m3pro_bringup car_base.launch.py` with the camera, `slam_stack.sh`). The launch configures the Orbbec DaBai DCW2 colour stream at 640x480 MJPG, 30 fps (`ros2 param get` confirms). `ros2 topic hz /camera/color/image_raw` over 60 s gave a **mean of 25.9 Hz** (window averages 23.7 to 27.0), as 640x480 `rgb8`: the driver decodes MJPEG on the CPU (32% of a core) and does not keep up with the camera's 30 fps. The camera itself offers MJPEG only, in 16 sizes up to 1920x1080 at up to 30 fps. Captures: `bringup/orin/ros2_topic_hz_color.txt`, `bringup/orin/camera_v4l2_formats.txt`.
+
+**26 Hz is therefore the headline tier**, added to `sweeps/phase1_baseline.yaml` for the re-run; the 33.3 ms deadline is kept as the budget's frame period.
+
+### Headline: YOLOX-s FP32 TensorRT at the rover's rate (26 Hz), RTX 5090
+
+Response p95 **1.94 ms** (range over three repeats 1.92–2.19 ms), p50 1.77 ms, service p95 1.76 ms, 0 misses in 4,680 frames, GPU power 73.5 W p50; `runs/bench_5090_rerun/`. This is the spin-on run (onnxruntime threads spin-waiting, `platform.allow_spinning = true`); the owner has since decided baselines run with `--no-spin`, and the no-spin 5090 sweep and the Thor sweep (after its API is stood down) will replace this headline when they are in.
+
 ## 1. FP32 baseline, idle bench
 
 `b2f sweep sweeps/phase1_baseline.yaml`: TensorRT fp32 (the baseline every optimization will be measured against) alternated with CUDA fp32 (a reference for what TensorRT itself is worth), 10/30/100 Hz, 60 s per tier, three repeats. Latencies in ms; the median across the three repeats with the range in brackets. No deadline (33.3 ms) was missed in any run.
 
-### RTX 5090 (`runs/bench_5090/`)
+### RTX 5090, four tiers (`runs/bench_5090_rerun/`, spinning on)
 
-onnxruntime 1.30.0, TensorRT 10.16.1, cuDNN 9.19.0, CUDA 13.0. Background at run start: a `pgvector` container and an idle `uvicorn` API of another project, load average 0.25; nothing was stopped.
+onnxruntime 1.30.0, TensorRT 10.16.1, cuDNN 9.19.0, CUDA 13.0. Background at run start: a `pgvector` container and an idle `uvicorn` API of another project holding 762 MiB on the GPU; nothing was stopped.
+
+| variant | Hz | response p50 | response p95 | response p99 | service p95 | GPU power p50 |
+|---|---|---|---|---|---|---|
+| trt_fp32 | 10 | 1.958 (1.956–1.976) | 2.707 (2.287–2.920) | 3.103 | 2.521 | 69 W |
+| **trt_fp32** | **26** | **1.772 (1.754–1.940)** | **1.939 (1.922–2.192)** | **2.057** | **1.759** | **74 W** |
+| trt_fp32 | 30 | 1.769 (1.739–2.079) | 1.946 (1.888–2.302) | 2.121 | 1.777 | 75 W |
+| trt_fp32 | 100 | 1.740 (1.723–1.829) | 1.952 (1.837–2.150) | 2.120 | 1.806 | 98 W |
+| cuda_fp32 | 10 | 2.936 (2.826–3.226) | 3.775 (3.735–4.105) | 6.353 | 3.625 | 69 W |
+| cuda_fp32 | 26 | 2.927 (2.783–3.115) | 3.865 (3.297–4.878) | 6.968 | 3.608 | 75 W |
+| cuda_fp32 | 30 | 2.880 (2.727–3.000) | 3.293 (2.884–3.536) | 4.262 | 3.134 | 77 W |
+| cuda_fp32 | 100 | 2.734 (2.700–2.843) | 2.875 (2.794–3.014) | 3.152 | 2.685 | 102 W |
+
+### RTX 5090, first sweep, three tiers (`runs/bench_5090/`, spinning on)
+
+Same configuration without the 26 Hz tier, run earlier the same day. Background: the same container and API (then without a GPU context), load average 0.25.
 
 | variant | Hz | response p50 | response p95 | response p99 | service p95 | GPU power p50 |
 |---|---|---|---|---|---|---|
@@ -19,9 +44,9 @@ onnxruntime 1.30.0, TensorRT 10.16.1, cuDNN 9.19.0, CUDA 13.0. Background at run
 | cuda_fp32 | 30 | 2.803 (2.762–2.947) | 3.055 (2.881–3.251) | 3.293 | 2.894 | 76 W |
 | cuda_fp32 | 100 | 2.739 (2.724–2.742) | 2.867 (2.835–3.016) | 3.088 | 2.685 | 102 W |
 
-### Jetson AGX Thor (`runs/bench_thor/`)
+### Jetson AGX Thor, first sweep, three tiers (`runs/bench_thor/`, spinning on)
 
-onnxruntime 1.24.0, TensorRT 10.13.3, cuDNN 9.12.0, CUDA 13.2, power mode `120W`. See the caveat on the container below.
+onnxruntime 1.24.0, TensorRT 10.13.3, cuDNN 9.12.0, CUDA 13.2, power mode `120W`. See the caveat on the container below. **Not the baseline**: the four-tier `--no-spin` Thor sweep waits for the Safety Observability API to be stood down. A four-tier re-run started before that was stopped after one run; its output is `runs/bench_thor_rerun_stopped/`, whose single run put the 26 Hz tier at 10.95 ms p95, between the 10 and 30 Hz values below, as expected.
 
 | variant | Hz | response p50 | response p95 | response p99 | service p95 | board power p50 |
 |---|---|---|---|---|---|---|
@@ -34,7 +59,7 @@ onnxruntime 1.24.0, TensorRT 10.13.3, cuDNN 9.12.0, CUDA 13.2, power mode `120W`
 
 ### What the baseline shows
 
-- **The request rate changes the latency, on both machines, with nothing else changing.** On the Thor, TensorRT fp32 responds in 4.4 ms (p95) at 100 Hz and 10.9 ms at 30 Hz: the same model is 2.5x slower at the rover's camera rate than at a rate that keeps the GPU busy. The 5090 shows the same shape, smaller: 1.89 ms at 100 Hz, 2.52 ms at 10 Hz. The reports show why on the 5090: the SM clock p50 is 2467 MHz at 10 Hz and 2550 MHz at 100 Hz, and GPU power rises from 69 W to 98 W; between sparse frames the GPU drops into a lower power state and pays to come back. The Thor's tegrastats has no GPU clock or load channel, so the same explanation there is inferred from the power rail (`VDD_GPU` 2.8 W at 10 Hz, 11.0 W at 100 Hz) rather than measured directly. For a robot this means: **a benchmark run flat out, or at 100 Hz, reports a number the 30 Hz pipeline will never see.** Every later comparison must be made at the tier the rover uses.
+- **The request rate changes the latency, on both machines, with nothing else changing.** On the Thor, TensorRT fp32 responds in 4.4 ms (p95) at 100 Hz and 10.9 ms at 30 Hz (10.95 ms at 26 Hz in the stopped re-run): the same model is 2.5x slower at the rover's camera rate than at a rate that keeps the GPU busy. The 5090 shows the same shape, smaller: in the four-tier run 1.95 ms at 100 Hz, 1.94 ms at 26 Hz, 2.71 ms at 10 Hz. The reports show why on the 5090: the SM clock p50 is 2445 MHz at 10 Hz, 2467 MHz at 26 Hz and 2557 MHz at 100 Hz, and GPU power rises from 69 W to 98 W; between sparse frames the GPU drops into a lower power state and pays to come back. On the 5090 the step is between 10 and 26 Hz; on the Thor, 26 and 30 Hz are still on the slow side of it. The Thor's tegrastats has no GPU clock or load channel, so the same explanation there is inferred from the power rail (`VDD_GPU` 2.8 W at 10 Hz, 11.0 W at 100 Hz) rather than measured directly. For a robot this means: **a benchmark run flat out, or at 100 Hz, reports a number the 30 Hz pipeline will never see.** Every later comparison must be made at the tier the rover uses.
 - **TensorRT over CUDA provider, same ONNX file, fp32:** 1.4–1.5x on the 5090, 1.3–2.2x on the Thor (p95). This is the gain the "baseline" already contains, which is why both are recorded.
 - **Repeat spread is small** except where the clock effect is in play: the 5090 10 Hz TensorRT p95 ranges 2.45–2.69 ms over three repeats, the Thor 10 Hz CUDA p50 ranges 12.2–14.6 ms. Those tiers need the repeats; at 100 Hz the p50s agree to within 2% (p95s within 8%).
 - **"fp32" on the 5090 is TF32 inside TensorRT.** The nsys kernel summary (`runs/nsys/phase1_5090_rover720p_cuda_gpu_kern_sum.csv`) attributes 76% of GPU kernel time to `tf32` implicit-GEMM kernels. TensorRT allows TF32 tensor-core math for fp32 networks by default. The baseline is what TensorRT does by default with an fp32 graph, which is the honest baseline for a deployment, but phase 2's fp16 result must be read against TF32, not true fp32. Whether to also build a TF32-disabled engine is a decision for the owner (see HANDOFF.md).
