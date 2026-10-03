@@ -12,6 +12,9 @@ What a board prints, from real captures under bringup/:
   idle or under GPU load, with or without --readall, so `gpu_util_pct` and
   `emc_util_pct` do not exist there and replay cannot steer the GPU or
   memory-bandwidth stressors on a Thor.
+* Orin NX, L4T R36.4: RAM, SWAP, per-core CPU (six online in MAXN_SUPER),
+  GR3D_FREQ, nine temperatures, and the rails VDD_IN, VDD_CPU_GPU_CV and
+  VDD_SOC. No EMC_FREQ, with or without --readall.
 
 Total board power goes by a different rail name on each board, so it is also
 reported under one neutral name, `power_board_w`. It is the only power
@@ -31,9 +34,11 @@ from .base import TelemetrySampler
 
 # Rails that carry the whole board's input power, in order of preference.
 # Only rails confirmed against a real capture belong here.
-#   VIN: AGX Thor (bringup/thor/tegrastats_*.txt); it is the largest rail and
-#        exceeds the sum of the other three.
-BOARD_POWER_RAILS = ("VIN",)
+#   VIN:    AGX Thor (bringup/thor/tegrastats_*.txt); it is the largest rail
+#           and exceeds the sum of the other three.
+#   VDD_IN: Orin NX (bringup/orin/tegrastats_*.txt); likewise the largest rail,
+#           above VDD_CPU_GPU_CV + VDD_SOC.
+BOARD_POWER_RAILS = ("VIN", "VDD_IN")
 
 _RAIL = re.compile(r"\b([A-Z][A-Z0-9_]+)\s+(\d+)mW/(\d+)mW")
 _TEMP = re.compile(r"\b([A-Za-z][A-Za-z0-9_]*)@(-?\d+(?:\.\d+)?)C\b")

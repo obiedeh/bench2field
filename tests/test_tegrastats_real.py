@@ -20,6 +20,17 @@ THOR_KEYS = {
 }
 
 
+ORIN_CAPTURES = sorted((BRINGUP / "orin").glob("tegrastats_*.txt"))
+ORIN_KEYS = {
+    "ram_used_mb", "ram_total_mb", "cpu_util_mean_pct", "cpu_util_max_pct", "cpu_cores_online",
+    "gpu_util_pct",
+    "temp_cpu_c", "temp_gpu_c", "temp_tj_c", "temp_cv0_c", "temp_cv1_c", "temp_cv2_c",
+    "temp_soc0_c", "temp_soc1_c", "temp_soc2_c",
+    "power_vdd_in_w", "power_vdd_cpu_gpu_cv_w", "power_vdd_soc_w",
+    "power_board_w",
+}
+
+
 def test_thor_captures_exist():
     assert [p.name for p in THOR_CAPTURES] == [
         "tegrastats_cuda_load.txt", "tegrastats_idle.txt", "tegrastats_trt_load.txt"]
@@ -53,6 +64,40 @@ def test_thor_tegrastats_has_no_gpu_or_memory_controller_load():
             assert "gpu_util_pct" not in s and "emc_util_pct" not in s
 
 
+def test_orin_captures_exist():
+    assert [p.name for p in ORIN_CAPTURES] == [
+        "tegrastats_cuda_load.txt", "tegrastats_idle.txt", "tegrastats_trt_load.txt"]
+
+
+@pytest.mark.parametrize("capture", ORIN_CAPTURES, ids=lambda p: "orin_" + p.stem)
+def test_every_real_orin_line_parses_completely(capture):
+    lines = capture.read_text().splitlines()
+    assert len(lines) == 20
+    for line in lines:
+        s = parse_tegrastats_line(line)
+        assert set(s) == ORIN_KEYS, line
+        assert s["cpu_cores_online"] == 6 and s["ram_total_mb"] == 7620
+        assert 0 <= s["gpu_util_pct"] <= 100 and "emc_util_pct" not in s
+        assert len(re.findall(r"@[\d.]+C\b", line)) == 9 and line.count("mW/") == 3
+        # VDD_IN is the board total on the Orin NX.
+        assert s["power_board_w"] == s["power_vdd_in_w"]
+        assert s["power_vdd_in_w"] > s["power_vdd_cpu_gpu_cv_w"] + s["power_vdd_soc_w"]
+
+
+def test_orin_tegrastats_reports_gpu_load_but_no_memory_controller_load():
+    text = "".join(c.read_text() for c in ORIN_CAPTURES)
+    assert "GR3D_FREQ" in text and "EMC_FREQ" not in text
+    loaded = [parse_tegrastats_line(l)["gpu_util_pct"] for l in (BRINGUP / "orin" / "tegrastats_cuda_load.txt").read_text().splitlines()]
+    assert max(loaded) > 0  # the CUDA run was visible to the GPU-load channel
+
+
+def test_nvpmodel_mode_from_real_orin_output_with_its_error_lines(monkeypatch):
+    captured = (BRINGUP / "orin" / "nvpmodel.txt").read_text()
+    assert captured.startswith("NV Power Mode: MAXN_SUPER\n0\nNVPM ERROR")
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: types.SimpleNamespace(stdout=captured))
+    assert read_nvpmodel() == "NV Power Mode: MAXN_SUPER"
+
+
 def test_board_power_is_not_guessed_for_an_unconfirmed_rail():
     s = parse_tegrastats_line("RAM 1/2MB CPU [1%@1] tj@40C VDD_SOMETHING 5000mW/5000mW")
     assert s["power_vdd_something_w"] == 5.0 and "power_board_w" not in s
@@ -73,4 +118,4 @@ def test_nvpmodel_missing_or_silent_is_none(monkeypatch):
     assert read_nvpmodel() is None
     monkeypatch.setattr(subprocess, "run", lambda *a, **k: types.SimpleNamespace(stdout=""))
     assert read_nvpmodel() is None
-    assert tegrastats.BOARD_POWER_RAILS == ("VIN",)
+    assert tegrastats.BOARD_POWER_RAILS == ("VIN", "VDD_IN")

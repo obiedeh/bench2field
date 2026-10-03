@@ -12,6 +12,32 @@ from typing import Any
 from .base import TelemetrySampler
 
 
+def read_channels(nv: Any, h: Any) -> dict[str, float]:
+    """One NVML sample for device handle `h`, leaving out what the device does
+    not implement: Jetson Thor's NVML has no memory info and no clock info,
+    and Jetson Orin's answers nothing but the device name. Any other NVML
+    error propagates."""
+    unsupported = getattr(nv, "NVMLError_NotSupported", ())
+    out: dict[str, float] = {}
+
+    def read(channels) -> None:
+        try:
+            out.update(channels())
+        except unsupported:
+            pass
+
+    def utilisation() -> dict[str, float]:
+        util = nv.nvmlDeviceGetUtilizationRates(h)
+        return {"gpu_util_pct": float(util.gpu), "gpu_mem_util_pct": float(util.memory)}
+
+    read(lambda: {"power_gpu_w": nv.nvmlDeviceGetPowerUsage(h) / 1000.0})
+    read(lambda: {"temp_gpu_c": float(nv.nvmlDeviceGetTemperature(h, nv.NVML_TEMPERATURE_GPU))})
+    read(utilisation)
+    read(lambda: {"gpu_mem_used_mb": nv.nvmlDeviceGetMemoryInfo(h).used / 2**20})
+    read(lambda: {"sm_clock_mhz": float(nv.nvmlDeviceGetClockInfo(h, nv.NVML_CLOCK_SM))})
+    return out
+
+
 class NvmlSampler(TelemetrySampler):
     name = "nvml"
 
@@ -26,6 +52,8 @@ class NvmlSampler(TelemetrySampler):
             pynvml.nvmlInit()
             if pynvml.nvmlDeviceGetCount() == 0:
                 return "NVML reports no GPUs"
+            if not read_channels(pynvml, pynvml.nvmlDeviceGetHandleByIndex(0)):
+                return "NVML answers no telemetry query on this device (as on Jetson Orin)"
         except Exception as exc:
             return f"NVML failed to initialise ({exc!r})"
         return None
@@ -43,29 +71,7 @@ class NvmlSampler(TelemetrySampler):
         self._h = pynvml.nvmlDeviceGetHandleByIndex(index)
 
     def read_once(self) -> dict[str, float]:
-        nv, h = self._nv, self._h
-        unsupported = getattr(nv, "NVMLError_NotSupported", ())
-        out: dict[str, float] = {}
-
-        def read(channels) -> None:
-            # A device may not implement every query: Jetson Thor's NVML has no
-            # memory info and no clock info. Leave those channels out and keep
-            # the rest; any other NVML error still propagates.
-            try:
-                out.update(channels())
-            except unsupported:
-                pass
-
-        def utilisation() -> dict[str, float]:
-            util = nv.nvmlDeviceGetUtilizationRates(h)
-            return {"gpu_util_pct": float(util.gpu), "gpu_mem_util_pct": float(util.memory)}
-
-        read(lambda: {"power_gpu_w": nv.nvmlDeviceGetPowerUsage(h) / 1000.0})
-        read(lambda: {"temp_gpu_c": float(nv.nvmlDeviceGetTemperature(h, nv.NVML_TEMPERATURE_GPU))})
-        read(utilisation)
-        read(lambda: {"gpu_mem_used_mb": nv.nvmlDeviceGetMemoryInfo(h).used / 2**20})
-        read(lambda: {"sm_clock_mhz": float(nv.nvmlDeviceGetClockInfo(h, nv.NVML_CLOCK_SM))})
-        return out
+        return read_channels(self._nv, self._h)
 
     def describe(self) -> dict[str, Any]:
         nv, h = self._nv, self._h

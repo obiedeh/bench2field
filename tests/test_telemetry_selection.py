@@ -97,6 +97,23 @@ def test_nvml_channels_a_device_does_not_support_are_left_out(monkeypatch):
     assert set(r) == {"power_gpu_w", "temp_gpu_c", "gpu_util_pct", "gpu_mem_util_pct"}
 
 
+def test_nvml_that_answers_nothing_is_unavailable(monkeypatch):
+    """Jetson Orin NX: NVML gives the device name and driver version and
+    raises NotSupported for every telemetry query
+    (bringup/orin/nvml_supported_calls.txt)."""
+    nv = fake_pynvml()
+
+    def not_supported(*args):
+        raise nv.NVMLError_NotSupported()
+
+    for fn in ("nvmlDeviceGetPowerUsage", "nvmlDeviceGetTemperature", "nvmlDeviceGetUtilizationRates",
+               "nvmlDeviceGetMemoryInfo", "nvmlDeviceGetClockInfo"):
+        setattr(nv, fn, not_supported)
+    monkeypatch.setitem(sys.modules, "pynvml", nv)
+    assert not NvmlSampler.available()
+    assert "answers no telemetry query" in NvmlSampler.unavailable_reason()
+
+
 def test_other_nvml_errors_are_not_swallowed(monkeypatch):
     nv = fake_pynvml()
 
