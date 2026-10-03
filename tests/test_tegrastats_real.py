@@ -20,7 +20,9 @@ THOR_KEYS = {
 }
 
 
-ORIN_CAPTURES = sorted((BRINGUP / "orin").glob("tegrastats_*.txt"))
+ORIN_BRINGUP = ("tegrastats_cuda_load.txt", "tegrastats_idle.txt", "tegrastats_trt_load.txt")
+ORIN_CAPTURES = [BRINGUP / "orin" / n for n in ORIN_BRINGUP]
+ORIN_ROVER_STACK = BRINGUP / "orin" / "tegrastats_rover_stack.txt"  # 60 s with the rover's ROS stack up
 ORIN_KEYS = {
     "ram_used_mb", "ram_total_mb", "cpu_util_mean_pct", "cpu_util_max_pct", "cpu_cores_online",
     "gpu_util_pct",
@@ -65,8 +67,18 @@ def test_thor_tegrastats_has_no_gpu_or_memory_controller_load():
 
 
 def test_orin_captures_exist():
-    assert [p.name for p in ORIN_CAPTURES] == [
-        "tegrastats_cuda_load.txt", "tegrastats_idle.txt", "tegrastats_trt_load.txt"]
+    assert all(p.exists() for p in ORIN_CAPTURES) and ORIN_ROVER_STACK.exists()
+
+
+def test_orin_rover_stack_capture_parses_and_shows_the_load():
+    lines = ORIN_ROVER_STACK.read_text().splitlines()
+    assert len(lines) == 122  # 60 s at 500 ms, plus the first line
+    parsed = [parse_tegrastats_line(l) for l in lines]
+    assert all(set(s) == ORIN_KEYS for s in parsed)
+    idle = [parse_tegrastats_line(l) for l in (BRINGUP / "orin" / "tegrastats_idle.txt").read_text().splitlines()]
+    med = lambda rows, k: sorted(r[k] for r in rows)[len(rows) // 2]
+    assert med(parsed, "cpu_util_mean_pct") > 3 * med(idle, "cpu_util_mean_pct")
+    assert med(parsed, "power_board_w") > med(idle, "power_board_w")
 
 
 @pytest.mark.parametrize("capture", ORIN_CAPTURES, ids=lambda p: "orin_" + p.stem)
