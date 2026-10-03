@@ -43,6 +43,7 @@ from bench2field import background, provenance  # noqa: E402
 from bench2field.backends.onnxruntime import OnnxRuntimeBackend, OrtOptions  # noqa: E402
 from bench2field.schema import describe_platform  # noqa: E402
 from bench2field.telemetry import auto_sampler  # noqa: E402
+from bench2field.telemetry.cpufreq import CpuFreqSampler  # noqa: E402
 
 try:
     import nvtx
@@ -219,12 +220,17 @@ def main() -> int:
 
     timings: dict[str, list[float]] = {s: [] for s in STAGES}
     n_dets: list[int] = []
+    frame_starts: list[float] = []
+    cpufreq = CpuFreqSampler()
     sampler.start()
+    cpufreq.start()
     t_start = time.perf_counter()
     with nvtx_range("timed_frames"):
         for jpeg in frames:
+            frame_starts.append(time.perf_counter())
             n_dets.append(one_frame(jpeg, timings))
     wall = time.perf_counter() - t_start
+    cpu_freq = cpufreq.stop()
     telemetry = sampler.stop()
 
     # What b2f run measures: session.run with NumPy feeds, copies included.
@@ -259,6 +265,16 @@ def main() -> int:
         "thresholds": {"conf": CONF_THRESHOLD, "nms": NMS_THRESHOLD},
         "settings": {"ort_allow_spinning": not a.no_spin, "cv2_threads": cv2.getNumThreads()},
         "telemetry": telemetry,
+        # CPU governor and per-core frequency during the timed frames, and
+        # per-frame timings on the same clock as its series, so host-stage
+        # time can be checked against the frequency the cores ran at.
+        "cpu_freq": cpu_freq,
+        "per_frame": {
+            "t_start_s": [round(t, 4) for t in frame_starts],
+            "host_ms": [round(timings["decode"][i] + timings["preprocess"][i] + timings["postprocess"][i], 4)
+                        for i in range(len(frames))],
+            "inference_ms": [round(v, 4) for v in timings["inference"]],
+        },
         "platform": describe_platform() | sampler.describe() | be.describe() | {"git": provenance.git_state()},
         "background": bg,
         "nvtx": "nvtx" in sys.modules,
@@ -274,6 +290,11 @@ def main() -> int:
               f"{result['stage_share_of_total_p50'][s]:>8.0%}")
     print(f"{'total':<12}{result['total_per_frame']['p50_ms']:>9.3f}{result['total_per_frame']['p95_ms']:>9.3f}")
     print(f"session.run with numpy feeds (what b2f run times): p50 {result['session_run_numpy']['p50_ms']:.3f} ms")
+    if cpu_freq["mean_khz"]:
+        govs = sorted({c["governor"] for c in cpu_freq["cores"].values()})
+        print(f"cpu frequency (mean across cores): p50 {cpu_freq['mean_khz']['p50'] / 1000:.0f} MHz, "
+              f"range {cpu_freq['mean_khz']['min'] / 1000:.0f}-{cpu_freq['mean_khz']['max'] / 1000:.0f} MHz, "
+              f"governor {', '.join(map(str, govs))}")
     print(f"detections per frame: mean {result['detections_per_frame']['mean']:.1f}; wrote {out}")
     return 0
 
