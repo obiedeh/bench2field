@@ -30,7 +30,7 @@ One report schema across all three, so results compare directly.
 ## Read the results
 
 - [Case study 01 findings](case_studies/01_perception_detector/PHASE1_FINDINGS.md): what phase 1 measured and what it means.
-- [The report](case_studies/01_perception_detector/report/index.html): every chart, from the committed runs. Download and open it; it works offline.
+- [The report](https://obiedeh.github.io/bench2field/case_studies/01_perception_detector/report/index.html): every chart, from the committed runs. GitHub shows an HTML file in a repository as source, so the link goes to the same file served as a page; the file itself is `case_studies/01_perception_detector/report/index.html` and works offline.
 - [Methodology](docs/METHODOLOGY.md): the rules every result follows.
 - [Status and handoff](HANDOFF.md): where the work stands.
 
