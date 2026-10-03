@@ -4,7 +4,7 @@ State of Bench2Field at the v1.0 release. Phase 1 is v1.0 (measure and diagnose)
 
 The GitHub repo is `github.com/obiedeh/bench2field`, **private** until the owner publishes it. PR #1 (`hardware-bringup`) merged into `master`; the v1.0 release work is on `v1-release` with its own PR. CI runs pytest on CPU for Python 3.10 and 3.12.
 
-**Identifiers:** machine hostnames, the rover's LAN address and home-directory paths were replaced in every tracked file with the board labels `bench-5090`, `bench-thor` and `field-orin` (`tools/scrub_identifiers.py`; `--check` reports leftovers). Where this file shows `bench-thor:` or `field-orin:` in an `rsync`/`ssh` command, that is the operator's SSH alias for the board. Git history from before the scrub still contains the originals; see the v1.0 PR for what remains.
+**Identifiers:** machine hostnames, the rover's LAN address and home-directory paths were replaced in every tracked file with the board labels `bench-5090`, `bench-thor` and `field-orin` Where this file shows `bench-thor:` or `field-orin:` in an `rsync`/`ssh` command, that is the operator's SSH alias for the board. The history was rewritten before publication so no commit contains them; `docs/COMMIT_MAP.md` maps the original commit IDs recorded in run files to the current ones.
 
 Last updated 2026-10-03, v1.0 release candidate. Steps 1 to 4 are done: bring-up on all three machines, publish (private repo, PR #1 open), and case study 01 phase 1: `--no-spin` FP32 baselines at 10/26/30/100 Hz on the 5090, the Thor (clean of vLLM) and the idle Orin NX, the end-to-end profile, the nsys capture, and `PHASE1_FINDINGS.md` with 26 Hz (the rover camera's delivered rate) as the headline tier. The owner reviews the findings against the reports before the PR merges. Phase 2 has not started.
 
@@ -99,7 +99,7 @@ Last updated 2026-10-03, v1.0 release candidate. Steps 1 to 4 are done: bring-up
 
 ## Git history note
 
-Commit `236aefc` (`b2f sweep --stopped`) accidentally includes two in-progress run files from the 5090 sweep (`runs/bench_5090/trt_fp32_r1.json`, identical to its final content, and a partial sweep manifest, superseded in `aad717a`). A rewritten history without them exists locally as branch `hardware-bringup-clean-history`; the force-push needed to publish it was not permitted, so the pushed branch keeps the untidy commit. Harmless; fix only if the owner wants to force-push the clean branch.
+Commit `236aefc` (`b2f sweep --stopped`) accidentally includes two in-progress run files from the 5090 sweep (`runs/bench_5090/trt_fp32_r1.json`, identical to its final content, and a partial sweep manifest, superseded in `aad717a`). Harmless, and left as it was when the history was rewritten for publication.
 
 **Baseline run directories** (all under `case_studies/01_perception_detector/runs/`): the baselines are `bench_5090_nospin/`, `bench_thor_nospin/` and `field_orin/` (idle Orin, labelled `bench-idle`). References kept as evidence: `bench_5090_rerun/` (spin-on, four tiers), `bench_thor_4tier_spin/` (clean, spin-on: ran from a stale checkout), `bench_5090/` and `bench_thor/` (first three-tier sweeps, spin-on; the Thor one with the container up), `bench_thor_rerun_stopped/` (one run, stopped by the owner).
 
@@ -139,7 +139,7 @@ Commit `236aefc` (`b2f sweep --stopped`) accidentally includes two in-progress r
 
 - `b2f report <case_study_dir> --out <file.html>`: one self-contained page from the committed runs, driven by `report.yaml` in the case study folder (which run sets are baselines, references, profiles). Generated output committed under `case_studies/01_perception_detector/report/` (`index.html`, `headline.svg`). The page footer records the generator's commit; because the generated file is itself tracked, the tree reads "dirty" at generation time whenever the report changed, so that flag on the footer is expected.
 - README rewritten as the entry point; `bringup/clean_clone/TRANSCRIPT.md` records the clean-clone test (two passes, second clean) and the two README fixes it forced.
-- Identifiers scrubbed (see above). What git history still contains: the original hostnames (`bench-5090`, `bench-thor`, `field-orin`, the `field-orin` ssh alias), the rover's LAN address and `/home/<user>` paths appear in every commit from the first bring-up commits up to the scrub commit `b9e6256`, in `HANDOFF.md`, `bringup/`, the run JSONs and `exports.json`; the LAN address is in `HANDOFF.md` from `e3ee918` to `7fd8a69`. Commit messages do not contain them. The owner decides whether to rewrite history before publishing; nothing was rewritten.
+- Identifiers scrubbed in every tracked file and in the full history (rewritten before publication). Commit IDs recorded in run files, manifests and the findings are the original ones; `docs/COMMIT_MAP.md` maps them to this history.
 - Tagging v1.0 and the GitHub Release (with the report attached) are the owner's call after review.
 
 ## Future direction (after case study 01)
