@@ -132,7 +132,7 @@ Nothing for phase 1. Phase 2 needs the decisions under open questions (TF32, spi
 
 ## Pull request
 
-`hardware-bringup` -> `master`, opened so CI runs; see the link printed when it was created (also `gh pr list` in the repo). Merging is the owner's call. `master` is still the v0.1 commit until then.
+`hardware-bringup` -> `master`: https://github.com/obiedeh/bench2field/pull/1, opened so CI runs. Merging is the owner's call. `master` is still the v0.1 commit until then.
 
 ## Commands to start phase 2
 
