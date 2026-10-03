@@ -4,7 +4,7 @@ State of the hardware bring-up and case study 01 phase 1. Work is on the `hardwa
 
 The GitHub repo exists: `github.com/obiedeh/bench2field`, **private**, with only `hardware-bringup` pushed (the owner's choice). CI has not run yet, because the workflow triggers on `master`/`main` and on pull requests. Before making the repo public, note that this file and `bringup/` name the owner's hosts and a LAN address.
 
-**Before the repo goes public:** scrub hostnames (`bench-5090`, `bench-thor`, `field-orin`) and the LAN address (`192.0.2.10`) from this file and from `bringup/` (the README, `versions.txt` files and the `host` field in every run JSON). Not done; logged here so it is not forgotten.
+**Identifiers:** machine hostnames, the rover's LAN address and home-directory paths were replaced in every tracked file with the board labels `bench-5090`, `bench-thor` and `field-orin` (`tools/scrub_identifiers.py`; `--check` reports leftovers). Where this file shows `bench-thor:` or `field-orin:` in an `rsync`/`ssh` command, that is the operator's SSH alias for the board. Git history from before the scrub still contains the originals; see the v1.0 PR for what remains.
 
 Last updated 2026-10-02 (late evening). Steps 1 to 4 are done: bring-up on all three machines, publish (private repo, PR #1 open), and case study 01 phase 1: `--no-spin` FP32 baselines at 10/26/30/100 Hz on the 5090, the Thor (clean of vLLM) and the idle Orin NX, the end-to-end profile, the nsys capture, and `PHASE1_FINDINGS.md` with 26 Hz (the rover camera's delivered rate) as the headline tier. The owner reviews the findings against the reports before the PR merges. Phase 2 has not started.
 
