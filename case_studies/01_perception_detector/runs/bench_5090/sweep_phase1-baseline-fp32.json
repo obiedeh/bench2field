@@ -39,8 +39,8 @@
   },
   "host": "bench-5090",
   "started_at": "2026-10-03T00:34:04.757136+00:00",
-  "finished_at": null,
-  "complete": false,
+  "finished_at": "2026-10-03T00:53:38.983362+00:00",
+  "complete": true,
   "runs": [
     {
       "order": 1,
@@ -50,6 +50,51 @@
       "started_at": "2026-10-03T00:34:04.757156+00:00",
       "run_id": "e475460affbb",
       "finished_at": "2026-10-03T00:37:20.678059+00:00"
+    },
+    {
+      "order": 2,
+      "label": "cuda_fp32",
+      "repeat": 1,
+      "file": "cuda_fp32_r1.json",
+      "started_at": "2026-10-03T00:37:20.678215+00:00",
+      "run_id": "35daf8bbda5a",
+      "finished_at": "2026-10-03T00:40:36.257054+00:00"
+    },
+    {
+      "order": 3,
+      "label": "trt_fp32",
+      "repeat": 2,
+      "file": "trt_fp32_r2.json",
+      "started_at": "2026-10-03T00:40:36.257211+00:00",
+      "run_id": "b5bfc5752baf",
+      "finished_at": "2026-10-03T00:43:52.041570+00:00"
+    },
+    {
+      "order": 4,
+      "label": "cuda_fp32",
+      "repeat": 2,
+      "file": "cuda_fp32_r2.json",
+      "started_at": "2026-10-03T00:43:52.041713+00:00",
+      "run_id": "5205bb21c93c",
+      "finished_at": "2026-10-03T00:47:07.644125+00:00"
+    },
+    {
+      "order": 5,
+      "label": "trt_fp32",
+      "repeat": 3,
+      "file": "trt_fp32_r3.json",
+      "started_at": "2026-10-03T00:47:07.644276+00:00",
+      "run_id": "9ca13c48cfe7",
+      "finished_at": "2026-10-03T00:50:23.389956+00:00"
+    },
+    {
+      "order": 6,
+      "label": "cuda_fp32",
+      "repeat": 3,
+      "file": "cuda_fp32_r3.json",
+      "started_at": "2026-10-03T00:50:23.390118+00:00",
+      "run_id": "800dd015f2ad",
+      "finished_at": "2026-10-03T00:53:38.983220+00:00"
     }
   ]
 }
