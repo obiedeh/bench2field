@@ -1,0 +1,140 @@
+# v4l2-ctl --list-formats-ext on the Orbbec DaBai DCW2 RGB camera, Orin NX (field-orin), 2026-10-03T01:20Z
+## /dev/video0
+	Driver name      : uvcvideo
+	Card type        : Orbbec DaBai DCW2 RGB Camera: O
+	Bus info         : usb-3610000.usb-2.3.4.3
+	Device Caps      : 0x04200001
+	Driver name      : uvcvideo
+	Bus info         : usb-3610000.usb-2.3.4.3
+ioctl: VIDIOC_ENUM_FMT
+	Type: Video Capture
+
+	[0]: 'MJPG' (Motion-JPEG, compressed)
+		Size: Discrete 640x480
+			Interval: Discrete 0.033s (30.000 fps)
+			Interval: Discrete 0.040s (25.000 fps)
+			Interval: Discrete 0.050s (20.000 fps)
+			Interval: Discrete 0.067s (15.000 fps)
+			Interval: Discrete 0.100s (10.000 fps)
+			Interval: Discrete 0.200s (5.000 fps)
+			Interval: Discrete 0.033s (30.000 fps)
+			Interval: Discrete 0.040s (25.000 fps)
+			Interval: Discrete 0.050s (20.000 fps)
+			Interval: Discrete 0.067s (15.000 fps)
+			Interval: Discrete 0.100s (10.000 fps)
+			Interval: Discrete 0.200s (5.000 fps)
+		Size: Discrete 1920x1080
+			Interval: Discrete 0.033s (30.000 fps)
+			Interval: Discrete 0.040s (25.000 fps)
+			Interval: Discrete 0.050s (20.000 fps)
+			Interval: Discrete 0.067s (15.000 fps)
+			Interval: Discrete 0.100s (10.000 fps)
+			Interval: Discrete 0.200s (5.000 fps)
+		Size: Discrete 1440x1080
+			Interval: Discrete 0.033s (30.000 fps)
+			Interval: Discrete 0.040s (25.000 fps)
+			Interval: Discrete 0.050s (20.000 fps)
+			Interval: Discrete 0.067s (15.000 fps)
+			Interval: Discrete 0.100s (10.000 fps)
+			Interval: Discrete 0.200s (5.000 fps)
+		Size: Discrete 1280x960
+			Interval: Discrete 0.033s (30.000 fps)
+			Interval: Discrete 0.040s (25.000 fps)
+			Interval: Discrete 0.050s (20.000 fps)
+			Interval: Discrete 0.067s (15.000 fps)
+			Interval: Discrete 0.100s (10.000 fps)
+			Interval: Discrete 0.200s (5.000 fps)
+		Size: Discrete 1280x720
+			Interval: Discrete 0.033s (30.000 fps)
+			Interval: Discrete 0.040s (25.000 fps)
+			Interval: Discrete 0.050s (20.000 fps)
+			Interval: Discrete 0.067s (15.000 fps)
+			Interval: Discrete 0.100s (10.000 fps)
+			Interval: Discrete 0.200s (5.000 fps)
+		Size: Discrete 640x360
+			Interval: Discrete 0.033s (30.000 fps)
+			Interval: Discrete 0.040s (25.000 fps)
+			Interval: Discrete 0.050s (20.000 fps)
+			Interval: Discrete 0.067s (15.000 fps)
+			Interval: Discrete 0.100s (10.000 fps)
+			Interval: Discrete 0.200s (5.000 fps)
+		Size: Discrete 320x240
+			Interval: Discrete 0.033s (30.000 fps)
+			Interval: Discrete 0.040s (25.000 fps)
+			Interval: Discrete 0.050s (20.000 fps)
+			Interval: Discrete 0.067s (15.000 fps)
+			Interval: Discrete 0.100s (10.000 fps)
+			Interval: Discrete 0.200s (5.000 fps)
+		Size: Discrete 640x480
+			Interval: Discrete 0.033s (30.000 fps)
+			Interval: Discrete 0.040s (25.000 fps)
+			Interval: Discrete 0.050s (20.000 fps)
+			Interval: Discrete 0.067s (15.000 fps)
+			Interval: Discrete 0.100s (10.000 fps)
+			Interval: Discrete 0.200s (5.000 fps)
+			Interval: Discrete 0.033s (30.000 fps)
+			Interval: Discrete 0.040s (25.000 fps)
+			Interval: Discrete 0.050s (20.000 fps)
+			Interval: Discrete 0.067s (15.000 fps)
+			Interval: Discrete 0.100s (10.000 fps)
+			Interval: Discrete 0.200s (5.000 fps)
+	[1]: 'YUYV' (YUYV 4:2:2)
+		Size: Discrete 640x480
+			Interval: Discrete 0.033s (30.000 fps)
+			Interval: Discrete 0.040s (25.000 fps)
+			Interval: Discrete 0.050s (20.000 fps)
+			Interval: Discrete 0.067s (15.000 fps)
+			Interval: Discrete 0.100s (10.000 fps)
+			Interval: Discrete 0.200s (5.000 fps)
+			Interval: Discrete 0.033s (30.000 fps)
+			Interval: Discrete 0.040s (25.000 fps)
+			Interval: Discrete 0.050s (20.000 fps)
+			Interval: Discrete 0.067s (15.000 fps)
+			Interval: Discrete 0.100s (10.000 fps)
+			Interval: Discrete 0.200s (5.000 fps)
+		Size: Discrete 1920x1080
+			Interval: Discrete 0.200s (5.000 fps)
+		Size: Discrete 1440x1080
+			Interval: Discrete 0.200s (5.000 fps)
+		Size: Discrete 1280x960
+			Interval: Discrete 0.200s (5.000 fps)
+		Size: Discrete 1280x720
+			Interval: Discrete 0.100s (10.000 fps)
+			Interval: Discrete 0.200s (5.000 fps)
+		Size: Discrete 640x360
+			Interval: Discrete 0.033s (30.000 fps)
+			Interval: Discrete 0.040s (25.000 fps)
+			Interval: Discrete 0.050s (20.000 fps)
+			Interval: Discrete 0.067s (15.000 fps)
+			Interval: Discrete 0.100s (10.000 fps)
+			Interval: Discrete 0.200s (5.000 fps)
+		Size: Discrete 320x240
+			Interval: Discrete 0.033s (30.000 fps)
+			Interval: Discrete 0.040s (25.000 fps)
+			Interval: Discrete 0.050s (20.000 fps)
+			Interval: Discrete 0.067s (15.000 fps)
+			Interval: Discrete 0.100s (10.000 fps)
+			Interval: Discrete 0.200s (5.000 fps)
+		Size: Discrete 640x480
+			Interval: Discrete 0.033s (30.000 fps)
+			Interval: Discrete 0.040s (25.000 fps)
+			Interval: Discrete 0.050s (20.000 fps)
+			Interval: Discrete 0.067s (15.000 fps)
+			Interval: Discrete 0.100s (10.000 fps)
+			Interval: Discrete 0.200s (5.000 fps)
+			Interval: Discrete 0.033s (30.000 fps)
+			Interval: Discrete 0.040s (25.000 fps)
+			Interval: Discrete 0.050s (20.000 fps)
+			Interval: Discrete 0.067s (15.000 fps)
+			Interval: Discrete 0.100s (10.000 fps)
+			Interval: Discrete 0.200s (5.000 fps)
+## /dev/video1
+	Driver name      : uvcvideo
+	Card type        : Orbbec DaBai DCW2 RGB Camera: O
+	Bus info         : usb-3610000.usb-2.3.4.3
+	Device Caps      : 0x04a00000
+	Driver name      : uvcvideo
+	Bus info         : usb-3610000.usb-2.3.4.3
+ioctl: VIDIOC_ENUM_FMT
+	Type: Video Capture
+

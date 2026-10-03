@@ -1,0 +1,6 @@
+numpy==2.2.6
+nvidia-ml-py==13.615.71
+onnx==1.23.1
+onnxruntime-gpu==1.24.0
+pytest==9.1.1
+PyYAML==6.0.3
