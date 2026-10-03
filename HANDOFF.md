@@ -6,7 +6,7 @@ The GitHub repo is `github.com/obiedeh/bench2field`, **private** until the owner
 
 **Identifiers:** machine hostnames, the rover's LAN address and home-directory paths were replaced in every tracked file with the board labels `bench-5090`, `bench-thor` and `field-orin` (`tools/scrub_identifiers.py`; `--check` reports leftovers). Where this file shows `bench-thor:` or `field-orin:` in an `rsync`/`ssh` command, that is the operator's SSH alias for the board. Git history from before the scrub still contains the originals; see the v1.0 PR for what remains.
 
-Last updated 2026-10-03, v1.0 release candidate. Steps 1 to 4 are done: bring-up on all three machines, publish (private repo, PR #1 open), and case study 01 phase 1: `--no-spin` FP32 baselines at 10/26/30/100 Hz on the 5090, the Thor (clean of vLLM) and the idle Orin NX, the end-to-end profile, the nsys capture, and `PHASE1_FINDINGS.md` with 26 Hz (the rover camera's delivered rate) as the headline tier. The owner reviews the findings against the reports before the PR merges. Phase 2 has not started.
+Last updated 2026-10-03 (end of day): v1.0.1 is released from `master`; phase 2 has started on branch `phase2` (pushed, not merged), speed measurements only. Steps 1 to 4 are done: bring-up on all three machines, publish (private repo, PR #1 open), and case study 01 phase 1: `--no-spin` FP32 baselines at 10/26/30/100 Hz on the 5090, the Thor (clean of vLLM) and the idle Orin NX, the end-to-end profile, the nsys capture, and `PHASE1_FINDINGS.md` with 26 Hz (the rover camera's delivered rate) as the headline tier. The owner reviews the findings against the reports before the PR merges. Phase 2 has not started.
 
 ## Done
 
@@ -105,10 +105,20 @@ Commit `236aefc` (`b2f sweep --stopped`) accidentally includes two in-progress r
 
 **Thor stand-down procedure that worked** (for any future clean Thor run): `systemctl --user stop physical-ai-safety` (the Safety Observability API is the user unit `physical-ai-safety.service`, enabled, `Restart=on-failure`), then `docker stop physical-ai-vllm` (it runs with `--rm`, so it is removed; expected), wait 3 minutes, confirm `docker ps` empty and `nvidia-smi --query-compute-apps` empty, run with `b2f sweep ... --expect-commit <hash>`, then `systemctl --user start physical-ai-safety`; the API re-creates the container within a few minutes.
 
+## Phase 2 so far (branch `phase2`, pushed, not merged)
+
+**Everything here is speed only, accuracy not yet measured.** No FP16 number goes into the findings, the report or the README until the accuracy harness exists.
+
+- Every report records the provider's options: `platform.provider_options_requested` (what the run asked for) and `platform.provider_options` (every option the session ended up with; for TensorRT, the engine build options).
+- `runs/phase2_orin_fp16/`: TensorRT fp32 and fp16 alternating on the Orin, 10/26/30/100 Hz, three repeats each, `--no-spin`, rover stack off, `MAXN_SUPER`; config `sweeps/phase2_orin_fp16.yaml`. Same ONNX file for both; FP16 is `trt_fp16_enable`.
+- `runs/phase2_profile_orin_rover_frames_480p_fp16.json` and `..._fp32.json`: pipeline profiles back to back on the 480p rover frames.
+- The pipeline profiler records the CPU governor, per-core frequency and per-frame timings (`cpu_freq`, `per_frame` in its JSON; `bench2field/telemetry/cpufreq.py`, read-only).
+- `runs/phase2_orin_profiles_alt/`: six profiles alternated fp32, fp16, three times, with CPU frequency. Host-stage time followed CPU frequency across the six runs.
+- `PHASE1_FINDINGS.md` is unchanged by any of this, apart from the v1.0.1 correction made on `master`.
+
 ## Blocked, waiting on the owner
 
-- Owner's review of `PHASE1_FINDINGS.md` against the reports on GitHub before PR #1 merges.
-- Phase 2 needs the decisions under open questions (TF32, the kernel's output scale) before its first variant is measured.
+Nothing. The next session's order is below.
 
 ## Deferred by decision
 
@@ -117,6 +127,10 @@ Commit `236aefc` (`b2f sweep --stopped`) accidentally includes two in-progress r
 - **Orin replay drift (explain before trusting replay validity, phase 5).** On the Orin, the CPU stressor was calibrated to a 40% target with the model idle: duty frozen at 0.118, 41.7% measured. During the 60 s tier that followed, CPU utilisation had a median of 35.5% with the duty unchanged. The rover's own services were still settling after boot, so the background load the calibration absorbed was not steady. Until this is explained (and the recording rule "steady-state background load" is enforced or checked), a replay's validity number should not be trusted on its own. No fix now.
 
 - **Field-load profile must be recorded without rviz2 (phase 5).** `bringup/orin/tegrastats_rover_stack.txt` (60 s with micro-ROS agent, `car_base.launch.py` with the camera, and `slam_stack.sh`) includes `rviz2`, which `slam_stack.sh` starts and which took a full core; rviz does not run on the rover in the field. Record the replay profile with the field stack only: micro-ROS agent, `car_base` with the camera, SLAM, no rviz. Keep the existing capture as a reference, not as the profile.
+
+## Deferred, not in plan
+
+- **CPU governor on the Orin.** Under `schedutil` the Orin's cores ran at a median of 755 to 986 MHz out of 1,984 MHz during the pipeline profiles, and host-stage time tracked that frequency (`runs/phase2_orin_profiles_alt/`). A performance-governor test is scripted (`case_studies/01_perception_detector/governor_test.sh`: records the governor and limits, sets `performance`, runs three alternated fp32/fp16 profile pairs, restores what it found in an exit trap, writes before/during/after into the run folder) but it needs the owner's `sudo` on the Orin and has not been run. Not part of phase 2 unless the owner adds it.
 
 ## Open questions
 
@@ -139,7 +153,7 @@ Commit `236aefc` (`b2f sweep --stopped`) accidentally includes two in-progress r
 
 - `b2f report <case_study_dir> --out <file.html>`: one self-contained page from the committed runs, driven by `report.yaml` in the case study folder (which run sets are baselines, references, profiles). Generated output committed under `case_studies/01_perception_detector/report/` (`index.html`, `headline.svg`). The page footer records the generator's commit; because the generated file is itself tracked, the tree reads "dirty" at generation time whenever the report changed, so that flag on the footer is expected.
 - README rewritten as the entry point; `bringup/clean_clone/TRANSCRIPT.md` records the clean-clone test (two passes, second clean) and the two README fixes it forced.
-- Identifiers scrubbed (see above). What git history still contains: the original hostnames (`bench-5090`, `bench-thor`, `field-orin`, the `field-orin` ssh alias), the rover's LAN address and `/home/<user>` paths appear in every commit from the first bring-up commits up to the scrub commit `b9e6256`, in `HANDOFF.md`, `bringup/`, the run JSONs and `exports.json`; the LAN address is in `HANDOFF.md` from `e3ee918` to `7fd8a69`. Commit messages do not contain them. The owner decides whether to rewrite history before publishing; nothing was rewritten.
+- Identifiers scrubbed (see above). What git history still contains: the three machines' original hostnames, an ssh alias for the rover's board, the rover's LAN address and `/home/<user>` paths appear in every commit from the first bring-up commits up to the scrub commit `b9e6256`, in `HANDOFF.md`, `bringup/`, the run JSONs and `exports.json`; the LAN address is in `HANDOFF.md` from `e3ee918` to `7fd8a69`. Commit messages do not contain them. The owner decides whether to rewrite history before publishing; nothing was rewritten.
 - Tagging v1.0 and the GitHub Release (with the report attached) are the owner's call after review.
 
 ## Future direction (after case study 01)
@@ -159,29 +173,24 @@ Logged by the owner's instruction; not to be built until case study 01 is done.
 
 - An external, billed, multi-agent cloud code review was offered by the development tooling during this work. The owner chose not to run it. Nothing in this repo has been through an external review.
 
-## Pull request
+## Pull requests and releases
 
-`hardware-bringup` -> `master`: https://github.com/obiedeh/bench2field/pull/1, opened so CI runs. Merging is the owner's call. `master` is still the v0.1 commit until then.
+PRs #1 (`hardware-bringup`), #2 (`v1-release`) and #3 (`fix/v1.0.1-thermal-claim`) are merged into `master`. Tags `v1.0` and `v1.0.1` are on `master`, each with a GitHub Release carrying the report. `phase2` is pushed and not merged. The repo is private.
 
-## Commands to start phase 2
+## Next session
 
-On the 5090 host, from `~/github/bench2field` (prefix everything with `env -u PYTHONPATH`); on the Jetsons, from the same path without the prefix.
+In this order, from the original plan:
 
-```bash
-# 1. Export the teacher (weights download once):
-.venv/bin/python case_studies/01_perception_detector/export_yolox.py l
-rsync -a models/yolox_l.onnx bench-thor:github/bench2field/models/ ; rsync -a models/yolox_l.onnx field-orin:github/bench2field/models/
+1. **Accuracy harness**: COCO validation subset plus labelled rover frames; FP32 baseline accuracy. (The rover frames captured so far show a blank wall; re-capture in the rover's working environment and label them.)
+2. **FP16 accuracy**, so the FP16 speed result on `phase2` can be claimed.
+3. **Continue the phase 2 ladder**: INT8, 2:4 sparsity, distillation, accuracy reported at every step.
 
-# 2. First rung of the ladder, fp16 TensorRT, same sweep shape as the baseline. Copy
-#    sweeps/phase1_baseline.yaml to sweeps/phase2_fp16.yaml with a trt_fp16 variant
-#    (precision: fp16) alongside trt_fp32, and decide on --no-spin (see open questions).
-.venv/bin/b2f sweep case_studies/01_perception_detector/sweeps/phase2_fp16.yaml --out-dir case_studies/01_perception_detector/runs/p2_fp16_5090
+NMS and copy fixes stay in phase 3 with the kernel, as planned.
 
-# 3. Accuracy for every variant from here on (methodology rule 9): needs the COCO val
-#    subset and labelled rover frames; nothing for this exists in the repo yet.
+Working notes for whoever picks this up:
 
-# 4. Compare at the rover's tier, with the repeats:
-.venv/bin/b2f retention "runs/.../trt_fp32_r*.json" "runs/.../trt_fp16_r*.json" "<field fp32>" "<field fp16>" --hz 30
-```
-
-Do not stop the Thor's `physical-ai-vllm` container; see the hardware table. Keep `PHASE1_FINDINGS.md` as the reference for what the frame costs around the model.
+- On the 5090 host, run everything as `env -u PYTHONPATH .venv/bin/<command>` from `~/github/bench2field`; on the Jetsons, `.venv/bin/<command>` from the same path.
+- Before any run on a board: sync the checkout, then pass `--expect-commit <hash>` (`b2f sweep` and `profile_pipeline.py` both take it). The Orin's and Thor's checkouts are rsync copies including `.git`; sync the committed `runs/` too or the tree reads dirty.
+- New run files must be `git add`ed before `python tools/scrub_identifiers.py` sees them; run it, then `--check`, before committing.
+- The teacher for distillation is not exported yet: `export_yolox.py l` (see the case study README for the two-step YOLOX install).
+- Do not `docker stop` the Thor's vLLM container on its own; use the stand-down procedure above.
