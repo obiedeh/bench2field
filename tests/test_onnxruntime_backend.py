@@ -40,6 +40,7 @@ def test_cpu_backend_runs_with_thread_options(tiny_model):
     d = be.describe()
     assert d["provider_active"] == "CPUExecutionProvider" and d["allow_spinning"] is False
     assert (d["tensorrt"], d["cudnn"], d["cuda_runtime"]) == (None, None, None)  # not an NVIDIA run
+    assert d["provider_options_requested"] == {} and isinstance(d["provider_options"], dict)
 
 
 def test_missing_provider_is_a_clear_error(tiny_model):
@@ -188,6 +189,10 @@ def test_tensorrt_provider_runs_a_conv_in_fp16(conv_model, tmp_path):
     assert y[0, 0, 5, 5] == pytest.approx(feeds["x"][0, :, 4:7, 4:7].sum(), rel=2e-2, abs=2e-2)
     d = be.describe()  # the libraries that ran are named in the report
     assert d["tensorrt"].startswith("10.") and d["cudnn"].startswith("9.") and d["cuda_runtime"]
+    # ... and so are the engine build options, requested and effective.
+    assert d["provider_options_requested"]["trt_fp16_enable"] is True
+    assert str(d["provider_options"]["trt_fp16_enable"]).lower() in ("1", "true")
+    assert "trt_max_workspace_size" in d["provider_options"]
 
 
 def test_nvidia_version_encoding():
