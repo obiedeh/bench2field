@@ -6,7 +6,7 @@ The GitHub repo exists: `github.com/obiedeh/bench2field`, **private**, with only
 
 **Before the repo goes public:** scrub hostnames (`bench-5090`, `bench-thor`, `field-orin`) and the LAN address (`192.0.2.10`) from this file and from `bringup/` (the README, `versions.txt` files and the `host` field in every run JSON). Not done; logged here so it is not forgotten.
 
-Last updated 2026-10-02 (evening). Steps 1 to 4 are done: bring-up on all three machines, publish (private repo, PR open), and case study 01 phase 1 (baselines on the 5090 and the Thor, end-to-end profile, nsys capture, `PHASE1_FINDINGS.md`). Phase 2 has not started.
+Last updated 2026-10-02 (late evening). Steps 1 to 4 are done: bring-up on all three machines, publish (private repo, PR #1 open), and case study 01 phase 1: `--no-spin` FP32 baselines at 10/26/30/100 Hz on the 5090, the Thor (clean of vLLM) and the idle Orin NX, the end-to-end profile, the nsys capture, and `PHASE1_FINDINGS.md` with 26 Hz (the rover camera's delivered rate) as the headline tier. The owner reviews the findings against the reports before the PR merges. Phase 2 has not started.
 
 ## Done
 
@@ -91,6 +91,7 @@ Last updated 2026-10-02 (evening). Steps 1 to 4 are done: bring-up on all three 
 | Thor | NVML on the Thor raises `NotSupported` for memory info and clock info, so the NVML sampler failed outright. | `044bf15`: unsupported channels are left out, other NVML errors still propagate. |
 | Thor | The PyPI `onnxruntime-gpu==1.30.0` aarch64 wheel has no TensorRT provider, and its CUDA provider fails on the first Relu with `cudaErrorNoKernelImageForDevice`. | Use the Jetson AI Lab wheel (1.24.0). No code change. |
 | Thor | tegrastats prints no `GR3D_FREQ` and no `EMC_FREQ`, idle or under load. | Documented and pinned by a test; see open questions. |
+| Thor | A sweep meant to be `--no-spin` ran spin-on because the Thor's checkout was two commits behind (my mistake). | `0ac4fbf`: every report and manifest records the git commit and dirty flag; `b2f sweep --expect-commit` refuses a wrong or dirty checkout. Always sync the board and pass `--expect-commit` before a remote sweep. |
 | Thor | `docker stop physical-ai-vllm` for the baseline sweep **destroyed the container**: it runs with `--rm`. The Safety Observability API (`uvicorn api.main:app`, port 8081, under the user's systemd) re-created it three minutes later, so the sweep ran with it up and idle. | Not fixable from here. The reports' `background` snapshots record the truth; the findings say so. Do not `docker stop` that container again; ask the owner how the API should be told to stand down. |
 | 5090 | Preprocess p95 of 40 ms in the pipeline profile. | Not a bug in the profiler: onnxruntime's spin-waiting intra-op threads compete with OpenCV. `--no-spin` on the profiler and on `b2f run` removes it; phase 2 should run with spinning off everywhere. |
 
@@ -100,9 +101,13 @@ Last updated 2026-10-02 (evening). Steps 1 to 4 are done: bring-up on all three 
 
 Commit `236aefc` (`b2f sweep --stopped`) accidentally includes two in-progress run files from the 5090 sweep (`runs/bench_5090/trt_fp32_r1.json`, identical to its final content, and a partial sweep manifest, superseded in `aad717a`). A rewritten history without them exists locally as branch `hardware-bringup-clean-history`; the force-push needed to publish it was not permitted, so the pushed branch keeps the untidy commit. Harmless; fix only if the owner wants to force-push the clean branch.
 
+**Baseline run directories** (all under `case_studies/01_perception_detector/runs/`): the baselines are `bench_5090_nospin/`, `bench_thor_nospin/` and `field_orin/` (idle Orin, labelled `bench-idle`). References kept as evidence: `bench_5090_rerun/` (spin-on, four tiers), `bench_thor_4tier_spin/` (clean, spin-on: ran from a stale checkout), `bench_5090/` and `bench_thor/` (first three-tier sweeps, spin-on; the Thor one with the container up), `bench_thor_rerun_stopped/` (one run, stopped by the owner).
+
+**Thor stand-down procedure that worked** (for any future clean Thor run): `systemctl --user stop physical-ai-safety` (the Safety Observability API is the user unit `physical-ai-safety.service`, enabled, `Restart=on-failure`), then `docker stop physical-ai-vllm` (it runs with `--rm`, so it is removed; expected), wait 3 minutes, confirm `docker ps` empty and `nvidia-smi --query-compute-apps` empty, run with `b2f sweep ... --expect-commit <hash>`, then `systemctl --user start physical-ai-safety`; the API re-creates the container within a few minutes.
+
 ## Blocked, waiting on the owner
 
-- **Thor four-tier baseline (`--no-spin`)**: wait for the owner to say the Safety Observability API and its `physical-ai-vllm` container are down, then run `phase1_baseline.yaml` on the Thor into `runs/bench_thor_rerun/` and check `platform.background` in every report shows no vLLM process or container. A re-run started before that stand-down was stopped by the owner after one run; its output is `runs/bench_thor_rerun_stopped/` with the manifest marked incomplete and why. The first Thor sweep (`runs/bench_thor/`) is also not the baseline (container up, spinning on).
+- Owner's review of `PHASE1_FINDINGS.md` against the reports on GitHub before PR #1 merges.
 - Phase 2 needs the decisions under open questions (TF32, the kernel's output scale) before its first variant is measured.
 
 ## Deferred by decision
@@ -117,7 +122,8 @@ Commit `236aefc` (`b2f sweep --stopped`) accidentally includes two in-progress r
 
 - **TF32 in the fp32 baseline.** TensorRT runs the fp32 graph with TF32 tensor-core kernels on the 5090 by default (76% of GPU kernel time in the nsys capture). Phase 2's fp16 and INT8 gains will be measured against TF32, not true fp32. Keep that (it is what a deployment gets), or also build a TF32-off engine (`trt_builder_optimization_level`/`TF32` flags via `extra_provider_options`) for the write-up? The Thor's kernels were not profiled.
 - **Spinning.** Decided: baselines and every phase 2 variant run with `--no-spin` (`no_spin: true` in the sweep config; reports record `platform.allow_spinning = false`). The library default is unchanged.
-- **Request-rate dependence.** Latency at 10 and 30 Hz is far worse than at 100 Hz on both machines because the GPU drops power states between frames. Retention at 30 Hz will therefore compare numbers dominated by clock ramp, not by the model. Options for the owner: accept (it is what the robot sees), add `jetson_clocks`/locked clocks as a recorded setting (changes the board, so not without asking), or report both tiers. Nothing changed.
+- **Request-rate dependence.** Latency at 10 to 30 Hz is far worse than at 100 Hz on all three machines because the GPU drops power states between frames; on the Orin the detector misses the 33.3 ms deadline at 10 Hz and fits it at 26 Hz. Retention at 26 Hz will therefore compare numbers partly set by clock state. Options for the owner: accept (it is what the robot sees), add `jetson_clocks`/locked clocks as a recorded setting (changes the board, so not without asking), or report both tiers. Nothing changed.
+- **Thermal swing on the Orin (phase 5 thermal hold).** In the idle Orin sweep the 26 Hz TensorRT p95 was 23.1 ms in the first repeat (die 59.7 °C) and 26.9 ms in the next two (63.5 °C, after the CUDA runs warmed the board). A 16% swing inside one sweep on an idle board; the thermal-hold and cooldown-gating work needs to cover the Orin before phase 5 field runs.
 - **Kernel spec versus the model.** `kernels/README.md` says the fused preprocessing kernel scales pixels to [0, 1]; YOLOX takes raw 0..255. The kernel's scale (and BGR/RGB order) should match `export_yolox.py`'s input convention before phase 3.
 - **Postprocess cost.** NumPy NMS over all 8400 candidates costs 1.0 ms per frame even with no detections. Thresholding before decoding would make it near zero. Left as is so phase 2 measures against the same baseline; worth fixing in the pipeline before phase 5.
 - **Copies and pinned memory.** Host-device copies run at pageable speed (21 GB/s) on the 5090. Pinned host memory and, on Jetson, unified memory belong to the phase 3 kernel work and are not in `b2f run`.
