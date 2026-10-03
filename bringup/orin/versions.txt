@@ -1,4 +1,4 @@
-# Jetson Orin NX (host field-orin), 2026-10-02
+# Jetson Orin NX (field-orin), 2026-10-02
 # NVIDIA Jetson Orin NX Engineering Reference Developer Kit Super (/proc/device-tree/model)
 # R36 (release), REVISION: 4.7, GCID: 42132812, BOARD: generic, EABI: aarch64, DATE: Thu Sep 18 22:54:44 UTC 2025
 # Python 3.10.12 (system; no python3-venv, so the venv was made with --without-pip and pip bootstrapped into it)
