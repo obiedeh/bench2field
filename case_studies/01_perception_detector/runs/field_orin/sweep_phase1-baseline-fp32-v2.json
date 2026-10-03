@@ -98,5 +98,11 @@
       "run_id": "78aeed2a4e68",
       "finished_at": "2026-10-03T03:00:55.955294+00:00"
     }
-  ]
+  ],
+  "git": {
+    "commit": "ac95271b7faed9fa825a5b83c859f9f7a26e05fc",
+    "dirty": null,
+    "root": null,
+    "recorded_afterwards": "Recorded after the fact from the session log: the Orin checkout was synced to this commit and verified with git log before the sweep started; the code then did not record git state (added in 0ac4fbf). The Orin tree lacked the committed runs/ files at the time, so the later guard would have called it dirty; code files matched the commit."
+  }
 }
