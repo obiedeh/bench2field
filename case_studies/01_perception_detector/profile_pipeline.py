@@ -160,7 +160,11 @@ def main() -> int:
     p.add_argument("--warmup", type=int, default=30, help="frames run before timing starts")
     p.add_argument("--limit", type=int, help="time at most this many frames")
     p.add_argument("--out", required=True)
+    p.add_argument("--expect-commit", metavar="HASH",
+                   help="refuse to run unless this checkout is at HASH (prefix ok) and clean")
     a = p.parse_args()
+    if a.expect_commit:
+        provenance.check_expected_commit(a.expect_commit)
 
     frames, manifest = load_frames(Path(a.frames))
     if a.limit:
