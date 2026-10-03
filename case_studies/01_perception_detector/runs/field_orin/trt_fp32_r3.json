@@ -1,0 +1,497 @@
+{
+  "variant": {
+    "model": "yolox-s",
+    "backend": "onnxruntime",
+    "provider": "TensorrtExecutionProvider",
+    "precision": "fp32",
+    "technique": "baseline",
+    "notes": ""
+  },
+  "environment": "bench-idle",
+  "tiers": [
+    {
+      "target_hz": 10.0,
+      "actual_hz": 10.011068008704962,
+      "duration_s": 59.933665366999776,
+      "deadline_ms": 33.3,
+      "deadline_misses": 535,
+      "latency": {
+        "n": 600,
+        "p50_ms": 33.46777950082469,
+        "p95_ms": 33.7292952005555,
+        "p99_ms": 33.82380029974229,
+        "max_ms": 37.856848000956234,
+        "mean_ms": 33.340185678301474
+      },
+      "telemetry": {
+        "n_samples": 120,
+        "cpu_cores_online": {
+          "p50": 6.0,
+          "peak": 6.0
+        },
+        "cpu_util_max_pct": {
+          "p50": 13.0,
+          "peak": 98.0
+        },
+        "cpu_util_mean_pct": {
+          "p50": 5.0,
+          "peak": 21.666666666666668
+        },
+        "gpu_util_pct": {
+          "p50": 0.0,
+          "peak": 99.0
+        },
+        "power_board_w": {
+          "p50": 7.193,
+          "peak": 9.405
+        },
+        "power_vdd_cpu_gpu_cv_w": {
+          "p50": 1.651,
+          "peak": 3.682
+        },
+        "power_vdd_in_w": {
+          "p50": 7.193,
+          "peak": 9.405
+        },
+        "power_vdd_soc_w": {
+          "p50": 1.847,
+          "peak": 1.941
+        },
+        "ram_total_mb": {
+          "p50": 7620.0,
+          "peak": 7620.0
+        },
+        "ram_used_mb": {
+          "p50": 4320.0,
+          "peak": 4325.0
+        },
+        "temp_cpu_c": {
+          "p50": 66.078,
+          "peak": 71.218
+        },
+        "temp_cv0_c": {
+          "p50": 62.4525,
+          "peak": 67.593
+        },
+        "temp_cv1_c": {
+          "p50": 63.7655,
+          "peak": 68.968
+        },
+        "temp_cv2_c": {
+          "p50": 61.187,
+          "peak": 66.468
+        },
+        "temp_gpu_c": {
+          "p50": 67.093,
+          "peak": 72.437
+        },
+        "temp_soc0_c": {
+          "p50": 64.031,
+          "peak": 69.437
+        },
+        "temp_soc1_c": {
+          "p50": 63.733999999999995,
+          "peak": 68.843
+        },
+        "temp_soc2_c": {
+          "p50": 62.343,
+          "peak": 67.75
+        },
+        "temp_tj_c": {
+          "p50": 67.093,
+          "peak": 72.437
+        }
+      },
+      "response": {
+        "n": 600,
+        "p50_ms": 33.576562000234844,
+        "p95_ms": 33.83706675085705,
+        "p99_ms": 33.96514845046113,
+        "max_ms": 37.9675740005041,
+        "mean_ms": 33.44847465377825
+      },
+      "dropped": 0,
+      "drop_late": false
+    },
+    {
+      "target_hz": 26.0,
+      "actual_hz": 26.005114509086745,
+      "duration_s": 59.988199608000286,
+      "deadline_ms": 33.3,
+      "deadline_misses": 0,
+      "latency": {
+        "n": 1560,
+        "p50_ms": 26.503287500418082,
+        "p95_ms": 26.756777000719012,
+        "p99_ms": 26.868640520478948,
+        "max_ms": 27.18683199964289,
+        "mean_ms": 26.331273781384787
+      },
+      "telemetry": {
+        "n_samples": 120,
+        "cpu_cores_online": {
+          "p50": 6.0,
+          "peak": 6.0
+        },
+        "cpu_util_max_pct": {
+          "p50": 19.0,
+          "peak": 90.0
+        },
+        "cpu_util_mean_pct": {
+          "p50": 6.833333333333333,
+          "peak": 23.333333333333332
+        },
+        "gpu_util_pct": {
+          "p50": 64.5,
+          "peak": 99.0
+        },
+        "power_board_w": {
+          "p50": 9.217,
+          "peak": 11.894
+        },
+        "power_vdd_cpu_gpu_cv_w": {
+          "p50": 2.908,
+          "peak": 5.311
+        },
+        "power_vdd_in_w": {
+          "p50": 9.217,
+          "peak": 11.894
+        },
+        "power_vdd_soc_w": {
+          "p50": 2.134,
+          "peak": 2.228
+        },
+        "ram_total_mb": {
+          "p50": 7620.0,
+          "peak": 7620.0
+        },
+        "ram_used_mb": {
+          "p50": 4321.0,
+          "peak": 4334.0
+        },
+        "temp_cpu_c": {
+          "p50": 62.234,
+          "peak": 63.562
+        },
+        "temp_cv0_c": {
+          "p50": 58.671499999999995,
+          "peak": 60.0
+        },
+        "temp_cv1_c": {
+          "p50": 59.968,
+          "peak": 60.906
+        },
+        "temp_cv2_c": {
+          "p50": 57.468,
+          "peak": 58.25
+        },
+        "temp_gpu_c": {
+          "p50": 63.562,
+          "peak": 64.562
+        },
+        "temp_soc0_c": {
+          "p50": 60.437,
+          "peak": 61.281
+        },
+        "temp_soc1_c": {
+          "p50": 60.0,
+          "peak": 60.843
+        },
+        "temp_soc2_c": {
+          "p50": 58.75,
+          "peak": 59.718
+        },
+        "temp_tj_c": {
+          "p50": 63.5155,
+          "peak": 64.562
+        }
+      },
+      "response": {
+        "n": 1560,
+        "p50_ms": 26.589526654788642,
+        "p95_ms": 26.85418706259952,
+        "p99_ms": 26.96450035824455,
+        "max_ms": 27.306112309815944,
+        "mean_ms": 26.41861977370191
+      },
+      "dropped": 0,
+      "drop_late": false
+    },
+    {
+      "target_hz": 30.0,
+      "actual_hz": 30.005259152294247,
+      "duration_s": 59.9894835390005,
+      "deadline_ms": 33.3,
+      "deadline_misses": 0,
+      "latency": {
+        "n": 1800,
+        "p50_ms": 22.65815600003407,
+        "p95_ms": 22.880595350670774,
+        "p99_ms": 23.004843239923503,
+        "max_ms": 23.607213999639498,
+        "mean_ms": 22.65151599610969
+      },
+      "telemetry": {
+        "n_samples": 120,
+        "cpu_cores_online": {
+          "p50": 6.0,
+          "peak": 6.0
+        },
+        "cpu_util_max_pct": {
+          "p50": 21.0,
+          "peak": 98.0
+        },
+        "cpu_util_mean_pct": {
+          "p50": 7.166666666666667,
+          "peak": 25.0
+        },
+        "gpu_util_pct": {
+          "p50": 60.5,
+          "peak": 99.0
+        },
+        "power_board_w": {
+          "p50": 9.792,
+          "peak": 12.466
+        },
+        "power_vdd_cpu_gpu_cv_w": {
+          "p50": 3.197,
+          "peak": 5.794
+        },
+        "power_vdd_in_w": {
+          "p50": 9.792,
+          "peak": 12.466
+        },
+        "power_vdd_soc_w": {
+          "p50": 2.23,
+          "peak": 2.32
+        },
+        "ram_total_mb": {
+          "p50": 7620.0,
+          "peak": 7620.0
+        },
+        "ram_used_mb": {
+          "p50": 4337.0,
+          "peak": 4351.0
+        },
+        "temp_cpu_c": {
+          "p50": 61.625,
+          "peak": 63.406
+        },
+        "temp_cv0_c": {
+          "p50": 58.031,
+          "peak": 59.031
+        },
+        "temp_cv1_c": {
+          "p50": 59.343,
+          "peak": 59.843
+        },
+        "temp_cv2_c": {
+          "p50": 56.843,
+          "peak": 57.343
+        },
+        "temp_gpu_c": {
+          "p50": 63.0,
+          "peak": 63.656
+        },
+        "temp_soc0_c": {
+          "p50": 59.875,
+          "peak": 60.375
+        },
+        "temp_soc1_c": {
+          "p50": 59.375,
+          "peak": 59.718
+        },
+        "temp_soc2_c": {
+          "p50": 58.125,
+          "peak": 59.0
+        },
+        "temp_tj_c": {
+          "p50": 63.0,
+          "peak": 63.656
+        }
+      },
+      "response": {
+        "n": 1800,
+        "p50_ms": 22.742621999896073,
+        "p95_ms": 22.971527467962005,
+        "p99_ms": 23.121639263226825,
+        "max_ms": 23.697465332588763,
+        "mean_ms": 22.736181715165205
+      },
+      "dropped": 0,
+      "drop_late": false
+    },
+    {
+      "target_hz": 100.0,
+      "actual_hz": 84.06404718299179,
+      "duration_s": 71.37415103199965,
+      "deadline_ms": 33.3,
+      "deadline_misses": 5988,
+      "latency": {
+        "n": 6000,
+        "p50_ms": 11.9010825001169,
+        "p95_ms": 12.046382999324123,
+        "p99_ms": 12.15630860062447,
+        "max_ms": 12.725639999189298,
+        "mean_ms": 11.882743888825644
+      },
+      "telemetry": {
+        "n_samples": 143,
+        "cpu_cores_online": {
+          "p50": 6.0,
+          "peak": 6.0
+        },
+        "cpu_util_max_pct": {
+          "p50": 49.0,
+          "peak": 100.0
+        },
+        "cpu_util_mean_pct": {
+          "p50": 12.0,
+          "peak": 28.5
+        },
+        "gpu_util_pct": {
+          "p50": 87.0,
+          "peak": 93.0
+        },
+        "power_board_w": {
+          "p50": 23.871,
+          "peak": 25.436
+        },
+        "power_vdd_cpu_gpu_cv_w": {
+          "p50": 12.821,
+          "peak": 14.122
+        },
+        "power_vdd_in_w": {
+          "p50": 23.871,
+          "peak": 25.436
+        },
+        "power_vdd_soc_w": {
+          "p50": 5.04,
+          "peak": 5.132
+        },
+        "ram_total_mb": {
+          "p50": 7620.0,
+          "peak": 7620.0
+        },
+        "ram_used_mb": {
+          "p50": 4352.0,
+          "peak": 4359.0
+        },
+        "temp_cpu_c": {
+          "p50": 70.25,
+          "peak": 72.937
+        },
+        "temp_cv0_c": {
+          "p50": 66.5,
+          "peak": 69.093
+        },
+        "temp_cv1_c": {
+          "p50": 66.843,
+          "peak": 69.468
+        },
+        "temp_cv2_c": {
+          "p50": 65.031,
+          "peak": 67.562
+        },
+        "temp_gpu_c": {
+          "p50": 72.125,
+          "peak": 75.0
+        },
+        "temp_soc0_c": {
+          "p50": 68.906,
+          "peak": 71.406
+        },
+        "temp_soc1_c": {
+          "p50": 66.562,
+          "peak": 69.031
+        },
+        "temp_soc2_c": {
+          "p50": 67.093,
+          "peak": 69.781
+        },
+        "temp_tj_c": {
+          "p50": 72.125,
+          "peak": 75.0
+        }
+      },
+      "response": {
+        "n": 6000,
+        "p50_ms": 5746.932311000819,
+        "p95_ms": 10805.289462150085,
+        "p99_ms": 11268.35651836096,
+        "max_ms": 11384.14204000037,
+        "mean_ms": 5714.219588396006
+      },
+      "dropped": 0,
+      "drop_late": false
+    }
+  ],
+  "platform": {
+    "host": "field-orin",
+    "machine": "aarch64",
+    "system": "Linux",
+    "kernel": "5.15.148-tegra",
+    "python": "3.10.12",
+    "l4t_release": "# R36 (release), REVISION: 4.7, GCID: 42132812, BOARD: generic, EABI: aarch64, DATE: Thu Sep 18 22:54:44 UTC 2025",
+    "is_jetson": true,
+    "telemetry": "tegrastats",
+    "nvpmodel": "NV Power Mode: MAXN_SUPER",
+    "backend": "onnxruntime",
+    "onnxruntime": "1.24.0",
+    "tensorrt": "10.7.0",
+    "cudnn": "9.3.0",
+    "cuda_runtime": "12.6",
+    "provider_active": "TensorrtExecutionProvider",
+    "precision": "fp32",
+    "intra_op_threads": "default",
+    "inter_op_threads": "default",
+    "allow_spinning": false,
+    "sweep": {
+      "name": "phase1-baseline-fp32-v2",
+      "label": "trt_fp32",
+      "repeat": 3,
+      "order": 5
+    },
+    "background": {
+      "stopped_for_this_run": [],
+      "containers_running": [],
+      "top_processes": [
+        {
+          "pid": 2365,
+          "cpu_pct": 11.0,
+          "mem_pct": 0.2,
+          "cmd": "python3 ~/oled_yahboom/yahboom_oled.py"
+        },
+        {
+          "pid": 910,
+          "cpu_pct": 1.4,
+          "mem_pct": 0.0,
+          "cmd": "[sugov:0]"
+        },
+        {
+          "pid": 1613,
+          "cpu_pct": 1.1,
+          "mem_pct": 6.1,
+          "cmd": "openclaw-gateway"
+        },
+        {
+          "pid": 268,
+          "cpu_pct": 0.6,
+          "mem_pct": 0.0,
+          "cmd": "[nvmap-bz]"
+        },
+        {
+          "pid": 321,
+          "cpu_pct": 0.3,
+          "mem_pct": 0.0,
+          "cmd": "/lib/systemd/systemd-udevd"
+        }
+      ],
+      "load_avg_1m": 1.41015625
+    }
+  },
+  "accuracy": {},
+  "run_id": "9511dce4c02e",
+  "created_at": "2026-10-03T02:55:28.236444+00:00",
+  "schema_version": "1.1"
+}
