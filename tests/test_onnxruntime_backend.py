@@ -58,7 +58,11 @@ def test_b2f_run_closes_the_sampler_even_when_the_run_fails(tiny_model, tmp_path
 
     monkeypatch.setattr("bench2field.telemetry.auto_sampler", lambda interval_s=0.5: Sampler())
     args = ["run", tiny_model, "--tiers", "50", "--duration", "0.1", "--warmup", "0"]
-    assert cli.main([*args, "--out", str(tmp_path / "r.json")]) == 0
+    assert cli.main([*args, "--out", str(tmp_path / "r.json"), "--stopped", "docker container x"]) == 0
+    from bench2field.schema import RunReport
+
+    bg = RunReport.load(tmp_path / "r.json").platform["background"]
+    assert bg["stopped_for_this_run"] == ["docker container x"] and "top_processes" in bg
     assert cli.main([*args, "--environment", "lab"]) == 2  # rejected label
     assert closed == [True, True]
 

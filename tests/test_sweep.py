@@ -70,8 +70,10 @@ def test_sweep_runs_in_planned_order_and_writes_reports_and_manifest(tmp_path):
 
 def test_run_argv_carries_the_whole_config():
     cfg = config(drop_late=True, cooldown_c=45.0, replay="profiles/rover.json", only="cpu",
+                 stopped=["docker container urban-edge-vllm"],
                  variants=[SweepVariant("a", "det.onnx", "cuda", name="yolo-s")])
     argv = run_argv(cfg, cfg.variants[0], 2, 5, Path("out/a_r2.json"))
+    assert argv[argv.index("--stopped") + 1] == "docker container urban-edge-vllm"
     assert argv[:2] == ["run", "det.onnx"]
     for flag, value in (("--provider", "cuda"), ("--tiers", "30"), ("--duration", "1"),
                         ("--deadline-ms", "33.3"), ("--sweep", "s"), ("--repeat", "2"), ("--order", "5"),
@@ -82,6 +84,7 @@ def test_run_argv_carries_the_whole_config():
     # Every flag is one `b2f run` really has, and lands where the run reads it.
     a = cli.build_parser().parse_args(argv)
     assert (a.cmd, a.model, a.drop_late, a.cooldown_c, a.sweep_label) == ("run", "det.onnx", True, 45.0, "a")
+    assert a.stopped == ["docker container urban-edge-vllm"]
 
 
 def test_sweep_never_overwrites_reports_and_can_resume(tmp_path):

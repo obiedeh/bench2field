@@ -18,6 +18,7 @@ import json
 import sys
 from pathlib import Path
 
+from . import background
 from .metrics import DEFAULT_STAT
 from .schema import ENV_BENCH_IDLE, ENV_REPLAY_PREFIX, RunReport, Variant
 
@@ -47,6 +48,7 @@ def _cmd_run(a: argparse.Namespace) -> int:
 
     if a.sweep:
         extra["sweep"] = {"name": a.sweep, "label": a.sweep_label, "repeat": a.repeat, "order": a.order}
+    extra["background"] = background.snapshot(a.stopped)
 
     variant = Variant(model=a.name or Path(a.model).stem, backend=be.name,
                       provider=be.provider(), precision=a.precision, technique=a.technique)
@@ -174,6 +176,9 @@ def build_parser() -> argparse.ArgumentParser:
     r.add_argument("--replay", help="load profile JSON to replay during the run")
     r.add_argument("--only", help="replay only these stressors: thermal,cpu,membw,gpu")
     r.add_argument("--no-telemetry", action="store_true")
+    r.add_argument("--stopped", action="append", default=[], metavar="WHAT",
+                   help="something you shut down for this run, recorded in the report "
+                        "(repeatable), e.g. 'docker container urban-edge-vllm'")
     r.add_argument("--out")
     r.add_argument("--sweep", help="set by b2f sweep: the sweep this run belongs to")
     r.add_argument("--sweep-label")

@@ -53,6 +53,7 @@ class SweepConfig:
     cooldown_c: float | None = None
     replay: str | None = None  # load profile to replay during every run
     only: str | None = None    # restrict replay to these stressors
+    stopped: list[str] = field(default_factory=list)  # what was shut down for the sweep, for the reports
 
     def __post_init__(self) -> None:
         if not _LABEL.match(self.name):
@@ -111,6 +112,8 @@ def run_argv(cfg: SweepConfig, variant: SweepVariant, repeat: int, order: int, o
         argv.append("--drop-late")
     if cfg.cooldown_c is not None:
         argv += ["--cooldown-c", f"{cfg.cooldown_c:g}"]
+    for what in cfg.stopped:
+        argv += ["--stopped", what]
     if cfg.replay:
         argv += ["--replay", cfg.replay]
         if cfg.only:
