@@ -8,10 +8,11 @@ from bench2field.schema import RunReport, TierResult
 from test_core import BASE, OPT
 
 
-def rep(variant, env, p95, nvpmodel=None, deadline_ms=33.3, drop_late=False):
+def rep(variant, env, p95, nvpmodel=None, deadline_ms=33.3, drop_late=False, ort=None):
     lat = latency_stats([p95 * 0.8] * 94 + [p95] * 6)
     tier = TierResult(30.0, 30.0, 10.0, deadline_ms, 0, lat, {}, response=lat, drop_late=drop_late)
-    return RunReport(variant, env, [tier], platform={} if nvpmodel is None else {"nvpmodel": nvpmodel})
+    platform = {k: v for k, v in (("nvpmodel", nvpmodel), ("onnxruntime", ort)) if v is not None}
+    return RunReport(variant, env, [tier], platform=platform)
 
 
 def group(variant, env, p95s, **kw):
@@ -119,3 +120,16 @@ def test_cli_retention_takes_globs_and_lists(tmp_path, capsys):
     assert "retention 50%" in out and out.count("3 repeats") == 4
     assert cli.main(["retention", str(tmp_path / "nothing_*.json"), *args[1:], "--hz", "30"]) == 2
     assert "no reports match" in capsys.readouterr().err
+
+
+def test_onnxruntime_version_gets_the_same_treatment_as_power_mode():
+    bb = group(BASE, "bench-idle", (9.0, 9.2, 8.9), ort="1.30.0")
+    bo = group(OPT, "bench-idle", (3.0, 3.1, 2.9), ort="1.30.0")
+    fb = group(BASE, "field", (12.0, 12.5, 11.8), ort="1.24.0")
+    fo = group(OPT, "field", (6.0, 6.2, 5.9), ort="1.24.0")
+    r = field_retention(bb, bo, fb, fo, 30.0)  # 5090 bench vs Jetson field: allowed, flagged
+    assert any("different onnxruntime versions ('1.30.0' vs '1.24.0')" in w for w in r.warnings)
+    with pytest.raises(ValueError, match="field baseline and optimized runs used different onnxruntime"):
+        field_retention(bb, bo, fb, group(OPT, "field", (6.0, 6.2, 5.9), ort="1.23.0"), 30.0)
+    with pytest.raises(ValueError, match="repeats of bench_baseline differ in onnxruntime version"):
+        field_retention(bb[:2] + group(BASE, "bench-idle", (9.1,), ort="1.29.0"), bo, fb, fo, 30.0)

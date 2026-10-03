@@ -195,12 +195,13 @@ def _one(values: set, what: str, where: str):
 def _check_comparable(groups: dict[str, list[RunReport]], target_hz: float) -> list[str]:
     """Refuse comparisons docs/METHODOLOGY.md does not allow; return warnings
     for the ones it allows but a reader should know about."""
-    key, env, mode, deadline, drop = {}, {}, {}, {}, {}
+    key, env, mode, ort, deadline, drop = {}, {}, {}, {}, {}, {}
     for name, runs in groups.items():
         where = f"the repeats of {name}"
         key[name] = _one({r.variant.key for r in runs}, "variant", where)
         env[name] = _one({r.environment for r in runs}, "environment", where)
         mode[name] = _one({r.platform.get("nvpmodel") for r in runs}, "power mode", where)
+        ort[name] = _one({r.platform.get("onnxruntime") for r in runs}, "onnxruntime version", where)
         deadline[name] = _one({r.tier(target_hz).deadline_ms for r in runs}, "deadline", where)
         drop[name] = _one({r.tier(target_hz).drop_late for r in runs}, "drop-late policy", where)
 
@@ -215,6 +216,10 @@ def _check_comparable(groups: dict[str, list[RunReport]], target_hz: float) -> l
             raise ValueError(
                 f"{side} baseline and optimized runs used different power modes: "
                 f"{mode[f'{side}_baseline']!r} vs {mode[f'{side}_optimized']!r}")
+        if ort[f"{side}_baseline"] != ort[f"{side}_optimized"]:
+            raise ValueError(
+                f"{side} baseline and optimized runs used different onnxruntime versions: "
+                f"{ort[f'{side}_baseline']!r} vs {ort[f'{side}_optimized']!r}")
     _one(set(deadline.values()), "deadline (ms)", "the runs being compared")
     _one(set(drop.values()), "drop-late policy", "the runs being compared")
 
@@ -223,6 +228,9 @@ def _check_comparable(groups: dict[str, list[RunReport]], target_hz: float) -> l
         warnings.append(f"bench and field used different power modes ({mode['bench_baseline']!r} vs "
                         f"{mode['field_baseline']!r}); expected if they are different boards, "
                         "a mistake if they are the same one")
+    if ort["bench_baseline"] != ort["field_baseline"]:
+        warnings.append(f"bench and field used different onnxruntime versions ({ort['bench_baseline']!r} vs "
+                        f"{ort['field_baseline']!r}); the runtime, not only the machine, differs")
     return warnings
 
 
