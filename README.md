@@ -1,128 +1,70 @@
 # Bench2Field
 
-**How much of a model optimization survives contact with the robot, and why.**
+**The detector fits the robot's frame; the frame doesn't.** On the rover's Jetson Orin NX, YOLOX-s in FP32 answers in **26.9 ms** at the camera's real 26 Hz, inside the 33.3 ms deadline. The whole frame around it, decode to detections, takes **47.8 ms**. A benchmark that times the model alone says GO; the robot would drop one frame in eight.
 
-An EmbodiedEdge Labs project.
+![Model alone versus the full frame on the RTX 5090, the Jetson AGX Thor and the rover's Jetson Orin NX, against the 33.3 ms deadline](case_studies/01_perception_detector/report/headline.svg)
 
-Quantize a perception model to INT8 and the benchmark says it is three times faster. Put it on the robot, next to SLAM, sensor drivers and a warm enclosure, and some of that speedup disappears. Most published numbers come from an idle device, so nobody says how much.
+Bench2Field measures how much of a model optimization survives contact with the robot, and why. v1 measures and diagnoses; v2 (phases 2 to 5 of the case study) will optimize and close the gap.
 
-Bench2Field measures that loss directly. Every optimization is run twice, once on the idle bench and once in the field, and the result is reported as **field retention**: the share of the bench gain that is still there on the robot. Then it works out where the rest went.
+An EmbodiedEdge Labs project. Apache-2.0.
 
 ## What it measures
 
-| Metric | Question it answers |
-|---|---|
-| **Field retention** | Of the speedup this optimization showed on the bench, how much is left on the robot? `(S_field − 1) / (S_bench − 1)` |
-| **Gap attribution** | Of the slowdown from bench to field, how much is thermal, CPU contention, memory bandwidth, GPU sharing, and how much is interaction between them? |
-| **Replay validity** | Does a recorded field load, replayed on the bench, reproduce field latency closely enough to stand in for the robot? |
-| **Readiness verdict** | GO / NO-GO / INCOMPLETE against a deployment budget written before testing: loop deadline, miss rate, power, temperature, accuracy floor. |
+- **Latency the way a robot sees it**: frames arrive at a fixed rate whether or not the last one is done, and a frame is late relative to when it arrived. Every tier is run at the rate the robot's camera actually delivers, because the same model is 2.6x slower at 26 Hz than at 100 Hz on a Jetson once the GPU drops its clocks between frames.
+- **The whole frame, not just the model**: decode, preprocess, copies, inference and postprocess, timed per stage on the same frames on every board.
+- **Field retention**: of the speedup an optimization shows on the bench, how much is left on the robot, and where the rest went (thermal, CPU contention, memory bandwidth, GPU sharing).
+- **Verdicts** against a budget written before testing: loop deadline, miss rate, power, temperature, accuracy.
 
-Latency is measured open-loop at fixed request rates, the way camera frames arrive. Each tier reports response time (arrival to completion, queueing included) and service time (inference alone); comparisons use response p95. A frame misses its deadline when it finishes late relative to when it arrived, and `--drop-late` skips frames that are already stale, counting them separately.
+Every number comes from a committed run file; `b2f report` builds the page from those files and nothing else.
 
-## How it works
+## The boards
 
-1. **Bench, idle.** Run the baseline and each optimized variant with no background load. Telemetry (power rails, temperatures, GPU and memory-controller load) is sampled throughout.
-2. **Record the field load.** On the robot, with everything running except the model under test, record a load profile: CPU, GPU and memory-controller utilisation and the operating temperature.
-3. **Field.** Run the same variants on the robot.
-4. **Replay.** Replay the load profile on the bench, first all stressors together (checked against the field run with replay validity), then one stressor at a time for attribution.
-5. **Report.** Field retention per optimization, gap attribution per variant, and a readiness verdict against the budget.
-
-Once a profile passes replay validity, new variants can be screened on the bench without driving the robot for every test.
-
-## Quick start
-
-```bash
-pip install -e ".[ort,dev]"          # use onnxruntime-gpu, the Jetson wheel, or a ROCm build as needed
-pytest
-
-# idle bench run at 10, 30 and 100 Hz
-b2f run models/detector_fp32.onnx --provider tensorrt --precision fp32 --tiers 10,30,100 --out runs/bench_fp32.json
-b2f run models/detector_fp32.onnx --provider tensorrt --precision int8 --technique ptq --out runs/bench_int8.json
-
-# or: three alternating repeats of both variants in one go, one report per run
-b2f sweep configs/sweeps/bringup_tiny.yaml --out-dir runs/sweep_tiny
-
-# on the robot, without the model running: record the background load
-b2f record-load rover-slam --duration 300
-
-# on the robot: the same two variants
-b2f run models/detector_fp32.onnx --provider tensorrt --precision fp32 --environment field --out runs/field_fp32.json
-b2f run models/detector_fp32.onnx --provider tensorrt --precision int8 --technique ptq --environment field --out runs/field_int8.json
-
-b2f retention runs/bench_fp32.json runs/bench_int8.json runs/field_fp32.json runs/field_int8.json --hz 30
-
-# back on the bench: replay the field load, check it, then attribute
-b2f run models/detector_fp32.onnx --provider tensorrt --replay profiles/rover-slam.json --out runs/replay_all.json
-b2f validity runs/replay_all.json runs/field_fp32.json --hz 30
-b2f run models/detector_fp32.onnx --provider tensorrt --replay profiles/rover-slam.json --only thermal --out runs/r_thermal.json
-b2f run models/detector_fp32.onnx --provider tensorrt --replay profiles/rover-slam.json --only membw   --out runs/r_membw.json
-b2f attribute runs/bench_fp32.json runs/field_fp32.json --hz 30 --stressor thermal=runs/r_thermal.json --stressor membw=runs/r_membw.json
-
-b2f verdict runs/field_int8.json configs/budgets/rover_perception.yaml
-```
-
-## Development setup
-
-```bash
-python3 -m venv .venv
-.venv/bin/pip install -e ".[dev,tools,nvml]"     # add gpu-stress for the GPU stressor (PyTorch)
-.venv/bin/pytest
-```
-
-Install the ONNX Runtime build that matches the machine instead of the `ort` extra: `onnxruntime-gpu[cuda,cudnn]` on a discrete NVIDIA GPU (plus `tensorrt-cu13` for the TensorRT provider), the Jetson wheel on a Jetson. The exact versions validated on each machine are listed under `bringup/`.
-
-**If the shell has ROS 2 sourced, unset `PYTHONPATH` first.** ROS exports a `PYTHONPATH` that puts its own Python packages ahead of the venv's, and a venv does not override it. Prefix every command with `env -u PYTHONPATH`, for example `env -u PYTHONPATH .venv/bin/pytest`, or run from a shell that has not sourced ROS.
-
-Tests that need onnxruntime, a GPU, NVML or PyTorch skip on machines without them.
-
-## Platforms
-
-One report schema across vendors, so results compare directly.
-
-| Platform | Telemetry | Backend paths |
+| | role | what it is |
 |---|---|---|
-| NVIDIA Jetson AGX Thor, Orin NX | tegrastats (power rails, temps, GPU, EMC) | ONNX Runtime: CUDA, TensorRT |
-| NVIDIA RTX (discrete) | NVML | ONNX Runtime: CUDA, TensorRT; Triton (planned) |
-| AMD Instinct (MI300X via AMD Developer Cloud) | rocm-smi | ONNX Runtime: MIGraphX, ROCm |
+| RTX 5090 | bench | development machine; TensorRT and Nsight |
+| Jetson AGX Thor | bench | the edge target for the optimization work |
+| Jetson Orin NX | field | the rover's own computer, with its SLAM stack and camera |
 
-The rocm-smi parser is written against documented output but not yet validated on hardware.
+One report schema across all three, so results compare directly.
 
-## Layout
+## Read the results
 
+- [Case study 01 findings](case_studies/01_perception_detector/PHASE1_FINDINGS.md): what phase 1 measured and what it means.
+- [The report](case_studies/01_perception_detector/report/index.html): every chart, from the committed runs. Download and open it; it works offline.
+- [Methodology](docs/METHODOLOGY.md): the rules every result follows.
+- [Status and handoff](HANDOFF.md): where the work stands.
+
+## Run one baseline yourself
+
+Needs Python 3.10+ and an NVIDIA GPU. On a Jetson, use its own ONNX Runtime wheel (see `bringup/README.md` for which one worked on each board).
+
+```bash
+git clone https://github.com/obiedeh/bench2field.git && cd bench2field
+python3 -m venv .venv && .venv/bin/pip install -e ".[dev,tools,nvml]"
+.venv/bin/pip install "onnxruntime-gpu[cuda,cudnn]" tensorrt-cu13   # discrete NVIDIA GPU, CUDA 13 driver
+.venv/bin/pytest                                                   # hardware tests skip where hardware is missing
+
+# the detector used in case study 01 (downloads the YOLOX-s checkpoint, ~70 MB; needs PyTorch, see the file)
+.venv/bin/pip install -r case_studies/01_perception_detector/requirements-export.txt --extra-index-url https://download.pytorch.org/whl/cu130
+.venv/bin/python case_studies/01_perception_detector/export_yolox.py s
+
+# one tier at the rover's camera rate, 60 s, TensorRT fp32, threads not spin-waiting
+.venv/bin/b2f run models/yolox_s.onnx --name yolox-s --provider tensorrt --precision fp32 --tiers 26 --no-spin --out runs/my_first.json
+
+# the report for case study 01, from its committed runs
+.venv/bin/b2f report case_studies/01_perception_detector --out /tmp/report.html
 ```
-src/bench2field/
-  schema.py        report contract (one JSON per run; add fields, never break them)
-  runner.py        open-loop tiers, deadline accounting, cooldown gating
-  metrics.py       field retention, gap attribution, replay validity
-  verdict.py       readiness gates against a deployment budget
-  sweep.py         repeats of several variants, run alternately, with a manifest of the order
-  report/          b2f report: one self-contained HTML page from a case study's committed runs
-  telemetry/       tegrastats, NVML, rocm-smi samplers
-  backends/        ONNX Runtime (CPU, CUDA, TensorRT, MIGraphX, ROCm)
-  loadreplay/      record a field-load profile; replay it as CPU, memory-bandwidth, GPU and thermal stressors
-configs/budgets/   deployment budgets
-case_studies/      one folder per model studied
-kernels/           custom kernels (CUDA, HIP ports)
-docs/METHODOLOGY.md
-```
 
-## Case studies
+If your shell has ROS 2 sourced, prefix every command with `env -u PYTHONPATH`: ROS's `PYTHONPATH` takes precedence over the venv.
 
-| # | Model | Focus | Status |
-|---|---|---|---|
-| 01 | Perception detector on the ROSMASTER rover | FP16 / INT8 / 2:4 pruning / distillation; custom CUDA preprocessing kernel with a HIP port; Triton serving | Planned |
-| 02 | Vision-language model (Cosmos-Reason2-2B, Gemma) | INT4 / FP8; KV-cache memory under load | Planned |
-| 03 | Manipulation policy (ACT, GR00T) | Inference latency against the control-loop deadline | Planned |
-| 04 | Edge intrusion-detection models (from jetson-edge-ai-security) | ONNX Runtime thread tuning on Thor | Measured there; to be imported |
-
-## Related work
-
-- [ros2_benchmark](https://github.com/NVIDIA-ISAAC-ROS/ros2_benchmark) measures throughput and latency of ROS 2 graphs as they are, from rosbag or live data.
-- [RobotPerf](https://arxiv.org/abs/2309.09212) is a vendor-neutral suite for robotics computing performance across ROS 2 pipelines.
-- [Beyond Benchmarks](https://arxiv.org/abs/2606.17241) reports a 20–30% drop from static benchmark to streaming deployment for a roadside perception model on a Jetson Orin Nano.
-
-Bench2Field asks a narrower question none of these answer: whether a specific optimization's gain survives deployment, how much of it, and what took the rest. It uses ONNX Runtime and the vendors' own profilers underneath rather than replacing them.
+Other commands: `b2f sweep` (repeats of several variants, alternated, one process per run), `b2f record-load` (a field-load profile on the robot), `b2f retention`, `b2f attribute`, `b2f validity`, `b2f verdict`. `b2f --help` lists them.
 
 ## Status
 
-v0.1: core runner, report contract, metrics, telemetry, load record/replay and verdicts, with tests. No case-study results yet; numbers will be published only from committed runs on named hardware.
+**v1.0: measure and diagnose.** Bring-up on three boards with real-hardware fixtures, the run contract, repeats and sweeps, the end-to-end profiler, the report, and case study 01 phase 1: FP32 baselines and the full-frame profile on all three boards.
+
+**v2: optimize and close the gap.** Case study 01 phases 2 to 5: the FP16 / INT8 / 2:4-sparsity / distillation ladder with accuracy at every step, a fused preprocessing CUDA kernel with a HIP port, Nsight and MIGraphX runs, and the field-load replay and gap attribution on the rover. Plan in `case_studies/01_perception_detector/PLAN.md`.
+
+## Related work
+
+[ros2_benchmark](https://github.com/NVIDIA-ISAAC-ROS/ros2_benchmark) measures ROS 2 graphs as they are; [RobotPerf](https://arxiv.org/abs/2309.09212) is a vendor-neutral suite across ROS 2 pipelines; [Beyond Benchmarks](https://arxiv.org/abs/2606.17241) reports a 20 to 30% drop from static benchmark to streaming deployment on an Orin Nano. Bench2Field asks a narrower question: whether a specific optimization's gain survives deployment, how much of it, and what took the rest.
