@@ -111,6 +111,10 @@ def main() -> int:
     p.add_argument("--frames", required=True, help="directory from tools/capture_frames.py or frames_from_video.py")
     p.add_argument("--provider", default="tensorrt")
     p.add_argument("--precision", default="fp32")
+    p.add_argument("--no-spin", action="store_true",
+                   help="onnxruntime intra-op threads sleep instead of spin-waiting between runs "
+                        "(the same knob as b2f run --no-spin)")
+    p.add_argument("--cv-threads", type=int, help="cv2.setNumThreads for decode and preprocess")
     p.add_argument("--warmup", type=int, default=30, help="frames run before timing starts")
     p.add_argument("--limit", type=int, help="time at most this many frames")
     p.add_argument("--out", required=True)
@@ -121,7 +125,10 @@ def main() -> int:
         frames = frames[:a.limit]
     import onnxruntime as ort
 
-    be = OnnxRuntimeBackend(a.model, OrtOptions(provider=a.provider, precision=a.precision))
+    if a.cv_threads is not None:
+        cv2.setNumThreads(a.cv_threads)
+    be = OnnxRuntimeBackend(a.model, OrtOptions(provider=a.provider, precision=a.precision,
+                                                allow_spinning=not a.no_spin))
     sess = be.session
     in_name, out_name = sess.get_inputs()[0].name, sess.get_outputs()[0].name
     sampler = auto_sampler()
@@ -204,6 +211,7 @@ def main() -> int:
         "detections_per_frame": {"mean": float(np.mean(n_dets)), "max": int(max(n_dets)),
                                  "frames_with_any": int(sum(1 for n in n_dets if n))},
         "thresholds": {"conf": CONF_THRESHOLD, "nms": NMS_THRESHOLD},
+        "settings": {"ort_allow_spinning": not a.no_spin, "cv2_threads": cv2.getNumThreads()},
         "telemetry": telemetry,
         "platform": describe_platform() | sampler.describe() | be.describe(),
         "background": bg,
