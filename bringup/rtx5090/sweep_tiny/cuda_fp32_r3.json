@@ -1,0 +1,92 @@
+{
+  "variant": {
+    "model": "tiny_conv",
+    "backend": "onnxruntime",
+    "provider": "CUDAExecutionProvider",
+    "precision": "fp32",
+    "technique": "baseline",
+    "notes": ""
+  },
+  "environment": "bench-idle",
+  "tiers": [
+    {
+      "target_hz": 30.0,
+      "actual_hz": 30.098413170002033,
+      "duration_s": 9.967302870936692,
+      "deadline_ms": 33.3,
+      "deadline_misses": 0,
+      "latency": {
+        "n": 300,
+        "p50_ms": 0.44410652481019497,
+        "p95_ms": 0.4993666894733906,
+        "p99_ms": 0.518366079777479,
+        "max_ms": 0.6036418490111828,
+        "mean_ms": 0.4423023636142413
+      },
+      "telemetry": {
+        "n_samples": 20,
+        "gpu_mem_used_mb": {
+          "p50": 2037.8125,
+          "peak": 2037.8125
+        },
+        "gpu_mem_util_pct": {
+          "p50": 0.0,
+          "peak": 0.0
+        },
+        "gpu_util_pct": {
+          "p50": 2.0,
+          "peak": 2.0
+        },
+        "power_gpu_w": {
+          "p50": 70.016,
+          "peak": 70.455
+        },
+        "sm_clock_mhz": {
+          "p50": 2475.0,
+          "peak": 2482.0
+        },
+        "temp_gpu_c": {
+          "p50": 43.0,
+          "peak": 43.0
+        }
+      },
+      "response": {
+        "n": 300,
+        "p50_ms": 0.6135774310678244,
+        "p95_ms": 0.6950554437935352,
+        "p99_ms": 0.7443119725212455,
+        "max_ms": 0.8055288344621658,
+        "mean_ms": 0.6161907423908511
+      },
+      "dropped": 0,
+      "drop_late": false
+    }
+  ],
+  "platform": {
+    "host": "bench-5090",
+    "machine": "x86_64",
+    "system": "Linux",
+    "kernel": "6.17.0-22-generic",
+    "python": "3.12.3",
+    "telemetry": "nvml",
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "driver": "580.178.04",
+    "backend": "onnxruntime",
+    "onnxruntime": "1.30.0",
+    "provider_active": "CUDAExecutionProvider",
+    "precision": "fp32",
+    "intra_op_threads": "default",
+    "inter_op_threads": "default",
+    "allow_spinning": true,
+    "sweep": {
+      "name": "bringup-tiny",
+      "label": "cuda_fp32",
+      "repeat": 3,
+      "order": 5
+    }
+  },
+  "accuracy": {},
+  "run_id": "fd34909615c4",
+  "created_at": "2026-10-02T13:01:53.259165+00:00",
+  "schema_version": "1.1"
+}

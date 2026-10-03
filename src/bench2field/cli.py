@@ -1,6 +1,7 @@
 """Command line: b2f <command>.
 
   b2f run          benchmark an ONNX model (optionally under a replayed field load)
+  b2f sweep        repeats of several variants, run alternately (A, B, A, B, ...)
   b2f record-load  record a field-load profile on the robot
   b2f retention    field retention of an optimization (4 reports)
   b2f attribute    split the bench-to-field gap across stressors
@@ -12,10 +13,13 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import glob
 import json
 import sys
 from pathlib import Path
 
+from . import background, provenance
+from .metrics import DEFAULT_STAT
 from .schema import ENV_BENCH_IDLE, ENV_REPLAY_PREFIX, RunReport, Variant
 
 
@@ -42,19 +46,42 @@ def _cmd_run(a: argparse.Namespace) -> int:
         suffix = "" if only is None else "+" + "+".join(sorted(only))
         env = f"{ENV_REPLAY_PREFIX}{prof.name}{suffix}"
 
+    if a.sweep:
+        extra["sweep"] = {"name": a.sweep, "label": a.sweep_label, "repeat": a.repeat, "order": a.order}
+    extra["background"] = background.snapshot(a.stopped)
+    extra["git"] = provenance.git_state()
+
     variant = Variant(model=a.name or Path(a.model).stem, backend=be.name,
                       provider=be.provider(), precision=a.precision, technique=a.technique)
     cfg = RunConfig(tiers_hz=[float(x) for x in a.tiers.split(",")], duration_s=a.duration,
-                    warmup_s=a.warmup, deadline_ms=a.deadline_ms, cooldown_max_c=a.cooldown_c)
-    with replay_ctx as rc:
-        if rc is not None:
-            extra |= rc.describe()
-        report = run(variant, env, be.infer, lambda i: feeds, cfg, sampler, extra)
+                    warmup_s=a.warmup, deadline_ms=a.deadline_ms, cooldown_max_c=a.cooldown_c,
+                    drop_late=a.drop_late)
+    try:
+        with replay_ctx as rc:
+            if rc is not None:
+                extra |= rc.describe()
+            report = run(variant, env, be.infer, lambda i: feeds, cfg, sampler, extra)
+    finally:
+        sampler.close()
     out = report.save(a.out or f"reports/{report.run_id}.json")
     for t in report.tiers:
-        print(f"{t.target_hz:>7g} Hz  p50 {t.latency.p50_ms:.3f}  p95 {t.latency.p95_ms:.3f}  "
-              f"p99 {t.latency.p99_ms:.3f} ms  misses {t.deadline_misses}")
+        print(f"{t.target_hz:>7g} Hz  response p50 {t.response.p50_ms:.3f}  p95 {t.response.p95_ms:.3f}  "
+              f"p99 {t.response.p99_ms:.3f} ms  (service p95 {t.latency.p95_ms:.3f} ms)  "
+              f"misses {t.deadline_misses}  dropped {t.dropped}")
     print(f"wrote {out}")
+    return 0
+
+
+def _cmd_sweep(a: argparse.Namespace) -> int:
+    from .sweep import SweepConfig, run_sweep, summarize
+
+    if a.expect_commit:
+        provenance.check_expected_commit(a.expect_commit)
+    cfg = SweepConfig.from_yaml(a.config)
+    cfg.stopped = [*cfg.stopped, *a.stopped]
+    manifest = run_sweep(cfg, a.out_dir, resume=a.resume, config_file=a.config)
+    print(summarize(cfg, a.out_dir, a.stat))
+    print(f"wrote {len(manifest['runs'])} runs and sweep_{cfg.name}.json to {a.out_dir}")
     return 0
 
 
@@ -62,7 +89,11 @@ def _cmd_record(a: argparse.Namespace) -> int:
     from .loadreplay import record
     from .telemetry import auto_sampler
 
-    prof = record(a.name, auto_sampler(a.interval), a.duration, a.notes)
+    sampler = auto_sampler(a.interval)
+    try:
+        prof = record(a.name, sampler, a.duration, a.notes)
+    finally:
+        sampler.close()
     print(json.dumps(prof.targets | {"soak_temp_c": prof.soak_temp_c}, indent=2))
     print(f"wrote {prof.save(a.out or f'profiles/{a.name}.json')}")
     return 0
@@ -71,11 +102,23 @@ def _cmd_record(a: argparse.Namespace) -> int:
 def _cmd_retention(a: argparse.Namespace) -> int:
     from .metrics import field_retention
 
-    r = field_retention(*(RunReport.load(p) for p in
+    r = field_retention(*(_load_group(spec) for spec in
                           (a.bench_base, a.bench_opt, a.field_base, a.field_opt)),
                         target_hz=a.hz, stat=a.stat)
     print(r.summary())
     return 0
+
+
+def _load_group(spec: str) -> list[RunReport]:
+    """Reports named by one argument: a file, a glob, or a comma-separated
+    list of either. More than one report means repeats of the same run."""
+    paths: list[str] = []
+    for part in spec.split(","):
+        part = part.strip()
+        paths += sorted(glob.glob(part)) if glob.has_magic(part) else [part]
+    if not paths:
+        raise ValueError(f"no reports match {spec!r}")
+    return [RunReport.load(p) for p in paths]
 
 
 def _cmd_attribute(a: argparse.Namespace) -> int:
@@ -110,7 +153,7 @@ def _cmd_verdict(a: argparse.Namespace) -> int:
     return 0 if v.passed else 1
 
 
-def main(argv: list[str] | None = None) -> int:
+def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="b2f", description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -125,6 +168,9 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--duration", type=float, default=60.0)
     r.add_argument("--warmup", type=float, default=5.0)
     r.add_argument("--deadline-ms", type=float, default=33.3)
+    r.add_argument("--drop-late", action="store_true",
+                   help="skip a frame already past its deadline when it would start "
+                        "(camera-style); drops are counted separately from misses")
     r.add_argument("--batch", type=int, default=1)
     r.add_argument("--intra-threads", type=int, default=0)
     r.add_argument("--inter-threads", type=int, default=0)
@@ -134,8 +180,28 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--replay", help="load profile JSON to replay during the run")
     r.add_argument("--only", help="replay only these stressors: thermal,cpu,membw,gpu")
     r.add_argument("--no-telemetry", action="store_true")
+    r.add_argument("--stopped", action="append", default=[], metavar="WHAT",
+                   help="something you shut down for this run, recorded in the report "
+                        "(repeatable), e.g. 'docker container urban-edge-vllm'")
     r.add_argument("--out")
+    r.add_argument("--sweep", help="set by b2f sweep: the sweep this run belongs to")
+    r.add_argument("--sweep-label")
+    r.add_argument("--repeat", type=int)
+    r.add_argument("--order", type=int, help="set by b2f sweep: position in the sweep's run order")
     r.set_defaults(fn=_cmd_run)
+
+    sw = sub.add_parser("sweep", help="repeats of several variants, run alternately")
+    sw.add_argument("config", help="sweep YAML: name, variants, repeats, tiers (see configs/sweeps/)")
+    sw.add_argument("--out-dir", required=True, help="one report per run plus the sweep manifest")
+    sw.add_argument("--resume", action="store_true", help="keep reports already there, run the rest")
+    sw.add_argument("--stopped", action="append", default=[], metavar="WHAT",
+                   help="something you shut down on this machine for the sweep; recorded in every "
+                        "report and in the manifest (repeatable)")
+    sw.add_argument("--stat", default=DEFAULT_STAT, help="statistic for the summary table")
+    sw.add_argument("--expect-commit", metavar="HASH",
+                   help="refuse to start unless this checkout is at HASH (prefix ok) with no "
+                        "uncommitted changes; use it when launching on a remote board")
+    sw.set_defaults(fn=_cmd_sweep)
 
     rec = sub.add_parser("record-load", help="record a field-load profile on the robot")
     rec.add_argument("name")
@@ -150,11 +216,13 @@ def main(argv: list[str] | None = None) -> int:
                               ("validity", _cmd_validity, "check a replay against the field")):
         s = sub.add_parser(cmd, help=helptext)
         s.add_argument("--hz", type=float, required=True)
-        s.add_argument("--stat", default="p95_ms")
+        s.add_argument("--stat", default=DEFAULT_STAT,
+                       help="response_{p50,p95,p99,max,mean}_ms (arrival to completion) "
+                            "or {p50,p95,p99,max,mean}_ms (service time)")
         s.set_defaults(fn=fn)
         if cmd == "retention":
             for x in ("bench_base", "bench_opt", "field_base", "field_opt"):
-                s.add_argument(x)
+                s.add_argument(x, help="report file, glob, or comma-separated list (repeats)")
         elif cmd == "attribute":
             s.add_argument("idle")
             s.add_argument("field")
@@ -169,7 +237,11 @@ def main(argv: list[str] | None = None) -> int:
     v.add_argument("budget")
     v.set_defaults(fn=_cmd_verdict)
 
-    a = p.parse_args(argv)
+    return p
+
+
+def main(argv: list[str] | None = None) -> int:
+    a = build_parser().parse_args(argv)
     try:
         return a.fn(a)
     except (KeyError, ValueError, RuntimeError) as exc:

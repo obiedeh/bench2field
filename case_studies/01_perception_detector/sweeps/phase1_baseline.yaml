@@ -1,0 +1,35 @@
+# Phase 1 baseline: YOLOX-s in FP32 on the idle bench, 10/30/100 Hz, three
+# repeats, alternating the TensorRT provider (the baseline every optimization
+# is measured against) with the CUDA provider (a reference for what TensorRT
+# itself is worth). About 27 minutes per machine.
+#
+# 26 Hz is the rate the rover's camera topic actually delivers with its stack
+# running: configured 640x480 MJPG at 30 fps, measured 25.9 Hz mean over 60 s
+# (bringup/orin/ros2_topic_hz_color.txt). It is the headline tier.
+#   5090:  env -u PYTHONPATH .venv/bin/b2f sweep case_studies/01_perception_detector/sweeps/phase1_baseline.yaml --out-dir case_studies/01_perception_detector/runs/bench_5090_rerun
+#   Thor:  .venv/bin/b2f sweep case_studies/01_perception_detector/sweeps/phase1_baseline.yaml --out-dir case_studies/01_perception_detector/runs/bench_thor_rerun
+# Add --stopped for whatever was shut down on that machine first. The first
+# sweep (name phase1-baseline-fp32, runs/bench_5090 and runs/bench_thor) had
+# tiers 10/30/100 only.
+name: phase1-baseline-fp32-v2
+# Owner's decision after the first profile: onnxruntime threads must not spin-wait
+# between runs (PHASE1_FINDINGS.md, finding 3). Reports record it as
+# platform.allow_spinning = false.
+no_spin: true
+environment: bench-idle
+repeats: 3
+tiers_hz: [10, 26, 30, 100]
+duration_s: 60
+warmup_s: 5
+deadline_ms: 33.3
+variants:
+  - label: trt_fp32
+    model: models/yolox_s.onnx
+    name: yolox-s
+    provider: tensorrt
+    precision: fp32
+  - label: cuda_fp32
+    model: models/yolox_s.onnx
+    name: yolox-s
+    provider: cuda
+    precision: fp32

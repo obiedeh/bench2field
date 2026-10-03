@@ -8,7 +8,14 @@ A variant is model + backend + provider + precision + technique. Bench, replay a
 
 ## 2. Open-loop load, deadlines from arrival
 
-Requests are issued at a fixed rate whether or not the previous one has finished, like frames from a camera. A request misses its deadline if it completes later than `arrival + deadline`. Latency percentiles (p50/p95/p99/max) are per request. Report tiers below, at and above the sensor rate the robot actually uses.
+Requests are issued at a fixed rate whether or not the previous one has finished, like frames from a camera. A request misses its deadline if it completes later than `arrival + deadline`. Report tiers below, at and above the sensor rate the robot actually uses.
+
+Two latencies are reported per tier, each as p50/p95/p99/max/mean:
+
+- **Response time**: scheduled arrival to completion. It includes time queued behind earlier frames and is what the robot experiences. Retention, attribution, replay validity and verdicts use response p95 unless told otherwise.
+- **Service time**: inference start to completion. It isolates the model from the queue and is the number to compare with other benchmarks.
+
+By default every frame is processed, so above saturation the backlog and response time grow for as long as the tier runs. With `--drop-late`, a frame already past its deadline when it would start is skipped, as a camera pipeline discards a stale frame. Dropped frames are counted separately from deadline misses (frames that ran and finished late); verdicts count both against the miss budget. Runs compared with each other must use the same policy.
 
 ## 3. Thermal state is controlled, not ignored
 
@@ -18,9 +25,13 @@ Before each tier the runner can wait until the hottest sensor is at or below a s
 
 Run each comparison at least three times, alternating variants (A, B, A, B, A, B) rather than in blocks, so slow drift such as warming or background jobs does not favour one variant. Report the median across repeats and the spread. A difference smaller than the spread between repeats is not a finding.
 
+`b2f sweep` runs a comparison this way from one YAML file: each run is a separate process, reports are named `<label>_r<repeat>.json`, and a manifest records the order they ran in. It never overwrites an existing report.
+
+`b2f retention` takes the repeats of each run (a glob or a comma-separated list), computes speedups from the medians, prints each group's range, and warns when there are fewer than three repeats or when a gain is no larger than the spread. It refuses to compare runs whose deadline or drop-late policy differ, repeats that differ in variant, environment or power mode, and a baseline and optimized run taken in different power modes or with different onnxruntime, TensorRT or cuDNN versions. A bench and a field run that differ in any of those are allowed with a warning naming the difference, since they may be different boards (the Thor and the rover's Orin NX run JetPack 7 and 6, with different TensorRT and cuDNN).
+
 ## 5. Field retention
 
-For an optimization O over baseline B at load tier h, using latency statistic s (p95 by default):
+For an optimization O over baseline B at load tier h, using latency statistic s (response p95 by default):
 
 ```
 S_bench = s(B, bench) / s(O, bench)
@@ -36,7 +47,9 @@ Recorded on the robot with its normal workload running and the model under test 
 
 ## 7. Replay validity
 
-A replay stands in for the field only if, for the baseline variant, replayed p95 latency is within 10% of field p95 at the same tier (`b2f validity`). Results that rely on replay alone state which profile was used and its validity error. Where the sampler reports a stressor's channel (tegrastats reports CPU, GPU and EMC load), replay steers the stressor's duty cycle to the profile target; elsewhere the duty cycle is open-loop and validity is the only check.
+A replay stands in for the field only if, for the baseline variant, replayed response p95 is within 10% of field response p95 at the same tier (`b2f validity`). Results that rely on replay alone state which profile was used and its validity error. Stressor duty cycles are calibrated before the benchmark starts, with the model idle as it was when the profile was recorded: where the sampler reports a stressor's channel (tegrastats reports CPU, GPU and EMC load), replay steers the duty cycle to the profile target, then freezes it for the run so the model's own load is not counted towards the target. Elsewhere the duty cycle is open-loop and validity is the only check. The frozen duty, the utilisation it achieved and the sampler that measured it are recorded in the report.
+
+GPU utilisation does not mean the same thing on every platform. NVML's figure on a discrete GPU is time-busy: the share of the sample period in which at least one kernel was running, however little of the GPU that kernel occupied. It is not SM occupancy. tegrastats' `GR3D_FREQ` on a Jetson is the load on the integrated GPU. A GPU stressor steered to 50% on an RTX 5090 is therefore not the same load as 50% GR3D on a Jetson, and a GPU target recorded on one must not be read as a target for the other. This is one reason profiles are replayed only on the platform family they were recorded on (section 6).
 
 ## 8. Gap attribution
 

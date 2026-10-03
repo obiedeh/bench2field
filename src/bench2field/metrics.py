@@ -14,13 +14,20 @@ any backend, model or vendor.
 from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
-from dataclasses import dataclass
+from typing import Any
+from dataclasses import dataclass, field
 
 import numpy as np
 
 from .schema import LatencyStats, RunReport
 
-STATS = ("p50_ms", "p95_ms", "p99_ms", "max_ms", "mean_ms")
+# Service-time stats, and the same stats on response time (scheduled arrival
+# to completion). Comparisons default to response p95: it is what the robot's
+# control loop experiences, and it includes queueing behind slow frames.
+SERVICE_STATS = ("p50_ms", "p95_ms", "p99_ms", "max_ms", "mean_ms")
+RESPONSE_PREFIX = "response_"
+STATS = tuple(RESPONSE_PREFIX + s for s in SERVICE_STATS) + SERVICE_STATS
+DEFAULT_STAT = "response_p95_ms"
 
 
 def latency_stats(samples_ms: Sequence[float]) -> LatencyStats:
@@ -41,12 +48,60 @@ def latency_stats(samples_ms: Sequence[float]) -> LatencyStats:
 def _stat(report: RunReport, target_hz: float, stat: str) -> float:
     if stat not in STATS:
         raise ValueError(f"stat must be one of {STATS}")
-    return float(getattr(report.tier(target_hz).latency, stat))
+    tier = report.tier(target_hz)
+    if not stat.startswith(RESPONSE_PREFIX):
+        return float(getattr(tier.latency, stat))
+    if tier.response is None:
+        raise ValueError(
+            f"run {report.run_id} (schema {report.schema_version}) has no response-time "
+            f"stats; re-run it, or compare service time with --stat {stat[len(RESPONSE_PREFIX):]}"
+        )
+    return float(getattr(tier.response, stat[len(RESPONSE_PREFIX):]))
 
 
-def speedup(baseline: RunReport, optimized: RunReport, target_hz: float, stat: str = "p95_ms") -> float:
+def speedup(baseline: RunReport, optimized: RunReport, target_hz: float, stat: str = DEFAULT_STAT) -> float:
     """Latency speedup of `optimized` over `baseline` at one load tier (>1 is faster)."""
     return _stat(baseline, target_hz, stat) / _stat(optimized, target_hz, stat)
+
+
+MIN_REPEATS = 3  # docs/METHODOLOGY.md, section 4
+
+# RunReport.platform keys that must agree between runs compared directly, and
+# that a reader should be warned about when bench and field differ in them.
+# (The Thor and the rover's Orin NX differ in all three library versions
+# because they run JetPack 7 and 6.)
+PLATFORM_FACTS = {
+    "nvpmodel": "power mode",
+    "onnxruntime": "onnxruntime version",
+    "tensorrt": "TensorRT version",
+    "cudnn": "cuDNN version",
+}
+
+@dataclass
+class RepeatStat:
+    """One latency statistic across the repeats of one variant in one environment."""
+
+    n: int
+    median: float
+    lo: float
+    hi: float
+
+    @property
+    def spread(self) -> float:
+        return self.hi - self.lo
+
+
+def repeat_stat(reports: Sequence[RunReport], target_hz: float, stat: str = DEFAULT_STAT) -> RepeatStat:
+    vals = [_stat(r, target_hz, stat) for r in reports]
+    return RepeatStat(len(vals), float(np.median(vals)), min(vals), max(vals))
+
+
+def _gain_is_finding(base: RepeatStat, opt: RepeatStat) -> bool | None:
+    """A difference smaller than the spread between repeats is not a finding.
+    None when there are too few repeats to know the spread."""
+    if min(base.n, opt.n) < 2:
+        return None
+    return abs(base.median - opt.median) > max(base.spread, opt.spread)
 
 
 @dataclass
@@ -57,22 +112,41 @@ class Retention:
     field_speedup: float
     retention: float | None  # share of the bench gain kept in the field; None if no bench gain
     note: str
+    # Per group ("bench_baseline", "bench_optimized", "field_baseline",
+    # "field_optimized"): the statistic across repeats. Speedups use medians.
+    groups: dict[str, RepeatStat] = field(default_factory=dict)
+    # Whether each gain is larger than the spread between repeats (None: unknown).
+    bench_gain_is_finding: bool | None = None
+    field_gain_is_finding: bool | None = None
+    warnings: list[str] = field(default_factory=list)
 
     def summary(self) -> str:
         r = "n/a" if self.retention is None else f"{self.retention:.0%}"
-        return (
+        lines = [
             f"{self.stat} @ {self.target_hz:g} Hz: bench {self.bench_speedup:.2f}x, "
             f"field {self.field_speedup:.2f}x, retention {r}. {self.note}"
-        )
+        ]
+        for name, g in self.groups.items():
+            lines.append(f"  {name:<16} median {g.median:.3f} ms  range {g.lo:.3f} to {g.hi:.3f} ms  "
+                         f"({g.n} repeat{'s' if g.n != 1 else ''})")
+        lines += [f"  WARNING: {w}" for w in self.warnings]
+        return "\n".join(lines)
+
+
+def _as_group(runs: RunReport | Sequence[RunReport]) -> list[RunReport]:
+    group = [runs] if isinstance(runs, RunReport) else list(runs)
+    if not group:
+        raise ValueError("a comparison group has no runs")
+    return group
 
 
 def field_retention(
-    bench_baseline: RunReport,
-    bench_optimized: RunReport,
-    field_baseline: RunReport,
-    field_optimized: RunReport,
+    bench_baseline: RunReport | Sequence[RunReport],
+    bench_optimized: RunReport | Sequence[RunReport],
+    field_baseline: RunReport | Sequence[RunReport],
+    field_optimized: RunReport | Sequence[RunReport],
     target_hz: float,
-    stat: str = "p95_ms",
+    stat: str = DEFAULT_STAT,
 ) -> Retention:
     """Share of an optimization's bench gain that survives in the field.
 
@@ -81,13 +155,37 @@ def field_retention(
     where S is the latency speedup of optimized over baseline. 100% means the
     whole gain survived; 0% means none did; negative means the optimization
     made things worse on the robot. Defined only when the bench shows a gain.
+
+    Each argument is one run or the repeats of that run. With repeats, the
+    speedups use the median across repeats, and a gain no larger than the
+    spread between repeats is flagged as not a finding. Runs that may not be
+    compared (different variant, deadline, drop policy or power mode) are
+    refused.
     """
-    _check_pair(bench_baseline, bench_optimized, field_baseline, field_optimized)
-    s_bench = speedup(bench_baseline, bench_optimized, target_hz, stat)
-    s_field = speedup(field_baseline, field_optimized, target_hz, stat)
+    groups = {"bench_baseline": _as_group(bench_baseline), "bench_optimized": _as_group(bench_optimized),
+              "field_baseline": _as_group(field_baseline), "field_optimized": _as_group(field_optimized)}
+    warnings = _check_comparable(groups, target_hz)
+    st = {name: repeat_stat(g, target_hz, stat) for name, g in groups.items()}
+    s_bench = st["bench_baseline"].median / st["bench_optimized"].median
+    s_field = st["field_baseline"].median / st["field_optimized"].median
+    bench_finding = _gain_is_finding(st["bench_baseline"], st["bench_optimized"])
+    field_finding = _gain_is_finding(st["field_baseline"], st["field_optimized"])
+
+    short = {name: s.n for name, s in st.items() if s.n < MIN_REPEATS}
+    if short:
+        warnings.append(f"fewer than {MIN_REPEATS} repeats ({', '.join(f'{k}: {v}' for k, v in short.items())}); "
+                        "the spread is not established, so this is not yet a reportable result")
+    if bench_finding is False:
+        warnings.append("the bench gain is no larger than the spread between repeats: not a finding")
+    if field_finding is False:
+        warnings.append("the field difference is no larger than the spread between repeats: not a finding")
+
+    def result(retention: float | None, note: str) -> Retention:
+        return Retention(stat, target_hz, s_bench, s_field, retention, note, st,
+                         bench_finding, field_finding, warnings)
+
     if s_bench <= 1.0:
-        return Retention(stat, target_hz, s_bench, s_field, None,
-                         "No bench gain, so retention is undefined.")
+        return result(None, "No bench gain, so retention is undefined.")
     r = (s_field - 1.0) / (s_bench - 1.0)
     if r < 0:
         note = "Optimization is slower than baseline in the field."
@@ -97,14 +195,53 @@ def field_retention(
         note = "Gain largely survives in the field."
     else:
         note = "Field gain exceeds bench gain; check for contention the baseline suffered more from."
-    return Retention(stat, target_hz, s_bench, s_field, r, note)
+    return result(r, note)
 
 
-def _check_pair(bb: RunReport, bo: RunReport, fb: RunReport, fo: RunReport) -> None:
-    if bb.variant.key != fb.variant.key or bo.variant.key != fo.variant.key:
+def _one(values: set, what: str, where: str):
+    if len(values) > 1:
+        raise ValueError(f"{where} differ in {what}: {sorted(map(str, values))}")
+    return next(iter(values))
+
+
+def _check_comparable(groups: dict[str, list[RunReport]], target_hz: float) -> list[str]:
+    """Refuse comparisons docs/METHODOLOGY.md does not allow; return warnings
+    for the ones it allows but a reader should know about."""
+    key, env, deadline, drop = {}, {}, {}, {}
+    # Platform facts that must agree within a comparison and are worth a
+    # warning across bench and field: power mode and the runtime stack.
+    facts: dict[str, dict[str, Any]] = {f: {} for f in PLATFORM_FACTS}
+    for name, runs in groups.items():
+        where = f"the repeats of {name}"
+        key[name] = _one({r.variant.key for r in runs}, "variant", where)
+        env[name] = _one({r.environment for r in runs}, "environment", where)
+        for fact, label in PLATFORM_FACTS.items():
+            facts[fact][name] = _one({r.platform.get(fact) for r in runs}, label, where)
+        deadline[name] = _one({r.tier(target_hz).deadline_ms for r in runs}, "deadline", where)
+        drop[name] = _one({r.tier(target_hz).drop_late for r in runs}, "drop-late policy", where)
+
+    if key["bench_baseline"] != key["field_baseline"] or key["bench_optimized"] != key["field_optimized"]:
         raise ValueError("bench and field runs must use the same variants")
-    if bb.environment == fb.environment:
+    if env["bench_baseline"] == env["field_baseline"]:
         raise ValueError("baseline bench and field runs share an environment label")
+    for side in ("bench", "field"):
+        if env[f"{side}_baseline"] != env[f"{side}_optimized"]:
+            raise ValueError(f"{side} baseline and optimized runs are from different environments")
+        for fact, label in PLATFORM_FACTS.items():
+            b, o = facts[fact][f"{side}_baseline"], facts[fact][f"{side}_optimized"]
+            if b != o:
+                raise ValueError(f"{side} baseline and optimized runs used different {label}s: {b!r} vs {o!r}")
+    _one(set(deadline.values()), "deadline (ms)", "the runs being compared")
+    _one(set(drop.values()), "drop-late policy", "the runs being compared")
+
+    warnings = []
+    for fact, label in PLATFORM_FACTS.items():
+        b, f = facts[fact]["bench_baseline"], facts[fact]["field_baseline"]
+        if b != f:
+            why = ("expected if they are different boards, a mistake if they are the same one"
+                   if fact == "nvpmodel" else "the software stack, not only the machine, differs")
+            warnings.append(f"bench and field used different {label}s ({b!r} vs {f!r}); {why}")
+    return warnings
 
 
 @dataclass
@@ -130,7 +267,7 @@ def attribute_gap(
     field: RunReport,
     single_stressor_runs: Iterable[tuple[str, RunReport]],
     target_hz: float,
-    stat: str = "p95_ms",
+    stat: str = DEFAULT_STAT,
 ) -> Attribution:
     """Split the idle-bench to field slowdown across causes.
 
@@ -167,7 +304,7 @@ class ReplayValidity:
 
 def replay_validity(
     replay: RunReport, field: RunReport, target_hz: float,
-    stat: str = "p95_ms", tolerance: float = 0.10,
+    stat: str = DEFAULT_STAT, tolerance: float = 0.10,
 ) -> ReplayValidity:
     """A load profile may stand in for the field only if replaying it reproduces
     field latency within `tolerance` (relative). Check this before trusting any

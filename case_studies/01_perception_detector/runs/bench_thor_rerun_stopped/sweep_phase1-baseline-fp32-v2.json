@@ -1,0 +1,57 @@
+{
+  "sweep": "phase1-baseline-fp32-v2",
+  "config_file": "case_studies/01_perception_detector/sweeps/phase1_baseline.yaml",
+  "config": {
+    "name": "phase1-baseline-fp32-v2",
+    "variants": [
+      {
+        "label": "trt_fp32",
+        "model": "models/yolox_s.onnx",
+        "provider": "tensorrt",
+        "precision": "fp32",
+        "technique": "baseline",
+        "name": "yolox-s"
+      },
+      {
+        "label": "cuda_fp32",
+        "model": "models/yolox_s.onnx",
+        "provider": "cuda",
+        "precision": "fp32",
+        "technique": "baseline",
+        "name": "yolox-s"
+      }
+    ],
+    "repeats": 3,
+    "environment": "bench-idle",
+    "tiers_hz": [
+      10,
+      26,
+      30,
+      100
+    ],
+    "duration_s": 60,
+    "warmup_s": 5,
+    "deadline_ms": 33.3,
+    "drop_late": false,
+    "cooldown_c": null,
+    "replay": null,
+    "only": null,
+    "stopped": []
+  },
+  "host": "bench-thor",
+  "started_at": "2026-10-03T01:25:50.590118+00:00",
+  "finished_at": null,
+  "complete": false,
+  "runs": [
+    {
+      "order": 1,
+      "label": "trt_fp32",
+      "repeat": 1,
+      "file": "trt_fp32_r1.json",
+      "started_at": "2026-10-03T01:25:50.590147+00:00",
+      "run_id": "b4cb3cc63b85",
+      "finished_at": "2026-10-03T01:30:12.708125+00:00"
+    }
+  ],
+  "stopped": "Stopped by the owner's instruction after run 1 of 6 (run 2 was killed mid-way and left no report). This sweep was started before the Safety Observability API and its physical-ai-vllm container had been stood down, against the owner's instruction to wait for that. Not the baseline; kept as partial evidence. The container was up and idle during run 1 (see the report's platform.background). Runs were also made with onnxruntime spinning on, not --no-spin."
+}

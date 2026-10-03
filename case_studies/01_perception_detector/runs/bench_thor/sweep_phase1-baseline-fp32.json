@@ -1,0 +1,102 @@
+{
+  "sweep": "phase1-baseline-fp32",
+  "config_file": "case_studies/01_perception_detector/sweeps/phase1_baseline.yaml",
+  "config": {
+    "name": "phase1-baseline-fp32",
+    "variants": [
+      {
+        "label": "trt_fp32",
+        "model": "models/yolox_s.onnx",
+        "provider": "tensorrt",
+        "precision": "fp32",
+        "technique": "baseline",
+        "name": "yolox-s"
+      },
+      {
+        "label": "cuda_fp32",
+        "model": "models/yolox_s.onnx",
+        "provider": "cuda",
+        "precision": "fp32",
+        "technique": "baseline",
+        "name": "yolox-s"
+      }
+    ],
+    "repeats": 3,
+    "environment": "bench-idle",
+    "tiers_hz": [
+      10,
+      30,
+      100
+    ],
+    "duration_s": 60,
+    "warmup_s": 5,
+    "deadline_ms": 33.3,
+    "drop_late": false,
+    "cooldown_c": null,
+    "replay": null,
+    "only": null,
+    "stopped": [
+      "docker container physical-ai-vllm (stopped before the sweep, started again after it)"
+    ]
+  },
+  "host": "bench-thor",
+  "started_at": "2026-10-03T00:35:04.249860+00:00",
+  "finished_at": "2026-10-03T01:02:37.451994+00:00",
+  "complete": true,
+  "runs": [
+    {
+      "order": 1,
+      "label": "trt_fp32",
+      "repeat": 1,
+      "file": "trt_fp32_r1.json",
+      "started_at": "2026-10-03T00:35:04.249891+00:00",
+      "run_id": "fe22014b0df3",
+      "finished_at": "2026-10-03T00:46:15.497281+00:00"
+    },
+    {
+      "order": 2,
+      "label": "cuda_fp32",
+      "repeat": 1,
+      "file": "cuda_fp32_r1.json",
+      "started_at": "2026-10-03T00:46:15.497661+00:00",
+      "run_id": "b3e28d42d75e",
+      "finished_at": "2026-10-03T00:49:31.415162+00:00"
+    },
+    {
+      "order": 3,
+      "label": "trt_fp32",
+      "repeat": 2,
+      "file": "trt_fp32_r2.json",
+      "started_at": "2026-10-03T00:49:31.415592+00:00",
+      "run_id": "31c07eaf9db0",
+      "finished_at": "2026-10-03T00:52:48.532543+00:00"
+    },
+    {
+      "order": 4,
+      "label": "cuda_fp32",
+      "repeat": 2,
+      "file": "cuda_fp32_r2.json",
+      "started_at": "2026-10-03T00:52:48.532953+00:00",
+      "run_id": "e3f0eb02f782",
+      "finished_at": "2026-10-03T00:56:04.395776+00:00"
+    },
+    {
+      "order": 5,
+      "label": "trt_fp32",
+      "repeat": 3,
+      "file": "trt_fp32_r3.json",
+      "started_at": "2026-10-03T00:56:04.396296+00:00",
+      "run_id": "7a0dd886427b",
+      "finished_at": "2026-10-03T00:59:21.580739+00:00"
+    },
+    {
+      "order": 6,
+      "label": "cuda_fp32",
+      "repeat": 3,
+      "file": "cuda_fp32_r3.json",
+      "started_at": "2026-10-03T00:59:21.581243+00:00",
+      "run_id": "3ce11a8f2553",
+      "finished_at": "2026-10-03T01:02:37.451517+00:00"
+    }
+  ]
+}

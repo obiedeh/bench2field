@@ -1,0 +1,97 @@
+{
+  "sweep": "bringup-tiny",
+  "config_file": "configs/sweeps/bringup_tiny.yaml",
+  "config": {
+    "name": "bringup-tiny",
+    "variants": [
+      {
+        "label": "cuda_fp32",
+        "model": "models/tiny_conv.onnx",
+        "provider": "cuda",
+        "precision": "fp32",
+        "technique": "baseline",
+        "name": null
+      },
+      {
+        "label": "trt_fp16",
+        "model": "models/tiny_conv.onnx",
+        "provider": "tensorrt",
+        "precision": "fp16",
+        "technique": "baseline",
+        "name": null
+      }
+    ],
+    "repeats": 3,
+    "environment": "bench-idle",
+    "tiers_hz": [
+      30
+    ],
+    "duration_s": 10,
+    "warmup_s": 5,
+    "deadline_ms": 33.3,
+    "drop_late": false,
+    "cooldown_c": null,
+    "replay": null,
+    "only": null
+  },
+  "host": "bench-5090",
+  "started_at": "2026-10-02T13:00:35.646606+00:00",
+  "finished_at": "2026-10-02T13:02:09.078437+00:00",
+  "complete": true,
+  "runs": [
+    {
+      "order": 1,
+      "label": "cuda_fp32",
+      "repeat": 1,
+      "file": "cuda_fp32_r1.json",
+      "started_at": "2026-10-02T13:00:35.646625+00:00",
+      "run_id": "c1275bea296c",
+      "finished_at": "2026-10-02T13:00:51.093010+00:00"
+    },
+    {
+      "order": 2,
+      "label": "trt_fp16",
+      "repeat": 1,
+      "file": "trt_fp16_r1.json",
+      "started_at": "2026-10-02T13:00:51.093165+00:00",
+      "run_id": "42a5cc44c0ca",
+      "finished_at": "2026-10-02T13:01:06.744394+00:00"
+    },
+    {
+      "order": 3,
+      "label": "cuda_fp32",
+      "repeat": 2,
+      "file": "cuda_fp32_r2.json",
+      "started_at": "2026-10-02T13:01:06.744524+00:00",
+      "run_id": "5c185aa8fbab",
+      "finished_at": "2026-10-02T13:01:22.235409+00:00"
+    },
+    {
+      "order": 4,
+      "label": "trt_fp16",
+      "repeat": 2,
+      "file": "trt_fp16_r2.json",
+      "started_at": "2026-10-02T13:01:22.235550+00:00",
+      "run_id": "6cf062c6042b",
+      "finished_at": "2026-10-02T13:01:37.901849+00:00"
+    },
+    {
+      "order": 5,
+      "label": "cuda_fp32",
+      "repeat": 3,
+      "file": "cuda_fp32_r3.json",
+      "started_at": "2026-10-02T13:01:37.901995+00:00",
+      "run_id": "fd34909615c4",
+      "finished_at": "2026-10-02T13:01:53.401049+00:00"
+    },
+    {
+      "order": 6,
+      "label": "trt_fp16",
+      "repeat": 3,
+      "file": "trt_fp16_r3.json",
+      "started_at": "2026-10-02T13:01:53.401194+00:00",
+      "run_id": "e14f4f71faba",
+      "finished_at": "2026-10-02T13:02:09.078296+00:00"
+    }
+  ]
+}

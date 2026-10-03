@@ -1,0 +1,242 @@
+{
+  "variant": {
+    "model": "yolox-s",
+    "backend": "onnxruntime",
+    "provider": "TensorrtExecutionProvider",
+    "precision": "fp32",
+    "technique": "baseline",
+    "notes": ""
+  },
+  "environment": "bench-idle",
+  "tiers": [
+    {
+      "target_hz": 10.0,
+      "actual_hz": 10.016366637608089,
+      "duration_s": 59.90196063183248,
+      "deadline_ms": 33.3,
+      "deadline_misses": 0,
+      "latency": {
+        "n": 600,
+        "p50_ms": 2.0125629380345345,
+        "p95_ms": 2.251034090295433,
+        "p99_ms": 2.64143977779895,
+        "max_ms": 3.1239641830325127,
+        "mean_ms": 2.0351174271975956
+      },
+      "telemetry": {
+        "n_samples": 120,
+        "gpu_mem_used_mb": {
+          "p50": 2062.9375,
+          "peak": 2062.9375
+        },
+        "gpu_mem_util_pct": {
+          "p50": 0.0,
+          "peak": 0.0
+        },
+        "gpu_util_pct": {
+          "p50": 3.0,
+          "peak": 4.0
+        },
+        "power_gpu_w": {
+          "p50": 71.0775,
+          "peak": 72.41
+        },
+        "sm_clock_mhz": {
+          "p50": 2467.0,
+          "peak": 2475.0
+        },
+        "temp_gpu_c": {
+          "p50": 45.0,
+          "peak": 46.0
+        }
+      },
+      "response": {
+        "n": 600,
+        "p50_ms": 2.179324859753251,
+        "p95_ms": 2.5154733331874,
+        "p99_ms": 2.9546318901702753,
+        "max_ms": 19.226460717618465,
+        "mean_ms": 2.2300201266383133
+      },
+      "dropped": 0,
+      "drop_late": false
+    },
+    {
+      "target_hz": 30.0,
+      "actual_hz": 30.015751332132805,
+      "duration_s": 59.96851386735216,
+      "deadline_ms": 33.3,
+      "deadline_misses": 0,
+      "latency": {
+        "n": 1800,
+        "p50_ms": 1.82849052362144,
+        "p95_ms": 2.03491544816643,
+        "p99_ms": 2.1103640738874674,
+        "max_ms": 2.225940115749836,
+        "mean_ms": 1.8222004320058558
+      },
+      "telemetry": {
+        "n_samples": 120,
+        "gpu_mem_used_mb": {
+          "p50": 2062.9375,
+          "peak": 2062.9375
+        },
+        "gpu_mem_util_pct": {
+          "p50": 0.0,
+          "peak": 0.0
+        },
+        "gpu_util_pct": {
+          "p50": 6.0,
+          "peak": 6.0
+        },
+        "power_gpu_w": {
+          "p50": 78.86,
+          "peak": 80.097
+        },
+        "sm_clock_mhz": {
+          "p50": 2482.0,
+          "peak": 2497.0
+        },
+        "temp_gpu_c": {
+          "p50": 47.0,
+          "peak": 48.0
+        }
+      },
+      "response": {
+        "n": 1800,
+        "p50_ms": 2.004829002544284,
+        "p95_ms": 2.219457644969225,
+        "p99_ms": 2.2894266713410616,
+        "max_ms": 5.406615789979696,
+        "mean_ms": 2.0034719380136163
+      },
+      "dropped": 0,
+      "drop_late": false
+    },
+    {
+      "target_hz": 100.0,
+      "actual_hz": 100.01376842555955,
+      "duration_s": 59.991740081924945,
+      "deadline_ms": 33.3,
+      "deadline_misses": 0,
+      "latency": {
+        "n": 6000,
+        "p50_ms": 1.5773880295455456,
+        "p95_ms": 1.762156467884779,
+        "p99_ms": 1.9033777527511124,
+        "max_ms": 2.4860468693077564,
+        "mean_ms": 1.608868805381159
+      },
+      "telemetry": {
+        "n_samples": 120,
+        "gpu_mem_used_mb": {
+          "p50": 2062.9375,
+          "peak": 2062.9375
+        },
+        "gpu_mem_util_pct": {
+          "p50": 1.0,
+          "peak": 1.0
+        },
+        "gpu_util_pct": {
+          "p50": 15.0,
+          "peak": 16.0
+        },
+        "power_gpu_w": {
+          "p50": 104.136,
+          "peak": 105.94
+        },
+        "sm_clock_mhz": {
+          "p50": 2550.0,
+          "peak": 2572.0
+        },
+        "temp_gpu_c": {
+          "p50": 50.0,
+          "peak": 50.0
+        }
+      },
+      "response": {
+        "n": 6000,
+        "p50_ms": 1.7539432737976313,
+        "p95_ms": 1.9531248603016138,
+        "p99_ms": 2.052644276991488,
+        "max_ms": 2.6468271389603615,
+        "mean_ms": 1.7672355830824624
+      },
+      "dropped": 0,
+      "drop_late": false
+    }
+  ],
+  "platform": {
+    "host": "bench-5090",
+    "machine": "x86_64",
+    "system": "Linux",
+    "kernel": "6.17.0-22-generic",
+    "python": "3.12.3",
+    "telemetry": "nvml",
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "driver": "580.178.04",
+    "backend": "onnxruntime",
+    "onnxruntime": "1.30.0",
+    "tensorrt": "10.16.1",
+    "cudnn": "9.19.0",
+    "cuda_runtime": "13.0",
+    "provider_active": "TensorrtExecutionProvider",
+    "precision": "fp32",
+    "intra_op_threads": "default",
+    "inter_op_threads": "default",
+    "allow_spinning": true,
+    "sweep": {
+      "name": "phase1-baseline-fp32",
+      "label": "trt_fp32",
+      "repeat": 1,
+      "order": 1
+    },
+    "background": {
+      "stopped_for_this_run": [],
+      "containers_running": [
+        {
+          "name": "telecom-pg",
+          "image": "pgvector/pgvector:pg16",
+          "status": "Up 4 days"
+        }
+      ],
+      "top_processes": [
+        {
+          "pid": 671788,
+          "cpu_pct": 179.0,
+          "mem_pct": 0.0,
+          "cmd": "~/github/bench2field/.venv/bin/python .venv/bin/b2f sweep case_studies/01_perception_detector/sweeps/phase1_ba"
+        },
+        {
+          "pid": 671928,
+          "cpu_pct": 100.0,
+          "mem_pct": 0.0,
+          "cmd": "ps -eo pid,pcpu,pmem,args --sort=-pcpu --no-headers"
+        },
+        {
+          "pid": 338994,
+          "cpu_pct": 9.9,
+          "mem_pct": 0.8,
+          "cmd": "/usr/bin/gnome-shell"
+        },
+        {
+          "pid": 671363,
+          "cpu_pct": 2.3,
+          "mem_pct": 0.7,
+          "cmd": "interactive dev tool"
+        },
+        {
+          "pid": 668774,
+          "cpu_pct": 1.3,
+          "mem_pct": 0.8,
+          "cmd": "interactive dev tool"
+        }
+      ],
+      "load_avg_1m": 0.22705078125
+    }
+  },
+  "accuracy": {},
+  "run_id": "e475460affbb",
+  "created_at": "2026-10-03T00:37:20.446084+00:00",
+  "schema_version": "1.1"
+}

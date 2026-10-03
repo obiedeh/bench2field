@@ -4,6 +4,11 @@ Requests are scheduled at a fixed rate (open loop), the way sensor frames
 arrive on a robot. A request misses its deadline when it finishes later than
 its scheduled arrival plus the deadline, so queueing behind a slow frame counts
 against you, as it would in a real control loop.
+
+Two latencies are kept per tier: service time (inference start to end) and
+response time (scheduled arrival to end). With drop_late, a frame that is
+already past its deadline when it would start is skipped, the way a camera
+pipeline discards a stale frame instead of processing it.
 """
 
 from __future__ import annotations
@@ -32,6 +37,7 @@ class RunConfig:
     # sampler has no temperature).
     cooldown_max_c: float | None = None
     cooldown_timeout_s: float = 300.0
+    drop_late: bool = False
     extra: dict[str, Any] = field(default_factory=dict)
 
 
@@ -54,21 +60,29 @@ def run_tier(
     sampler: TelemetrySampler | None = None,
     clock: Callable[[], float] = time.perf_counter,
     sleep: Callable[[float], None] = time.sleep,
+    drop_late: bool = False,
 ) -> TierResult:
     if target_hz <= 0 or duration_s <= 0:
         raise ValueError("target_hz and duration_s must be positive")
     sampler = sampler or NullSampler()
     period = 1.0 / target_hz
 
-    warm_end = clock() + warmup_s
-    i = 0
-    while clock() < warm_end:
+    # Warm up at the tier's own rate, never flat out. A back-to-back burst
+    # leaves the device in a state the tier does not produce (on an RTX 5090,
+    # NVML power read 350 W for a 70 W tier and took ~3 s to settle), and that
+    # transient would be measured as part of the tier.
+    next_start = clock()
+    for i in range(max(1, int(round(warmup_s * target_hz))) if warmup_s > 0 else 0):
+        now = clock()
+        if now < next_start:
+            sleep(next_start - now)
+        next_start = clock() + period
         infer(make_input(i))
-        i += 1
 
     n_requests = max(1, int(round(duration_s * target_hz)))
     latencies: list[float] = []
-    misses = 0
+    responses: list[float] = []
+    misses = dropped = 0
     sampler.start()
     t0 = clock()
     for k in range(n_requests):
@@ -76,12 +90,16 @@ def run_tier(
         now = clock()
         if now < scheduled:
             sleep(scheduled - now)
+        elif drop_late and (now - scheduled) * 1000.0 > deadline_ms:
+            dropped += 1
+            continue
         x = make_input(k)
         start = clock()
         infer(x)
         end = clock()
         latencies.append((end - start) * 1000.0)
-        if (end - scheduled) * 1000.0 > deadline_ms:
+        responses.append((end - scheduled) * 1000.0)
+        if responses[-1] > deadline_ms:
             misses += 1
     elapsed = clock() - t0
     telemetry = sampler.stop()
@@ -94,6 +112,9 @@ def run_tier(
         deadline_misses=misses,
         latency=latency_stats(latencies),
         telemetry=telemetry,
+        response=latency_stats(responses),
+        dropped=dropped,
+        drop_late=drop_late,
     )
 
 
@@ -117,6 +138,6 @@ def run(
             )
         tiers.append(
             run_tier(infer, make_input, hz, config.duration_s, config.deadline_ms,
-                     config.warmup_s, sampler)
+                     config.warmup_s, sampler, drop_late=config.drop_late)
         )
     return RunReport(variant=variant, environment=environment, tiers=tiers, platform=plat)

@@ -7,11 +7,18 @@ platform implements read_once(); the threading and summarising live here.
 
 from __future__ import annotations
 
+import shutil
 import threading
 import time
+import warnings
+from pathlib import Path
 from typing import Any
 
 import numpy as np
+
+
+class TelemetryWarning(UserWarning):
+    """A run is about to proceed without the telemetry this machine should have."""
 
 
 class TelemetrySampler:
@@ -82,6 +89,16 @@ def summarize(samples: list[dict[str, float]]) -> dict[str, Any]:
 class NullSampler(TelemetrySampler):
     name = "none"
 
+    def __init__(self, interval_s: float = 0.5, reason: str = "") -> None:
+        super().__init__(interval_s)
+        self.reason = reason
+
+    def describe(self) -> dict[str, Any]:
+        info: dict[str, Any] = {"telemetry": self.name}
+        if self.reason:
+            info["telemetry_missing"] = self.reason
+        return info
+
     def read_once(self) -> dict[str, float]:
         return {}
 
@@ -92,14 +109,39 @@ class NullSampler(TelemetrySampler):
         return {"n_samples": 0}
 
 
+def _is_jetson() -> bool:
+    return Path("/etc/nv_tegra_release").exists()
+
+
+def _has_nvidia_gpu() -> bool:
+    return shutil.which("nvidia-smi") is not None or Path("/proc/driver/nvidia/version").exists()
+
+
 def auto_sampler(interval_s: float = 0.5) -> TelemetrySampler:
     """Pick the best sampler for this machine: tegrastats on Jetson, NVML on
-    discrete NVIDIA, rocm-smi on AMD, otherwise none."""
-    from .rocm_smi import RocmSmiSampler
+    discrete NVIDIA, rocm-smi on AMD.
+
+    If none can be used the run still goes ahead, but with a TelemetryWarning
+    saying what is missing and the reason recorded in the report: a run with
+    no power or temperature data should never look like a normal one.
+    """
     from .nvml import NvmlSampler
+    from .rocm_smi import RocmSmiSampler
     from .tegrastats import TegrastatsSampler
 
     for cls in (TegrastatsSampler, NvmlSampler, RocmSmiSampler):
         if cls.available():
             return cls(interval_s=interval_s)
-    return NullSampler(interval_s=interval_s)
+
+    if _is_jetson():
+        reason = "this is a Jetson but tegrastats is not on PATH"
+    elif _has_nvidia_gpu():
+        reason = f"an NVIDIA GPU is present but NVML is unusable: {NvmlSampler.unavailable_reason()}"
+    else:
+        reason = "no tegrastats, NVML or rocm-smi on this machine"
+    warnings.warn(
+        f"NO TELEMETRY: {reason}. This run will record no power, temperature or "
+        "utilisation, and budget gates that need them will be INCOMPLETE.",
+        TelemetryWarning, stacklevel=2,
+    )
+    return NullSampler(interval_s=interval_s, reason=reason)

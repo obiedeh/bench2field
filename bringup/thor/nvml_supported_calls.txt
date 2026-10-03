@@ -1,0 +1,8 @@
+# pynvml calls on Jetson AGX Thor (L4T R38.4.0, driver 580.00, nvidia-ml-py 13.615.71), 2026-10-02
+nvmlDeviceGetName                 = NVIDIA Thor
+nvmlSystemGetDriverVersion        = 580.00
+nvmlDeviceGetPowerUsage           = 1965        (mW; equals the tegrastats VDD_GPU rail)
+nvmlDeviceGetTemperature          = 36
+nvmlDeviceGetUtilizationRates     = gpu 0, memory 0
+nvmlDeviceGetMemoryInfo           FAILED NVMLError_NotSupported
+nvmlDeviceGetClockInfo(CLOCK_SM)  FAILED NVMLError_NotSupported

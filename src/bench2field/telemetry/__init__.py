@@ -1,3 +1,3 @@
-from .base import NullSampler, TelemetrySampler, auto_sampler, summarize
+from .base import NullSampler, TelemetrySampler, TelemetryWarning, auto_sampler, summarize
 
-__all__ = ["NullSampler", "TelemetrySampler", "auto_sampler", "summarize"]
+__all__ = ["NullSampler", "TelemetrySampler", "TelemetryWarning", "auto_sampler", "summarize"]

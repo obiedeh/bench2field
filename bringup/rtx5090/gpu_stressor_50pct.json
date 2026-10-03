@@ -1,0 +1,34 @@
+{
+ "idle_before": {
+  "n": 10,
+  "util_p50": 1.0,
+  "util_mean": 2.8,
+  "util_min": 1.0,
+  "util_max": 19.0,
+  "power_p50_w": 48.1695
+ },
+ "open_loop_duty_0.50_30s": {
+  "n": 60,
+  "util_p50": 50.0,
+  "util_mean": 49.9,
+  "util_min": 49.0,
+  "util_max": 51.0,
+  "power_p50_w": 369.1915
+ },
+ "calibration": {
+  "channel": "gpu_util_pct",
+  "target_pct": 50.0,
+  "duty": 0.5,
+  "achieved_pct": 50.0,
+  "steered": true,
+  "converged": true
+ },
+ "after_calibration_30s": {
+  "n": 60,
+  "util_p50": 50.0,
+  "util_mean": 49.81666666666667,
+  "util_min": 49.0,
+  "util_max": 50.0,
+  "power_p50_w": 371.118
+ }
+}

@@ -1,0 +1,2 @@
+{"name": "synth-gpu50", "duration_s": 0, "interval_s": 0.5, "platform": {}, "samples": [],
+ "targets": {"gpu_util_pct": 50.0}, "soak_temp_c": null, "notes": "synthetic bring-up profile, not a field recording"}

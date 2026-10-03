@@ -1,0 +1,234 @@
+# ros2 topic hz /camera/color/image_raw --window 300, 60 s, rover stack up (micro-ROS agent, m3pro_bringup car_base.launch.py, slam_stack.sh), Orin NX (field-orin), 2026-10-03T01:24Z
+# configured: 640x480 MJPG 30 fps (dabai_dcw2.launch.py defaults, confirmed with ros2 param get); depth 640x400 @10, IR 640x400 @10, point cloud and coloured point cloud on
+average rate: 26.042
+	min: 0.007s max: 0.068s std dev: 0.01675s window: 28
+average rate: 24.992
+	min: 0.004s max: 0.101s std dev: 0.01989s window: 53
+average rate: 23.685
+	min: 0.004s max: 0.272s std dev: 0.03247s window: 79
+average rate: 24.443
+	min: 0.004s max: 0.272s std dev: 0.02947s window: 107
+average rate: 24.879
+	min: 0.004s max: 0.272s std dev: 0.02744s window: 134
+average rate: 25.007
+	min: 0.004s max: 0.272s std dev: 0.02614s window: 160
+average rate: 25.370
+	min: 0.004s max: 0.272s std dev: 0.02463s window: 188
+average rate: 25.791
+	min: 0.004s max: 0.272s std dev: 0.02393s window: 217
+average rate: 26.098
+	min: 0.004s max: 0.272s std dev: 0.02329s window: 246
+average rate: 26.060
+	min: 0.004s max: 0.272s std dev: 0.02268s window: 273
+average rate: 26.174
+	min: 0.004s max: 0.272s std dev: 0.02228s window: 300
+average rate: 26.315
+	min: 0.003s max: 0.272s std dev: 0.02253s window: 300
+average rate: 25.322
+	min: 0.003s max: 0.272s std dev: 0.02657s window: 300
+average rate: 25.551
+	min: 0.003s max: 0.272s std dev: 0.02598s window: 300
+average rate: 25.421
+	min: 0.003s max: 0.232s std dev: 0.02369s window: 300
+average rate: 25.455
+	min: 0.003s max: 0.232s std dev: 0.02331s window: 300
+average rate: 25.618
+	min: 0.003s max: 0.232s std dev: 0.02314s window: 300
+average rate: 25.656
+	min: 0.003s max: 0.232s std dev: 0.02352s window: 300
+average rate: 25.404
+	min: 0.003s max: 0.232s std dev: 0.02410s window: 300
+average rate: 25.118
+	min: 0.003s max: 0.232s std dev: 0.02393s window: 300
+average rate: 25.093
+	min: 0.003s max: 0.232s std dev: 0.02422s window: 300
+average rate: 25.088
+	min: 0.003s max: 0.232s std dev: 0.02441s window: 300
+average rate: 25.006
+	min: 0.003s max: 0.232s std dev: 0.02420s window: 300
+average rate: 26.096
+	min: 0.007s max: 0.142s std dev: 0.02023s window: 300
+average rate: 26.365
+	min: 0.004s max: 0.142s std dev: 0.01959s window: 300
+average rate: 26.946
+	min: 0.004s max: 0.141s std dev: 0.01826s window: 300
+average rate: 26.389
+	min: 0.004s max: 0.141s std dev: 0.01988s window: 300
+average rate: 26.059
+	min: 0.004s max: 0.141s std dev: 0.02056s window: 300
+average rate: 25.930
+	min: 0.004s max: 0.141s std dev: 0.02039s window: 300
+average rate: 26.219
+	min: 0.004s max: 0.136s std dev: 0.01945s window: 300
+average rate: 26.431
+	min: 0.004s max: 0.136s std dev: 0.01937s window: 300
+average rate: 26.423
+	min: 0.004s max: 0.136s std dev: 0.01940s window: 300
+average rate: 26.232
+	min: 0.004s max: 0.136s std dev: 0.01926s window: 300
+average rate: 26.281
+	min: 0.004s max: 0.136s std dev: 0.01968s window: 300
+average rate: 25.980
+	min: 0.004s max: 0.136s std dev: 0.01998s window: 300
+average rate: 25.742
+	min: 0.004s max: 0.136s std dev: 0.01997s window: 300
+average rate: 25.959
+	min: 0.004s max: 0.136s std dev: 0.01951s window: 300
+average rate: 25.957
+	min: 0.004s max: 0.162s std dev: 0.02047s window: 300
+average rate: 26.300
+	min: 0.004s max: 0.162s std dev: 0.01938s window: 300
+average rate: 26.219
+	min: 0.005s max: 0.162s std dev: 0.01959s window: 300
+average rate: 25.941
+	min: 0.004s max: 0.162s std dev: 0.02045s window: 300
+average rate: 25.749
+	min: 0.004s max: 0.162s std dev: 0.02062s window: 300
+average rate: 25.481
+	min: 0.004s max: 0.162s std dev: 0.02075s window: 300
+average rate: 25.610
+	min: 0.004s max: 0.162s std dev: 0.02108s window: 300
+average rate: 25.707
+	min: 0.004s max: 0.162s std dev: 0.02101s window: 300
+average rate: 25.871
+	min: 0.004s max: 0.162s std dev: 0.02074s window: 300
+average rate: 25.736
+	min: 0.004s max: 0.162s std dev: 0.02091s window: 300
+average rate: 25.531
+	min: 0.004s max: 0.162s std dev: 0.02093s window: 300
+average rate: 25.641
+	min: 0.004s max: 0.162s std dev: 0.02065s window: 300
+average rate: 26.281
+	min: 0.004s max: 0.119s std dev: 0.01896s window: 300
+average rate: 26.568
+	min: 0.004s max: 0.119s std dev: 0.01832s window: 300
+average rate: 26.445
+	min: 0.004s max: 0.119s std dev: 0.01821s window: 300
+average rate: 26.532
+	min: 0.004s max: 0.119s std dev: 0.01776s window: 300
+average rate: 26.420
+	min: 0.004s max: 0.119s std dev: 0.01789s window: 300
+average rate: 26.397
+	min: 0.004s max: 0.102s std dev: 0.01749s window: 300
+average rate: 26.311
+	min: 0.004s max: 0.105s std dev: 0.01762s window: 300
+average rate: 26.459
+	min: 0.004s max: 0.105s std dev: 0.01726s window: 300
+average rate: 26.929
+	min: 0.004s max: 0.105s std dev: 0.01704s window: 300
+average rate: 27.030
+	min: 0.004s max: 0.105s std dev: 0.01659s window: 300
+
+# ros2 topic hz /scan --window 100 during the same 60 s
+average rate: 28.395
+	min: 0.000s max: 0.151s std dev: 0.06043s window: 32
+average rate: 28.582
+	min: 0.000s max: 0.159s std dev: 0.06015s window: 64
+average rate: 28.495
+	min: 0.000s max: 0.159s std dev: 0.06027s window: 96
+average rate: 28.541
+	min: 0.000s max: 0.159s std dev: 0.06025s window: 100
+average rate: 28.523
+	min: 0.000s max: 0.152s std dev: 0.06018s window: 100
+average rate: 28.536
+	min: 0.000s max: 0.152s std dev: 0.06030s window: 100
+average rate: 28.528
+	min: 0.000s max: 0.152s std dev: 0.06005s window: 100
+average rate: 28.547
+	min: 0.000s max: 0.154s std dev: 0.05998s window: 100
+average rate: 28.505
+	min: 0.000s max: 0.154s std dev: 0.05994s window: 100
+average rate: 28.541
+	min: 0.000s max: 0.154s std dev: 0.05994s window: 100
+average rate: 28.536
+	min: 0.000s max: 0.155s std dev: 0.05997s window: 100
+average rate: 28.602
+	min: 0.000s max: 0.155s std dev: 0.05973s window: 100
+average rate: 28.546
+	min: 0.000s max: 0.155s std dev: 0.06000s window: 100
+average rate: 28.548
+	min: 0.000s max: 0.154s std dev: 0.05999s window: 100
+average rate: 28.575
+	min: 0.000s max: 0.154s std dev: 0.06007s window: 100
+average rate: 28.541
+	min: 0.000s max: 0.153s std dev: 0.06009s window: 100
+average rate: 28.547
+	min: 0.000s max: 0.153s std dev: 0.06006s window: 100
+average rate: 28.539
+	min: 0.000s max: 0.153s std dev: 0.05994s window: 100
+average rate: 28.523
+	min: 0.000s max: 0.153s std dev: 0.05982s window: 100
+average rate: 28.542
+	min: 0.000s max: 0.152s std dev: 0.05975s window: 100
+average rate: 28.608
+	min: 0.000s max: 0.152s std dev: 0.05955s window: 100
+average rate: 28.540
+	min: 0.000s max: 0.152s std dev: 0.05978s window: 100
+average rate: 28.577
+	min: 0.000s max: 0.152s std dev: 0.05964s window: 100
+average rate: 28.563
+	min: 0.000s max: 0.152s std dev: 0.05978s window: 100
+average rate: 28.548
+	min: 0.000s max: 0.151s std dev: 0.05990s window: 100
+average rate: 28.583
+	min: 0.000s max: 0.153s std dev: 0.05997s window: 100
+average rate: 28.521
+	min: 0.000s max: 0.153s std dev: 0.06018s window: 100
+average rate: 28.526
+	min: 0.000s max: 0.153s std dev: 0.06002s window: 100
+average rate: 28.523
+	min: 0.000s max: 0.153s std dev: 0.05995s window: 100
+average rate: 28.535
+	min: 0.000s max: 0.153s std dev: 0.05977s window: 100
+average rate: 28.529
+	min: 0.000s max: 0.153s std dev: 0.05988s window: 100
+average rate: 28.612
+	min: 0.000s max: 0.152s std dev: 0.05969s window: 100
+average rate: 28.534
+	min: 0.000s max: 0.154s std dev: 0.05992s window: 100
+average rate: 28.529
+	min: 0.000s max: 0.154s std dev: 0.05989s window: 100
+average rate: 28.545
+	min: 0.000s max: 0.154s std dev: 0.05999s window: 100
+average rate: 28.513
+	min: 0.000s max: 0.153s std dev: 0.06000s window: 100
+average rate: 28.544
+	min: 0.000s max: 0.153s std dev: 0.06002s window: 100
+average rate: 28.541
+	min: 0.000s max: 0.153s std dev: 0.05998s window: 100
+average rate: 28.639
+	min: 0.000s max: 0.153s std dev: 0.05987s window: 100
+average rate: 28.524
+	min: 0.000s max: 0.153s std dev: 0.06008s window: 100
+average rate: 28.518
+	min: 0.000s max: 0.153s std dev: 0.06003s window: 100
+average rate: 28.542
+	min: 0.000s max: 0.153s std dev: 0.06004s window: 100
+average rate: 28.529
+	min: 0.000s max: 0.153s std dev: 0.06012s window: 100
+average rate: 28.549
+	min: 0.000s max: 0.153s std dev: 0.06017s window: 100
+average rate: 28.526
+	min: 0.000s max: 0.153s std dev: 0.06013s window: 100
+average rate: 28.534
+	min: 0.000s max: 0.153s std dev: 0.05998s window: 100
+average rate: 28.526
+	min: 0.000s max: 0.153s std dev: 0.06004s window: 100
+average rate: 28.615
+	min: 0.000s max: 0.152s std dev: 0.05983s window: 100
+average rate: 28.531
+	min: 0.000s max: 0.156s std dev: 0.06028s window: 100
+average rate: 28.620
+	min: 0.000s max: 0.156s std dev: 0.06006s window: 100
+average rate: 28.544
+	min: 0.000s max: 0.156s std dev: 0.06022s window: 100
+average rate: 28.514
+	min: 0.000s max: 0.153s std dev: 0.06005s window: 100
+average rate: 28.541
+	min: 0.000s max: 0.153s std dev: 0.05991s window: 100
+average rate: 28.512
+	min: 0.000s max: 0.153s std dev: 0.05993s window: 100
+average rate: 28.535
+	min: 0.000s max: 0.153s std dev: 0.05999s window: 100
+average rate: 28.540
+	min: 0.000s max: 0.153s std dev: 0.06000s window: 100

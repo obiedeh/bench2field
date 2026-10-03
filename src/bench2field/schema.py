@@ -12,11 +12,13 @@ import platform
 import socket
 import uuid
 from dataclasses import asdict, dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-SCHEMA_VERSION = "1.0"
+# 1.1 adds TierResult.response, .dropped and .drop_late. 1.0 reports still load;
+# they have no response-time stats.
+SCHEMA_VERSION = "1.1"
 
 # Where the run happened. Field retention compares the same variant across
 # environments, so this label is mandatory and must be one of these forms.
@@ -42,15 +44,31 @@ class TierResult:
     duration_s: float
     deadline_ms: float
     deadline_misses: int
+    # Service time: inference start to inference end, for frames that ran.
     latency: LatencyStats
     # Summaries from the platform telemetry sampler (power rails, temps,
     # GPU/EMC utilisation). Keys are sampler-specific; see telemetry/.
     telemetry: dict[str, Any] = field(default_factory=dict)
+    # Response time: scheduled arrival to inference end, so time spent queued
+    # behind earlier frames counts. None in schema 1.0 reports.
+    response: LatencyStats | None = None
+    # Frames skipped under the drop-late policy: already past their deadline
+    # when they would have started. Counted separately from deadline_misses,
+    # which are frames that ran and finished late.
+    dropped: int = 0
+    drop_late: bool = False
+
+    @property
+    def n_scheduled(self) -> int:
+        return self.latency.n + self.dropped
 
     @property
     def miss_rate(self) -> float:
-        total = max(1, self.latency.n)
-        return self.deadline_misses / total
+        return self.deadline_misses / max(1, self.n_scheduled)
+
+    @property
+    def drop_rate(self) -> float:
+        return self.dropped / max(1, self.n_scheduled)
 
 
 @dataclass
@@ -75,7 +93,7 @@ class RunReport:
     platform: dict[str, Any] = field(default_factory=dict)
     accuracy: dict[str, float] = field(default_factory=dict)
     run_id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
-    created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     schema_version: str = SCHEMA_VERSION
 
     def tier(self, target_hz: float) -> TierResult:
@@ -107,6 +125,9 @@ class RunReport:
                 deadline_misses=t["deadline_misses"],
                 latency=LatencyStats(**t["latency"]),
                 telemetry=t.get("telemetry", {}),
+                response=LatencyStats(**t["response"]) if t.get("response") else None,
+                dropped=t.get("dropped", 0),
+                drop_late=t.get("drop_late", False),
             )
             for t in d["tiers"]
         ]

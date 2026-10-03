@@ -1,0 +1,200 @@
+{
+  "what": "end-to-end pipeline profile, one frame at a time, stages timed on the host clock",
+  "model": {
+    "file": "models/yolox_s.onnx",
+    "sha256": "00b70c44385bb5567e784b0c1efae213c4f2ec06efacfc8e3f52eca333356205"
+  },
+  "frames": {
+    "dir": "data/rover_frames_720p",
+    "n": 100,
+    "warmup": 20,
+    "set_sha256": "4eb92662a7477da28206816836c084e36b5457b596b1d8a7f83b6718b1820c47",
+    "decoded_shape": [
+      720,
+      1280,
+      3
+    ],
+    "jpeg_bytes_mean": 115929.76
+  },
+  "stages": {
+    "decode": {
+      "n": 100,
+      "p50_ms": 1.5605543740093708,
+      "p95_ms": 1.6292686574161053,
+      "p99_ms": 1.6513554845005274,
+      "mean_ms": 1.570111787877977,
+      "max_ms": 1.6579432412981987
+    },
+    "preprocess": {
+      "n": 100,
+      "p50_ms": 0.7178515661507845,
+      "p95_ms": 2.0377436419948936,
+      "p99_ms": 2.159928651526571,
+      "mean_ms": 1.1513730185106397,
+      "max_ms": 2.350575290620327
+    },
+    "h2d": {
+      "n": 100,
+      "p50_ms": 0.25969604030251503,
+      "p95_ms": 0.31622659880667925,
+      "p99_ms": 0.3352790558710695,
+      "mean_ms": 0.26605195831507444,
+      "max_ms": 0.34469692036509514
+    },
+    "inference": {
+      "n": 100,
+      "p50_ms": 1.1334843002259731,
+      "p95_ms": 1.2385078007355332,
+      "p99_ms": 1.2837894028052688,
+      "mean_ms": 1.1413406860083342,
+      "max_ms": 1.2887106277048588
+    },
+    "d2h": {
+      "n": 100,
+      "p50_ms": 0.22973492741584778,
+      "p95_ms": 0.27131063397973776,
+      "p99_ms": 0.2970388811081648,
+      "mean_ms": 0.23983413353562355,
+      "max_ms": 0.3020702861249447
+    },
+    "postprocess": {
+      "n": 100,
+      "p50_ms": 0.9525925852358341,
+      "p95_ms": 1.0082226246595383,
+      "p99_ms": 1.0152710741385818,
+      "mean_ms": 0.9523232094943523,
+      "max_ms": 1.0333899408578873
+    }
+  },
+  "stage_share_of_total_p50": {
+    "decode": 0.3215043448341594,
+    "preprocess": 0.14789128870308582,
+    "h2d": 0.05350240061099223,
+    "inference": 0.23351966031641067,
+    "d2h": 0.047329832625179515,
+    "postprocess": 0.19625247291017237
+  },
+  "total_per_frame": {
+    "n": 100,
+    "p50_ms": 4.947016714140773,
+    "p95_ms": 6.181765231303871,
+    "p99_ms": 6.522842547856273,
+    "mean_ms": 5.321034793742001,
+    "max_ms": 6.896980572491884
+  },
+  "session_run_numpy": {
+    "n": 100,
+    "p50_ms": 1.587539678439498,
+    "p95_ms": 1.7809199402108788,
+    "p99_ms": 1.8208928173407914,
+    "mean_ms": 1.613596212118864,
+    "max_ms": 1.8560467287898064
+  },
+  "copies_h2d_plus_d2h_p50_ms": 0.4894309677183628,
+  "throughput_fps_sequential": 184.22378988400894,
+  "detections_per_frame": {
+    "mean": 0.0,
+    "max": 0,
+    "frames_with_any": 0
+  },
+  "thresholds": {
+    "conf": 0.3,
+    "nms": 0.45
+  },
+  "settings": {
+    "ort_allow_spinning": true,
+    "cv2_threads": 24
+  },
+  "telemetry": {
+    "n_samples": 2,
+    "gpu_mem_used_mb": {
+      "p50": 2073.875,
+      "peak": 2073.875
+    },
+    "gpu_mem_util_pct": {
+      "p50": 0.0,
+      "peak": 0.0
+    },
+    "gpu_util_pct": {
+      "p50": 1.0,
+      "peak": 1.0
+    },
+    "power_gpu_w": {
+      "p50": 148.9895,
+      "peak": 164.767
+    },
+    "sm_clock_mhz": {
+      "p50": 2632.5,
+      "peak": 2700.0
+    },
+    "temp_gpu_c": {
+      "p50": 45.5,
+      "peak": 46.0
+    }
+  },
+  "platform": {
+    "host": "bench-5090",
+    "machine": "x86_64",
+    "system": "Linux",
+    "kernel": "6.17.0-22-generic",
+    "python": "3.12.3",
+    "telemetry": "nvml",
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "driver": "580.178.04",
+    "backend": "onnxruntime",
+    "onnxruntime": "1.30.0",
+    "tensorrt": "10.16.1",
+    "cudnn": "9.19.0",
+    "cuda_runtime": "13.2",
+    "provider_active": "TensorrtExecutionProvider",
+    "precision": "fp32",
+    "intra_op_threads": "default",
+    "inter_op_threads": "default",
+    "allow_spinning": true
+  },
+  "background": {
+    "stopped_for_this_run": [],
+    "containers_running": [
+      {
+        "name": "telecom-pg",
+        "image": "pgvector/pgvector:pg16",
+        "status": "Up 4 days"
+      }
+    ],
+    "top_processes": [
+      {
+        "pid": 685535,
+        "cpu_pct": 80.0,
+        "mem_pct": 0.7,
+        "cmd": "ps -eo pid,pcpu,pmem,args --sort=-pcpu --no-headers"
+      },
+      {
+        "pid": 685413,
+        "cpu_pct": 20.1,
+        "mem_pct": 0.1,
+        "cmd": "/opt/nvidia/nsight-systems/2025.6.3/target-linux-x64/nsys --start-agent --session-name profile-685392 --shm-name NSys-cr"
+      },
+      {
+        "pid": 338994,
+        "cpu_pct": 9.9,
+        "mem_pct": 0.8,
+        "cmd": "/usr/bin/gnome-shell"
+      },
+      {
+        "pid": 685392,
+        "cpu_pct": 8.5,
+        "mem_pct": 0.2,
+        "cmd": "/opt/nvidia/nsight-systems/2025.6.3/target-linux-x64/nsys profile --trace cuda,nvtx,osrt --sample none --cpuctxsw none -"
+      },
+      {
+        "pid": 684043,
+        "cpu_pct": 2.9,
+        "mem_pct": 0.3,
+        "cmd": ".venv/bin/python -m uvicorn apps.api.main:app --host 0.0.0.0 --port 8000"
+      }
+    ],
+    "load_avg_1m": 1.40625
+  },
+  "nvtx": true,
+  "created_at": "2026-10-03T00:55:05.843374+00:00"
+}
