@@ -1,0 +1,307 @@
+{
+  "what": "end-to-end pipeline profile, one frame at a time, stages timed on the host clock",
+  "model": {
+    "file": "models/yolox_s.onnx",
+    "sha256": "00b70c44385bb5567e784b0c1efae213c4f2ec06efacfc8e3f52eca333356205"
+  },
+  "frames": {
+    "dir": "data/rover_frames_480p",
+    "n": 300,
+    "warmup": 30,
+    "set_sha256": "b39dce6618b8ae269beeedcadaa7dd34f5c4160534fc7f60e94c196717d088b5",
+    "decoded_shape": [
+      480,
+      640,
+      3
+    ],
+    "jpeg_bytes_mean": 38664.88
+  },
+  "stages": {
+    "decode": {
+      "n": 300,
+      "p50_ms": 3.7102599962963723,
+      "p95_ms": 5.17009980394505,
+      "p99_ms": 5.199553601123625,
+      "mean_ms": 3.5708815402176697,
+      "max_ms": 5.213528012973256
+    },
+    "preprocess": {
+      "n": 300,
+      "p50_ms": 2.8461809997679666,
+      "p95_ms": 3.459652595483931,
+      "p99_ms": 3.5572386237618043,
+      "mean_ms": 2.8177569799299818,
+      "max_ms": 3.6214400024618953
+    },
+    "h2d": {
+      "n": 300,
+      "p50_ms": 1.1940584954572842,
+      "p95_ms": 1.3250406060251407,
+      "p99_ms": 1.3831769752141554,
+      "mean_ms": 1.1836730336168937,
+      "max_ms": 1.4237619907362387
+    },
+    "inference": {
+      "n": 300,
+      "p50_ms": 24.82739098923048,
+      "p95_ms": 24.947276603779756,
+      "p99_ms": 25.077820777369197,
+      "mean_ms": 24.835569999947136,
+      "max_ms": 25.096151992329396
+    },
+    "d2h": {
+      "n": 300,
+      "p50_ms": 1.1528244940564036,
+      "p95_ms": 1.2838203489081934,
+      "p99_ms": 1.330615333863534,
+      "mean_ms": 1.1379565131210256,
+      "max_ms": 1.3950889988336712
+    },
+    "postprocess": {
+      "n": 300,
+      "p50_ms": 8.94313250319101,
+      "p95_ms": 10.847144854778891,
+      "p99_ms": 11.592566806211835,
+      "mean_ms": 8.485769613131803,
+      "max_ms": 11.847875997773372
+    }
+  },
+  "stage_share_of_total_p50": {
+    "decode": 0.08694458586630126,
+    "preprocess": 0.06669614220361345,
+    "h2d": 0.02798103677135933,
+    "inference": 0.5817940602152227,
+    "d2h": 0.027014777485220704,
+    "postprocess": 0.20956939745828254
+  },
+  "total_per_frame": {
+    "n": 300,
+    "p50_ms": 42.71704749407945,
+    "p95_ms": 45.85977025417378,
+    "p99_ms": 47.49676101040677,
+    "mean_ms": 42.03160767996451,
+    "max_ms": 47.81673301476985
+  },
+  "session_run_numpy": {
+    "n": 300,
+    "p50_ms": 22.971884500293527,
+    "p95_ms": 23.178135204216233,
+    "p99_ms": 26.329695209133206,
+    "mean_ms": 22.958169483220747,
+    "max_ms": 27.509006002219394
+  },
+  "copies_h2d_plus_d2h_p50_ms": 2.346882989513688,
+  "throughput_fps_sequential": 23.68466676905243,
+  "detections_per_frame": {
+    "mean": 0.0,
+    "max": 0,
+    "frames_with_any": 0
+  },
+  "thresholds": {
+    "conf": 0.3,
+    "nms": 0.45
+  },
+  "settings": {
+    "ort_allow_spinning": false,
+    "cv2_threads": 6
+  },
+  "telemetry": {
+    "n_samples": 26,
+    "cpu_cores_online": {
+      "p50": 6.0,
+      "peak": 6.0
+    },
+    "cpu_util_max_pct": {
+      "p50": 54.0,
+      "peak": 88.0
+    },
+    "cpu_util_mean_pct": {
+      "p50": 13.166666666666666,
+      "peak": 28.5
+    },
+    "gpu_util_pct": {
+      "p50": 63.5,
+      "peak": 99.0
+    },
+    "power_board_w": {
+      "p50": 9.102,
+      "peak": 12.056
+    },
+    "power_vdd_cpu_gpu_cv_w": {
+      "p50": 2.806,
+      "peak": 5.397
+    },
+    "power_vdd_in_w": {
+      "p50": 9.102,
+      "peak": 12.056
+    },
+    "power_vdd_soc_w": {
+      "p50": 2.13,
+      "peak": 2.222
+    },
+    "ram_total_mb": {
+      "p50": 7620.0,
+      "peak": 7620.0
+    },
+    "ram_used_mb": {
+      "p50": 4328.0,
+      "peak": 4333.0
+    },
+    "temp_cpu_c": {
+      "p50": 59.7025,
+      "peak": 60.812
+    },
+    "temp_cv0_c": {
+      "p50": 55.968,
+      "peak": 56.468
+    },
+    "temp_cv1_c": {
+      "p50": 57.25,
+      "peak": 57.593
+    },
+    "temp_cv2_c": {
+      "p50": 54.718,
+      "peak": 55.062
+    },
+    "temp_gpu_c": {
+      "p50": 60.6405,
+      "peak": 61.468
+    },
+    "temp_soc0_c": {
+      "p50": 57.718,
+      "peak": 58.031
+    },
+    "temp_soc1_c": {
+      "p50": 57.3905,
+      "peak": 57.718
+    },
+    "temp_soc2_c": {
+      "p50": 55.984,
+      "peak": 56.593
+    },
+    "temp_tj_c": {
+      "p50": 60.6405,
+      "peak": 61.156
+    }
+  },
+  "platform": {
+    "host": "field-orin",
+    "machine": "aarch64",
+    "system": "Linux",
+    "kernel": "5.15.148-tegra",
+    "python": "3.10.12",
+    "l4t_release": "# R36 (release), REVISION: 4.7, GCID: 42132812, BOARD: generic, EABI: aarch64, DATE: Thu Sep 18 22:54:44 UTC 2025",
+    "is_jetson": true,
+    "telemetry": "tegrastats",
+    "nvpmodel": "NV Power Mode: MAXN_SUPER",
+    "backend": "onnxruntime",
+    "onnxruntime": "1.24.0",
+    "tensorrt": "10.7.0",
+    "cudnn": "9.3.0",
+    "cuda_runtime": "12.6",
+    "provider_active": "TensorrtExecutionProvider",
+    "precision": "fp32",
+    "intra_op_threads": "default",
+    "inter_op_threads": "default",
+    "allow_spinning": false,
+    "provider_options_requested": {
+      "trt_engine_cache_enable": true,
+      "trt_engine_cache_path": ".trt_cache"
+    },
+    "provider_options": {
+      "trt_load_user_initializer": "0",
+      "trt_op_types_to_exclude": "",
+      "trt_external_data_bytestream": "0",
+      "trt_preview_features": "",
+      "trt_engine_hw_compatible": "0",
+      "trt_ep_context_file_path": "",
+      "trt_dump_ep_context_model": "0",
+      "trt_cuda_graph_enable": "0",
+      "trt_profile_opt_shapes": "",
+      "trt_onnx_bytestream_size": "0",
+      "trt_profile_min_shapes": "",
+      "trt_onnx_bytestream": "0",
+      "trt_extra_plugin_lib_paths": "",
+      "trt_builder_optimization_level": "3",
+      "trt_sparsity_enable": "0",
+      "trt_dla_core": "0",
+      "trt_engine_cache_path": ".trt_cache",
+      "trt_int8_calibration_table_name": "",
+      "trt_tactic_sources": "",
+      "trt_bf16_enable": "0",
+      "trt_weight_stripped_engine_enable": "0",
+      "trt_fp16_enable": "0",
+      "trt_max_workspace_size": "0",
+      "trt_int8_enable": "0",
+      "trt_min_subgraph_size": "1",
+      "trt_external_data_bytestream_size": "0",
+      "trt_engine_decryption_lib_path": "",
+      "trt_int8_use_native_calibration_table": "0",
+      "trt_profile_max_shapes": "",
+      "trt_timing_cache_enable": "0",
+      "user_compute_stream": "0",
+      "trt_onnx_model_folder_path": "",
+      "trt_max_partition_iterations": "1000",
+      "trt_auxiliary_streams": "-1",
+      "device_id": "0",
+      "trt_build_heuristics_enable": "0",
+      "has_user_compute_stream": "0",
+      "trt_dump_subgraphs": "0",
+      "trt_dla_enable": "0",
+      "trt_engine_cache_prefix": "",
+      "trt_engine_cache_enable": "1",
+      "trt_engine_decryption_enable": "0",
+      "trt_force_timing_cache": "0",
+      "trt_layer_norm_fp32_fallback": "0",
+      "trt_force_sequential_engine_build": "0",
+      "trt_context_memory_sharing_enable": "0",
+      "trt_timing_cache_path": "",
+      "trt_ep_context_embed_mode": "0",
+      "trt_detailed_build_log": "0"
+    },
+    "git": {
+      "commit": "41fb14836174ff1622a0adc919849d16fa398cfa",
+      "dirty": false,
+      "root": "~/github/bench2field"
+    }
+  },
+  "background": {
+    "stopped_for_this_run": [],
+    "containers_running": [],
+    "top_processes": [
+      {
+        "pid": 3046737,
+        "cpu_pct": 22.0,
+        "mem_pct": 0.1,
+        "cmd": "/usr/bin/python3 /opt/ros/humble/_local_setup_util.py sh bash"
+      },
+      {
+        "pid": 2365,
+        "cpu_pct": 11.1,
+        "mem_pct": 0.2,
+        "cmd": "python3 ~/oled_yahboom/yahboom_oled.py"
+      },
+      {
+        "pid": 3046654,
+        "cpu_pct": 3.0,
+        "mem_pct": 0.0,
+        "cmd": "interactive dev tool"
+      },
+      {
+        "pid": 910,
+        "cpu_pct": 1.4,
+        "mem_pct": 0.0,
+        "cmd": "[sugov:0]"
+      },
+      {
+        "pid": 321,
+        "cpu_pct": 0.3,
+        "mem_pct": 0.0,
+        "cmd": "/lib/systemd/systemd-udevd"
+      }
+    ],
+    "load_avg_1m": 0.88525390625
+  },
+  "nvtx": false,
+  "created_at": "2026-10-03T21:06:46.742902+00:00"
+}

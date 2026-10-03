@@ -1,0 +1,308 @@
+{
+  "what": "end-to-end pipeline profile, one frame at a time, stages timed on the host clock",
+  "model": {
+    "file": "models/yolox_s.onnx",
+    "sha256": "00b70c44385bb5567e784b0c1efae213c4f2ec06efacfc8e3f52eca333356205"
+  },
+  "frames": {
+    "dir": "data/rover_frames_480p",
+    "n": 300,
+    "warmup": 30,
+    "set_sha256": "b39dce6618b8ae269beeedcadaa7dd34f5c4160534fc7f60e94c196717d088b5",
+    "decoded_shape": [
+      480,
+      640,
+      3
+    ],
+    "jpeg_bytes_mean": 38664.88
+  },
+  "stages": {
+    "decode": {
+      "n": 300,
+      "p50_ms": 4.700022007455118,
+      "p95_ms": 4.7665466081525665,
+      "p99_ms": 5.1854617304343265,
+      "mean_ms": 4.363639106741175,
+      "max_ms": 5.255674012005329
+    },
+    "preprocess": {
+      "n": 300,
+      "p50_ms": 3.1217265059240162,
+      "p95_ms": 3.3028856545570306,
+      "p99_ms": 3.5604472790146247,
+      "mean_ms": 3.05431887677211,
+      "max_ms": 3.76723799854517
+    },
+    "h2d": {
+      "n": 300,
+      "p50_ms": 1.2607965036295354,
+      "p95_ms": 1.4158660000248349,
+      "p99_ms": 1.6077389167912768,
+      "mean_ms": 1.2754151035430066,
+      "max_ms": 1.6358019929612055
+    },
+    "inference": {
+      "n": 300,
+      "p50_ms": 17.900425496918615,
+      "p95_ms": 18.162623859825544,
+      "p99_ms": 18.325823088380275,
+      "mean_ms": 17.937064490154928,
+      "max_ms": 18.62267499382142
+    },
+    "d2h": {
+      "n": 300,
+      "p50_ms": 1.2859660055255517,
+      "p95_ms": 1.5096786490175873,
+      "p99_ms": 1.5967580820142755,
+      "mean_ms": 1.2928729329238802,
+      "max_ms": 1.6786189953563735
+    },
+    "postprocess": {
+      "n": 300,
+      "p50_ms": 10.261563496896997,
+      "p95_ms": 10.917467606486753,
+      "p99_ms": 11.28534466770361,
+      "mean_ms": 9.860674706772746,
+      "max_ms": 11.426131997723132
+    }
+  },
+  "stage_share_of_total_p50": {
+    "decode": 0.12198185866938491,
+    "preprocess": 0.08101962093923927,
+    "h2d": 0.0327220384654893,
+    "inference": 0.46457807423528996,
+    "d2h": 0.033375274262723596,
+    "postprocess": 0.26632313342787295
+  },
+  "total_per_frame": {
+    "n": 300,
+    "p50_ms": 38.56226099014748,
+    "p95_ms": 39.468970680900384,
+    "p99_ms": 40.182844755327096,
+    "mean_ms": 37.783985216907844,
+    "max_ms": 41.02842800784856
+  },
+  "session_run_numpy": {
+    "n": 300,
+    "p50_ms": 19.86795099946903,
+    "p95_ms": 19.961478812183486,
+    "p99_ms": 20.17337318713544,
+    "mean_ms": 19.875935306530057,
+    "max_ms": 21.386453008744866
+  },
+  "copies_h2d_plus_d2h_p50_ms": 2.546762509155087,
+  "throughput_fps_sequential": 26.32678165557114,
+  "detections_per_frame": {
+    "mean": 0.0,
+    "max": 0,
+    "frames_with_any": 0
+  },
+  "thresholds": {
+    "conf": 0.3,
+    "nms": 0.45
+  },
+  "settings": {
+    "ort_allow_spinning": false,
+    "cv2_threads": 6
+  },
+  "telemetry": {
+    "n_samples": 23,
+    "cpu_cores_online": {
+      "p50": 6.0,
+      "peak": 6.0
+    },
+    "cpu_util_max_pct": {
+      "p50": 60.0,
+      "peak": 86.0
+    },
+    "cpu_util_mean_pct": {
+      "p50": 14.166666666666666,
+      "peak": 30.833333333333332
+    },
+    "gpu_util_pct": {
+      "p50": 31.0,
+      "peak": 97.0
+    },
+    "power_board_w": {
+      "p50": 7.756,
+      "peak": 9.67
+    },
+    "power_vdd_cpu_gpu_cv_w": {
+      "p50": 2.131,
+      "peak": 3.868
+    },
+    "power_vdd_in_w": {
+      "p50": 7.756,
+      "peak": 9.67
+    },
+    "power_vdd_soc_w": {
+      "p50": 1.842,
+      "peak": 1.842
+    },
+    "ram_total_mb": {
+      "p50": 7620.0,
+      "peak": 7620.0
+    },
+    "ram_used_mb": {
+      "p50": 4324.0,
+      "peak": 4333.0
+    },
+    "temp_cpu_c": {
+      "p50": 60.156,
+      "peak": 61.187
+    },
+    "temp_cv0_c": {
+      "p50": 56.437,
+      "peak": 56.781
+    },
+    "temp_cv1_c": {
+      "p50": 57.812,
+      "peak": 58.25
+    },
+    "temp_cv2_c": {
+      "p50": 55.187,
+      "peak": 55.562
+    },
+    "temp_gpu_c": {
+      "p50": 61.062,
+      "peak": 61.562
+    },
+    "temp_soc0_c": {
+      "p50": 58.031,
+      "peak": 58.437
+    },
+    "temp_soc1_c": {
+      "p50": 57.968,
+      "peak": 58.343
+    },
+    "temp_soc2_c": {
+      "p50": 56.468,
+      "peak": 56.812
+    },
+    "temp_tj_c": {
+      "p50": 61.062,
+      "peak": 61.562
+    }
+  },
+  "platform": {
+    "host": "field-orin",
+    "machine": "aarch64",
+    "system": "Linux",
+    "kernel": "5.15.148-tegra",
+    "python": "3.10.12",
+    "l4t_release": "# R36 (release), REVISION: 4.7, GCID: 42132812, BOARD: generic, EABI: aarch64, DATE: Thu Sep 18 22:54:44 UTC 2025",
+    "is_jetson": true,
+    "telemetry": "tegrastats",
+    "nvpmodel": "NV Power Mode: MAXN_SUPER",
+    "backend": "onnxruntime",
+    "onnxruntime": "1.24.0",
+    "tensorrt": "10.7.0",
+    "cudnn": "9.3.0",
+    "cuda_runtime": "12.6",
+    "provider_active": "TensorrtExecutionProvider",
+    "precision": "fp16",
+    "intra_op_threads": "default",
+    "inter_op_threads": "default",
+    "allow_spinning": false,
+    "provider_options_requested": {
+      "trt_engine_cache_enable": true,
+      "trt_engine_cache_path": ".trt_cache",
+      "trt_fp16_enable": true
+    },
+    "provider_options": {
+      "trt_load_user_initializer": "0",
+      "trt_op_types_to_exclude": "",
+      "trt_external_data_bytestream": "0",
+      "trt_preview_features": "",
+      "trt_engine_hw_compatible": "0",
+      "trt_ep_context_file_path": "",
+      "trt_dump_ep_context_model": "0",
+      "trt_cuda_graph_enable": "0",
+      "trt_profile_opt_shapes": "",
+      "trt_onnx_bytestream_size": "0",
+      "trt_profile_min_shapes": "",
+      "trt_onnx_bytestream": "0",
+      "trt_extra_plugin_lib_paths": "",
+      "trt_builder_optimization_level": "3",
+      "trt_sparsity_enable": "0",
+      "trt_dla_core": "0",
+      "trt_engine_cache_path": ".trt_cache",
+      "trt_int8_calibration_table_name": "",
+      "trt_tactic_sources": "",
+      "trt_bf16_enable": "0",
+      "trt_weight_stripped_engine_enable": "0",
+      "trt_fp16_enable": "1",
+      "trt_max_workspace_size": "0",
+      "trt_int8_enable": "0",
+      "trt_min_subgraph_size": "1",
+      "trt_external_data_bytestream_size": "0",
+      "trt_engine_decryption_lib_path": "",
+      "trt_int8_use_native_calibration_table": "0",
+      "trt_profile_max_shapes": "",
+      "trt_timing_cache_enable": "0",
+      "user_compute_stream": "0",
+      "trt_onnx_model_folder_path": "",
+      "trt_max_partition_iterations": "1000",
+      "trt_auxiliary_streams": "-1",
+      "device_id": "0",
+      "trt_build_heuristics_enable": "0",
+      "has_user_compute_stream": "0",
+      "trt_dump_subgraphs": "0",
+      "trt_dla_enable": "0",
+      "trt_engine_cache_prefix": "",
+      "trt_engine_cache_enable": "1",
+      "trt_engine_decryption_enable": "0",
+      "trt_force_timing_cache": "0",
+      "trt_layer_norm_fp32_fallback": "0",
+      "trt_force_sequential_engine_build": "0",
+      "trt_context_memory_sharing_enable": "0",
+      "trt_timing_cache_path": "",
+      "trt_ep_context_embed_mode": "0",
+      "trt_detailed_build_log": "0"
+    },
+    "git": {
+      "commit": "41fb14836174ff1622a0adc919849d16fa398cfa",
+      "dirty": false,
+      "root": "~/github/bench2field"
+    }
+  },
+  "background": {
+    "stopped_for_this_run": [],
+    "containers_running": [],
+    "top_processes": [
+      {
+        "pid": 2365,
+        "cpu_pct": 11.1,
+        "mem_pct": 0.2,
+        "cmd": "python3 ~/oled_yahboom/yahboom_oled.py"
+      },
+      {
+        "pid": 910,
+        "cpu_pct": 1.4,
+        "mem_pct": 0.0,
+        "cmd": "[sugov:0]"
+      },
+      {
+        "pid": 321,
+        "cpu_pct": 0.3,
+        "mem_pct": 0.0,
+        "cmd": "/lib/systemd/systemd-udevd"
+      },
+      {
+        "pid": 1,
+        "cpu_pct": 0.2,
+        "mem_pct": 0.1,
+        "cmd": "/sbin/init 2"
+      },
+      {
+        "pid": 147,
+        "cpu_pct": 0.2,
+        "mem_pct": 0.0,
+        "cmd": "[irq/167-c250000]"
+      }
+    ],
+    "load_avg_1m": 1.005859375
+  },
+  "nvtx": false,
+  "created_at": "2026-10-03T21:06:19.934447+00:00"
+}
