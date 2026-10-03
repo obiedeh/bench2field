@@ -126,6 +126,8 @@ On the rover's board, with its own 640x480 camera frames, the whole frame costs 
 
 The board drew 9.1 W during the profile, GPU load 71% p50, junction 56.7 °C.
 
+These frames show a blank wall: zero detections in all 300, small JPEGs (38 KB). Decode and NMS were therefore at their cheapest. A busy scene gives the decoder more to do and NMS real candidates to suppress, so the Orin frame will be slower than 47.8 ms, not faster.
+
 ### Where the time goes on the 5090
 
 1. **Inference is 15–25% of the frame.** At the rover's 720p, the host-side stages (decode, preprocess, postprocess) take 4.5 ms with spinning off (5.8 ms with it) against 1.1 ms of inference. Optimizing the model alone cannot make this pipeline faster than about 5 ms per frame on the 5090; the host work has to shrink too.
