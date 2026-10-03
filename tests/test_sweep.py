@@ -167,3 +167,22 @@ def test_real_sweep_on_cpu_records_sweep_position_in_each_report(tmp_path):
     rep = RunReport.load(tmp_path / "out" / "b_r2.json")
     assert rep.platform["sweep"] == {"name": "cpu-check", "label": "b", "repeat": 2, "order": 4}
     assert rep.variant.technique == "other" and rep.tier(50.0).response.n == 10
+
+
+def test_cli_sweep_stopped_reaches_reports_and_manifest(tmp_path, monkeypatch):
+    import json
+
+    from bench2field import sweep as sweep_mod
+
+    cfg_file = tmp_path / "s.yaml"
+    cfg_file.write_text("name: s\nrepeats: 1\ntiers_hz: [30]\nstopped: [from-config]\n"
+                        "variants:\n  - {label: a, model: m.onnx}\n")
+    runner = FakeRunner()
+    monkeypatch.setattr(sweep_mod, "subprocess_runner", runner)
+    assert cli.main(["sweep", str(cfg_file), "--out-dir", str(tmp_path / "out"),
+                     "--stopped", "docker container physical-ai-vllm"]) == 0
+    argv = runner.calls[0]
+    assert [argv[i + 1] for i, x in enumerate(argv) if x == "--stopped"] == [
+        "from-config", "docker container physical-ai-vllm"]
+    manifest = json.loads((tmp_path / "out" / "sweep_s.json").read_text())
+    assert manifest["config"]["stopped"] == ["from-config", "docker container physical-ai-vllm"]

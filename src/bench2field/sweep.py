@@ -130,7 +130,7 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def run_sweep(cfg: SweepConfig, out_dir: str | Path, runner: Runner = subprocess_runner,
+def run_sweep(cfg: SweepConfig, out_dir: str | Path, runner: Runner | None = None,
               resume: bool = False, config_file: str | None = None) -> dict[str, Any]:
     """Run the sweep and return its manifest, also written to
     <out_dir>/sweep_<name>.json after every run so a sweep that stops half
@@ -139,6 +139,7 @@ def run_sweep(cfg: SweepConfig, out_dir: str | Path, runner: Runner = subprocess
     Existing reports are never overwritten: without `resume` their presence
     is an error, with it those runs are skipped.
     """
+    runner = runner or subprocess_runner
     out_dir = Path(out_dir)
     runs = plan(cfg)
     existing = [p for r, v in runs if (p := report_path(out_dir, v, r)).exists()]

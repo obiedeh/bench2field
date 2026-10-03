@@ -1,0 +1,55 @@
+{
+  "sweep": "phase1-baseline-fp32",
+  "config_file": "case_studies/01_perception_detector/sweeps/phase1_baseline.yaml",
+  "config": {
+    "name": "phase1-baseline-fp32",
+    "variants": [
+      {
+        "label": "trt_fp32",
+        "model": "models/yolox_s.onnx",
+        "provider": "tensorrt",
+        "precision": "fp32",
+        "technique": "baseline",
+        "name": "yolox-s"
+      },
+      {
+        "label": "cuda_fp32",
+        "model": "models/yolox_s.onnx",
+        "provider": "cuda",
+        "precision": "fp32",
+        "technique": "baseline",
+        "name": "yolox-s"
+      }
+    ],
+    "repeats": 3,
+    "environment": "bench-idle",
+    "tiers_hz": [
+      10,
+      30,
+      100
+    ],
+    "duration_s": 60,
+    "warmup_s": 5,
+    "deadline_ms": 33.3,
+    "drop_late": false,
+    "cooldown_c": null,
+    "replay": null,
+    "only": null,
+    "stopped": []
+  },
+  "host": "bench-5090",
+  "started_at": "2026-10-03T00:34:04.757136+00:00",
+  "finished_at": null,
+  "complete": false,
+  "runs": [
+    {
+      "order": 1,
+      "label": "trt_fp32",
+      "repeat": 1,
+      "file": "trt_fp32_r1.json",
+      "started_at": "2026-10-03T00:34:04.757156+00:00",
+      "run_id": "e475460affbb",
+      "finished_at": "2026-10-03T00:37:20.678059+00:00"
+    }
+  ]
+}

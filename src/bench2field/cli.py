@@ -75,6 +75,7 @@ def _cmd_sweep(a: argparse.Namespace) -> int:
     from .sweep import SweepConfig, run_sweep, summarize
 
     cfg = SweepConfig.from_yaml(a.config)
+    cfg.stopped = [*cfg.stopped, *a.stopped]
     manifest = run_sweep(cfg, a.out_dir, resume=a.resume, config_file=a.config)
     print(summarize(cfg, a.out_dir, a.stat))
     print(f"wrote {len(manifest['runs'])} runs and sweep_{cfg.name}.json to {a.out_dir}")
@@ -190,6 +191,9 @@ def build_parser() -> argparse.ArgumentParser:
     sw.add_argument("config", help="sweep YAML: name, variants, repeats, tiers (see configs/sweeps/)")
     sw.add_argument("--out-dir", required=True, help="one report per run plus the sweep manifest")
     sw.add_argument("--resume", action="store_true", help="keep reports already there, run the rest")
+    sw.add_argument("--stopped", action="append", default=[], metavar="WHAT",
+                   help="something you shut down on this machine for the sweep; recorded in every "
+                        "report and in the manifest (repeatable)")
     sw.add_argument("--stat", default=DEFAULT_STAT, help="statistic for the summary table")
     sw.set_defaults(fn=_cmd_sweep)
 
