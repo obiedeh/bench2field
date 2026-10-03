@@ -13,6 +13,7 @@ from bench2field.backends.onnxruntime import (  # noqa: E402
     loaded_nvidia_library_versions,
     preload_gpu_libraries,
     preload_tensorrt_libraries,
+    synthetic_tensor,
 )
 
 
@@ -204,3 +205,35 @@ def test_library_versions_are_none_when_nothing_is_loaded(monkeypatch):
 
     monkeypatch.setattr(ctypes, "CDLL", no_such_library)
     assert loaded_nvidia_library_versions() == {"tensorrt": None, "cudnn": None, "cuda_runtime": None}
+
+
+def test_synthetic_inputs_follow_each_input_dtype(tmp_path):
+    """Two inputs like RT-DETR's: a float image and int64 sizes."""
+    sizes = helper.make_tensor_value_info("orig_target_sizes", TensorProto.INT64, ["N", 2])
+    img = helper.make_tensor_value_info("images", TensorProto.FLOAT, ["N", 3, 4, 4])
+    g = helper.make_graph([helper.make_node("Cast", ["orig_target_sizes"], ["y"], to=TensorProto.FLOAT),
+                           helper.make_node("Identity", ["images"], ["z"])], "two",
+                          [img, sizes],
+                          [helper.make_tensor_value_info("y", TensorProto.FLOAT, ["N", 2]),
+                           helper.make_tensor_value_info("z", TensorProto.FLOAT, ["N", 3, 4, 4])])
+    m = helper.make_model(g, opset_imports=[helper.make_opsetid("", 17)])
+    m.ir_version = 8
+    onnx.save(m, tmp_path / "two.onnx")
+    be = OnnxRuntimeBackend(str(tmp_path / "two.onnx"))
+    feeds = be.synthetic_input(batch=2)
+    assert feeds["images"].dtype == np.float32 and feeds["images"].shape == (2, 3, 4, 4)
+    assert feeds["orig_target_sizes"].dtype == np.int64 and feeds["orig_target_sizes"].tolist() == [[1, 1], [1, 1]]
+    y, z = be.infer(feeds)
+    assert y.shape == (2, 2) and z.shape == (2, 3, 4, 4)
+
+
+def test_synthetic_tensor_dtypes():
+    rng = np.random.default_rng(0)
+    assert synthetic_tensor([2], "tensor(float16)", rng).dtype == np.float16
+    assert synthetic_tensor([2], "tensor(double)", rng).dtype == np.float64
+    assert synthetic_tensor([3], "tensor(int32)", rng).tolist() == [1, 1, 1]
+    assert synthetic_tensor([2], "tensor(bool)", rng).tolist() == [True, True]
+    u8 = synthetic_tensor([1000], "tensor(uint8)", rng)
+    assert u8.dtype == np.uint8 and u8.min() >= 0 and u8.max() <= 255 and u8.std() > 0
+    with pytest.raises(ValueError, match="no synthetic input"):
+        synthetic_tensor([1], "tensor(string)", rng)

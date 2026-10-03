@@ -127,6 +127,31 @@ class OrtOptions:
     extra_provider_options: dict[str, Any] = field(default_factory=dict)
 
 
+# onnxruntime input types ("tensor(float)") -> numpy dtypes.
+ONNX_DTYPES = {
+    "float": np.float32, "float16": np.float16, "double": np.float64, "bfloat16": np.float32,
+    "int8": np.int8, "int16": np.int16, "int32": np.int32, "int64": np.int64,
+    "uint8": np.uint8, "uint16": np.uint16, "uint32": np.uint32, "uint64": np.uint64,
+    "bool": np.bool_,
+}
+
+
+def synthetic_tensor(dims: list[int], onnx_type: str, rng: np.random.Generator) -> np.ndarray:
+    """A plausible stand-in input of the right shape and dtype. RT-DETR, for
+    example, takes `orig_target_sizes` as int64 next to the float image."""
+    kind = onnx_type.removeprefix("tensor(").removesuffix(")")
+    if kind not in ONNX_DTYPES:
+        raise ValueError(f"no synthetic input for ONNX type {onnx_type!r}")
+    dtype = ONNX_DTYPES[kind]
+    if dtype == np.bool_:
+        return np.ones(dims, dtype=np.bool_)
+    if np.issubdtype(dtype, np.integer):
+        if dtype == np.uint8:  # image bytes
+            return rng.integers(0, 256, size=dims, dtype=np.uint8)
+        return np.ones(dims, dtype=dtype)
+    return rng.standard_normal(dims).astype(dtype)
+
+
 class OnnxRuntimeBackend:
     name = "onnxruntime"
 
@@ -194,14 +219,15 @@ class OnnxRuntimeBackend:
         return [(i.name, list(i.shape), i.type) for i in self._inputs]
 
     def synthetic_input(self, batch: int = 1, seed: int = 0) -> dict[str, np.ndarray]:
-        """Random tensors matching the model's inputs (dynamic dims -> batch or 1)."""
+        """Tensors matching the model's inputs in shape and dtype (dynamic dims
+        -> batch or 1). Floats are standard normal; integers are 1 (a plausible
+        size or index); bools are True."""
         rng = np.random.default_rng(seed)
         feeds: dict[str, np.ndarray] = {}
         for name, shape, typ in self.input_specs():
             dims = [batch if i == 0 and not isinstance(d, int) else (d if isinstance(d, int) else 1)
                     for i, d in enumerate(shape)]
-            dtype = np.float16 if "float16" in typ else np.float32
-            feeds[name] = rng.standard_normal(dims).astype(dtype)
+            feeds[name] = synthetic_tensor(dims, typ, rng)
         return feeds
 
     def infer(self, inputs: dict[str, np.ndarray]) -> list[np.ndarray]:
