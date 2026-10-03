@@ -19,9 +19,15 @@ from bench2field.schema import RunReport  # noqa: E402
 from bench2field.sweep import SweepConfig, report_path  # noqa: E402
 
 RUNS = HERE / "runs"
-SWEEPS = {"RTX 5090 (re-run, with the 26 Hz tier)": "bench_5090_rerun",
-          "Jetson AGX Thor (re-run, with the 26 Hz tier)": "bench_thor_rerun",
-          "RTX 5090 (first sweep)": "bench_5090", "Jetson AGX Thor (first sweep)": "bench_thor"}
+SWEEPS = {
+    "RTX 5090, baseline (four tiers, --no-spin)": "bench_5090_nospin",
+    "Jetson AGX Thor, baseline (four tiers, --no-spin)": "bench_thor_nospin",
+    "Jetson Orin NX, idle (four tiers, --no-spin)": "field_orin",
+    "RTX 5090, spin-on reference (four tiers)": "bench_5090_rerun",
+    "Jetson AGX Thor, clean but spin-on (four tiers)": "bench_thor_4tier_spin",
+    "RTX 5090, first sweep (three tiers, spin-on)": "bench_5090",
+    "Jetson AGX Thor, first sweep (three tiers, spin-on, container up)": "bench_thor",
+}
 PROFILES = sorted(RUNS.glob("profile_*.json"))
 STAGES = ("decode", "preprocess", "h2d", "inference", "d2h", "postprocess")
 
