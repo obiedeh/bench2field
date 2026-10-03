@@ -18,7 +18,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import background
+from . import background, provenance
 from .metrics import DEFAULT_STAT
 from .schema import ENV_BENCH_IDLE, ENV_REPLAY_PREFIX, RunReport, Variant
 
@@ -49,6 +49,7 @@ def _cmd_run(a: argparse.Namespace) -> int:
     if a.sweep:
         extra["sweep"] = {"name": a.sweep, "label": a.sweep_label, "repeat": a.repeat, "order": a.order}
     extra["background"] = background.snapshot(a.stopped)
+    extra["git"] = provenance.git_state()
 
     variant = Variant(model=a.name or Path(a.model).stem, backend=be.name,
                       provider=be.provider(), precision=a.precision, technique=a.technique)
@@ -74,6 +75,8 @@ def _cmd_run(a: argparse.Namespace) -> int:
 def _cmd_sweep(a: argparse.Namespace) -> int:
     from .sweep import SweepConfig, run_sweep, summarize
 
+    if a.expect_commit:
+        provenance.check_expected_commit(a.expect_commit)
     cfg = SweepConfig.from_yaml(a.config)
     cfg.stopped = [*cfg.stopped, *a.stopped]
     manifest = run_sweep(cfg, a.out_dir, resume=a.resume, config_file=a.config)
@@ -195,6 +198,9 @@ def build_parser() -> argparse.ArgumentParser:
                    help="something you shut down on this machine for the sweep; recorded in every "
                         "report and in the manifest (repeatable)")
     sw.add_argument("--stat", default=DEFAULT_STAT, help="statistic for the summary table")
+    sw.add_argument("--expect-commit", metavar="HASH",
+                   help="refuse to start unless this checkout is at HASH (prefix ok) with no "
+                        "uncommitted changes; use it when launching on a remote board")
     sw.set_defaults(fn=_cmd_sweep)
 
     rec = sub.add_parser("record-load", help="record a field-load profile on the robot")

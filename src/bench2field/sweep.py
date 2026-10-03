@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Any
 
 from .metrics import DEFAULT_STAT, repeat_stat
+from .provenance import git_state
 from .schema import ENV_BENCH_IDLE, RunReport, describe_platform, validate_environment
 
 Runner = Callable[[list[str]], int]
@@ -153,7 +154,7 @@ def run_sweep(cfg: SweepConfig, out_dir: str | Path, runner: Runner | None = Non
     manifest_path = out_dir / f"sweep_{cfg.name}.json"
     manifest: dict[str, Any] = {
         "sweep": cfg.name, "config_file": config_file, "config": asdict(cfg),
-        "host": describe_platform().get("host"), "started_at": _now(), "finished_at": None,
+        "host": describe_platform().get("host"), "git": git_state(), "started_at": _now(), "finished_at": None,
         "complete": False, "runs": [],
     }
 
