@@ -8,7 +8,7 @@ way the rover's pipeline would run it, for a set of JPEG frames:
     h2d         input copy to the GPU                    onnxruntime OrtValue (IO binding)
     inference   the model, input and output on device    session.run_with_iobinding
     d2h         output copy back                         OrtValue.numpy()
-    postprocess objectness x class score, NMS            NumPy (yolox.utils.demo_utils.multiclass_nms)
+    postprocess objectness x class score, NMS            NumPy (YOLOX's multiclass_nms, copied below)
 
 Each stage is wrapped in an NVTX range, so `nsys profile` on this script
 shows them on the timeline. A second pass times `session.run()` with NumPy
@@ -73,10 +73,52 @@ def preprocess(img: np.ndarray, size: int = INPUT_SIZE) -> tuple[np.ndarray, flo
     return np.ascontiguousarray(x), r
 
 
+# NMS as YOLOX's demo code does it, copied from yolox/utils/demo_utils.py
+# (Megvii, Apache-2.0) so the profile runs on boards without the yolox
+# package or PyTorch. Same code as the 5090 profiles, which imported it.
+def nms(boxes: np.ndarray, scores: np.ndarray, nms_thr: float) -> list[int]:
+    """Single class NMS implemented in Numpy."""
+    x1, y1, x2, y2 = boxes[:, 0], boxes[:, 1], boxes[:, 2], boxes[:, 3]
+    areas = (x2 - x1 + 1) * (y2 - y1 + 1)
+    order = scores.argsort()[::-1]
+    keep = []
+    while order.size > 0:
+        i = order[0]
+        keep.append(i)
+        xx1 = np.maximum(x1[i], x1[order[1:]])
+        yy1 = np.maximum(y1[i], y1[order[1:]])
+        xx2 = np.minimum(x2[i], x2[order[1:]])
+        yy2 = np.minimum(y2[i], y2[order[1:]])
+        w = np.maximum(0.0, xx2 - xx1 + 1)
+        h = np.maximum(0.0, yy2 - yy1 + 1)
+        inter = w * h
+        ovr = inter / (areas[i] + areas[order[1:]] - inter)
+        inds = np.where(ovr <= nms_thr)[0]
+        order = order[inds + 1]
+    return keep
+
+
+def multiclass_nms(boxes: np.ndarray, scores: np.ndarray, nms_thr: float, score_thr: float) -> np.ndarray | None:
+    """Multiclass NMS implemented in Numpy. Class-aware version."""
+    final_dets = []
+    for cls_ind in range(scores.shape[1]):
+        cls_scores = scores[:, cls_ind]
+        valid_score_mask = cls_scores > score_thr
+        if valid_score_mask.sum() == 0:
+            continue
+        valid_scores = cls_scores[valid_score_mask]
+        valid_boxes = boxes[valid_score_mask]
+        keep = nms(valid_boxes, valid_scores, nms_thr)
+        if len(keep) > 0:
+            cls_inds = np.ones((len(keep), 1)) * cls_ind
+            final_dets.append(np.concatenate([valid_boxes[keep], valid_scores[keep, None], cls_inds], 1))
+    if len(final_dets) == 0:
+        return None
+    return np.concatenate(final_dets, 0)
+
+
 def postprocess(out: np.ndarray, ratio: float) -> np.ndarray | None:
     """Decoded YOLOX output (1 x 8400 x 85) -> detections after NMS."""
-    from yolox.utils.demo_utils import multiclass_nms
-
     pred = out[0]
     boxes = pred[:, :4]
     scores = pred[:, 4:5] * pred[:, 5:]
@@ -86,7 +128,7 @@ def postprocess(out: np.ndarray, ratio: float) -> np.ndarray | None:
     xyxy[:, 2] = boxes[:, 0] + boxes[:, 2] / 2
     xyxy[:, 3] = boxes[:, 1] + boxes[:, 3] / 2
     xyxy /= ratio
-    return multiclass_nms(xyxy, scores, nms_thr=NMS_THRESHOLD, score_thr=CONF_THRESHOLD, class_agnostic=False)
+    return multiclass_nms(xyxy, scores, nms_thr=NMS_THRESHOLD, score_thr=CONF_THRESHOLD)
 
 
 def stats(samples_ms: list[float]) -> dict[str, float]:
