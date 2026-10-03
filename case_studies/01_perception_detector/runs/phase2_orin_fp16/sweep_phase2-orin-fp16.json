@@ -1,0 +1,107 @@
+{
+  "sweep": "phase2-orin-fp16",
+  "config_file": "case_studies/01_perception_detector/sweeps/phase2_orin_fp16.yaml",
+  "config": {
+    "name": "phase2-orin-fp16",
+    "variants": [
+      {
+        "label": "trt_fp32",
+        "model": "models/yolox_s.onnx",
+        "provider": "tensorrt",
+        "precision": "fp32",
+        "technique": "baseline",
+        "name": "yolox-s"
+      },
+      {
+        "label": "trt_fp16",
+        "model": "models/yolox_s.onnx",
+        "provider": "tensorrt",
+        "precision": "fp16",
+        "technique": "fp16",
+        "name": "yolox-s"
+      }
+    ],
+    "repeats": 3,
+    "environment": "bench-idle",
+    "tiers_hz": [
+      10,
+      26,
+      30,
+      100
+    ],
+    "duration_s": 60,
+    "warmup_s": 5,
+    "deadline_ms": 33.3,
+    "drop_late": false,
+    "cooldown_c": null,
+    "replay": null,
+    "only": null,
+    "stopped": [],
+    "no_spin": true
+  },
+  "host": "field-orin",
+  "git": {
+    "commit": "41fb14836174ff1622a0adc919849d16fa398cfa",
+    "dirty": false,
+    "root": "~/github/bench2field"
+  },
+  "started_at": "2026-10-03T20:31:41.007201+00:00",
+  "finished_at": "2026-10-03T21:05:32.069373+00:00",
+  "complete": true,
+  "runs": [
+    {
+      "order": 1,
+      "label": "trt_fp32",
+      "repeat": 1,
+      "file": "trt_fp32_r1.json",
+      "started_at": "2026-10-03T20:31:41.007282+00:00",
+      "run_id": "c54f2474b7db",
+      "finished_at": "2026-10-03T20:36:17.250548+00:00"
+    },
+    {
+      "order": 2,
+      "label": "trt_fp16",
+      "repeat": 1,
+      "file": "trt_fp16_r1.json",
+      "started_at": "2026-10-03T20:36:17.278085+00:00",
+      "run_id": "ca48699314e2",
+      "finished_at": "2026-10-03T20:47:33.241392+00:00"
+    },
+    {
+      "order": 3,
+      "label": "trt_fp32",
+      "repeat": 2,
+      "file": "trt_fp32_r2.json",
+      "started_at": "2026-10-03T20:47:33.242122+00:00",
+      "run_id": "e5521ede2b35",
+      "finished_at": "2026-10-03T20:52:09.538171+00:00"
+    },
+    {
+      "order": 4,
+      "label": "trt_fp16",
+      "repeat": 2,
+      "file": "trt_fp16_r2.json",
+      "started_at": "2026-10-03T20:52:09.538710+00:00",
+      "run_id": "1f7ae3fd31be",
+      "finished_at": "2026-10-03T20:56:32.883458+00:00"
+    },
+    {
+      "order": 5,
+      "label": "trt_fp32",
+      "repeat": 3,
+      "file": "trt_fp32_r3.json",
+      "started_at": "2026-10-03T20:56:32.884429+00:00",
+      "run_id": "e7f80973312f",
+      "finished_at": "2026-10-03T21:01:08.756343+00:00"
+    },
+    {
+      "order": 6,
+      "label": "trt_fp16",
+      "repeat": 3,
+      "file": "trt_fp16_r3.json",
+      "started_at": "2026-10-03T21:01:08.757299+00:00",
+      "run_id": "a321de2ae209",
+      "finished_at": "2026-10-03T21:05:32.068343+00:00"
+    }
+  ]
+}
