@@ -98,5 +98,11 @@
       "run_id": "074f764bdd72",
       "finished_at": "2026-10-03T02:24:05.820765+00:00"
     }
-  ]
+  ],
+  "git": {
+    "commit": "ac95271b7faed9fa825a5b83c859f9f7a26e05fc",
+    "dirty": null,
+    "root": null,
+    "recorded_afterwards": "Recorded after the fact from the session log: the sweep ran from the 5090 host checkout at this commit, pushed just before it started; the code then did not record git state (added in 0ac4fbf). Code files matched the commit; whether the tree was otherwise clean was not checked."
+  }
 }

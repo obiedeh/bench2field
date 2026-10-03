@@ -39,7 +39,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from bench2field import background  # noqa: E402
+from bench2field import background, provenance  # noqa: E402
 from bench2field.backends.onnxruntime import OnnxRuntimeBackend, OrtOptions  # noqa: E402
 from bench2field.schema import describe_platform  # noqa: E402
 from bench2field.telemetry import auto_sampler  # noqa: E402
@@ -255,7 +255,7 @@ def main() -> int:
         "thresholds": {"conf": CONF_THRESHOLD, "nms": NMS_THRESHOLD},
         "settings": {"ort_allow_spinning": not a.no_spin, "cv2_threads": cv2.getNumThreads()},
         "telemetry": telemetry,
-        "platform": describe_platform() | sampler.describe() | be.describe(),
+        "platform": describe_platform() | sampler.describe() | be.describe() | {"git": provenance.git_state()},
         "background": bg,
         "nvtx": "nvtx" in sys.modules,
         "created_at": datetime.now(timezone.utc).isoformat(),
