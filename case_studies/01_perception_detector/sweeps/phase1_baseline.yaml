@@ -1,0 +1,25 @@
+# Phase 1 baseline: YOLOX-s in FP32 on the idle bench, 10/30/100 Hz, three
+# repeats, alternating the TensorRT provider (the baseline every optimization
+# is measured against) with the CUDA provider (a reference for what TensorRT
+# itself is worth). About 20 minutes per machine.
+#   5090:  env -u PYTHONPATH .venv/bin/b2f sweep case_studies/01_perception_detector/sweeps/phase1_baseline.yaml --out-dir case_studies/01_perception_detector/runs/bench_5090
+#   Thor:  .venv/bin/b2f sweep case_studies/01_perception_detector/sweeps/phase1_baseline.yaml --out-dir case_studies/01_perception_detector/runs/bench_thor
+# Add `stopped:` entries for whatever was shut down on that machine first.
+name: phase1-baseline-fp32
+environment: bench-idle
+repeats: 3
+tiers_hz: [10, 30, 100]
+duration_s: 60
+warmup_s: 5
+deadline_ms: 33.3
+variants:
+  - label: trt_fp32
+    model: models/yolox_s.onnx
+    name: yolox-s
+    provider: tensorrt
+    precision: fp32
+  - label: cuda_fp32
+    model: models/yolox_s.onnx
+    name: yolox-s
+    provider: cuda
+    precision: fp32

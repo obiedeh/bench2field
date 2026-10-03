@@ -4,7 +4,9 @@ State of the hardware bring-up and case study 01 phase 1. Work is on the `hardwa
 
 The GitHub repo exists: `github.com/obiedeh/bench2field`, **private**, with only `hardware-bringup` pushed (the owner's choice). CI has not run yet, because the workflow triggers on `master`/`main` and on pull requests. Before making the repo public, note that this file and `bringup/` name the owner's hosts and a LAN address.
 
-Last updated 2026-10-02. Steps 1 and 2 (5090 and Thor) are done. The Orin is switched off; the owner will say when it is back. `b2f sweep` is built. Step 4 (case study 01 phase 1) is waiting on the detector pick.
+**Before the repo goes public:** scrub hostnames (`bench-5090`, `bench-thor`, `field-orin`) and the LAN address (`192.0.2.10`) from this file and from `bringup/` (the README, `versions.txt` files and the `host` field in every run JSON). Not done; logged here so it is not forgotten.
+
+Last updated 2026-10-02. Steps 1 and 2 (5090, Thor and Orin) are done. `b2f sweep` is built. Step 4: YOLOX chosen, YOLOX-s exported and on all three machines; the baseline sweeps have not been run (they take about 20 minutes per machine and need the owner's OK).
 
 ## Done
 
@@ -39,7 +41,30 @@ Last updated 2026-10-02. Steps 1 and 2 (5090 and Thor) are done. The Orin is swi
 - CUDA and TensorRT fp16 runs of the tiny model both work.
 - Replay steering, 60 s, CPU target 40%: duty frozen at 0.342, 42.4% measured with the model idle, 41.9% median during the run. Memory-bandwidth target 30%: not measurable on the Thor, ran open-loop.
 
+**Step 2, Jetson Orin NX on the rover** (evidence in `bringup/orin/`, details in `bringup/README.md`)
+
+- L4T R36.4.7 (JetPack 6), **Python 3.10.12**: the suite runs there, 110 passed, 2 skipped (no PyTorch, NVML unusable).
+- ONNX Runtime wheel: `onnxruntime-gpu==1.24.0` from the Jetson AI Lab `jp6/cu126` index, the same version as the Thor, as the owner asked. TensorRT 10.7.0, CUDA 12.6.
+- The cuDNN that actually loads is 9.3.0 (from the `cross-aarch64` package `ldconfig` points at), not the installed 9.11.0.98. Recorded in every report; not changed.
+- Board power rail: `VDD_IN`, now mapped to `power_board_w`, so the rover budget's power gate resolves there.
+- tegrastats has `GR3D_FREQ` but no `EMC_FREQ`; NVML answers no telemetry query at all.
+- Replay steering, CPU target 40%: converged at duty 0.118 (the rover's own services were already using CPU), 41.7% measured idle, 35.5% median during the run.
+
+**Owner's decisions applied after bring-up**
+
+- Every report records the TensorRT, cuDNN and CUDA runtime versions the providers actually loaded (`platform.tensorrt`, `.cudnn`, `.cuda_runtime`), asked of the libraries themselves.
+- Retention treats the onnxruntime version like power mode: repeats and baseline/optimized pairs must match, bench vs field differing is a warning. 5090 stays on 1.30.0, Jetsons on 1.24.0.
+- Every report records what else the machine was doing (`platform.background`: running containers, the five busiest processes, load average) and what was stopped for the run (`b2f run --stopped ...`, or `stopped:` in a sweep config).
+- Synthetic inputs follow each input's dtype, so RT-DETR's int64 input would work.
+
 **Step 3**: `LICENSE` (Apache-2.0), `CONTRIBUTING.md`, `.github/workflows/ci.yml` (pytest on CPU, Python 3.10 and 3.12), and the private GitHub repo.
+
+**Step 4.1 and 4.2: detector and export**
+
+- YOLOX (Apache-2.0), pinned to commit `6ddff482`. YOLOX-s is the student, YOLOX-l the teacher (not yet exported; `export_yolox.py l` does it).
+- `models/yolox_s.onnx`: static 1x3x640x640, opset 11, decoding in the graph, NMS outside. Provenance (weights and ONNX SHA-256, versions, PyTorch agreement check) in `case_studies/01_perception_detector/exports.json`; the choices and why in that folder's README.
+- The same file is on the 5090, the Thor and the Orin (`models/`), same hash on all three.
+- `case_studies/01_perception_detector/sweeps/phase1_baseline.yaml` is the baseline sweep, ready to run.
 
 **Start of step 4: repeats and `b2f sweep`** (the deferred methodology work, built before any baseline run)
 
@@ -64,8 +89,8 @@ Last updated 2026-10-02. Steps 1 and 2 (5090 and Thor) are done. The Orin is swi
 
 ## Blocked, waiting on the owner
 
-1. **Orin (rest of step 2).** `field-orin` (192.0.2.10, user `jetson`) is switched off; the owner will say when it is back. Still to do there: the same checks under `bringup/orin/`, its JetPack and Python version (the Python 3.10 case), and confirming its total-power rail so `power_board_w` can be mapped for it.
-2. **Detector choice (step 4.1).** Two options were proposed to the owner: YOLOX (s as student, l as teacher) and RT-DETRv2 (S as student, L as teacher), both Apache-2.0. No pick yet.
+1. **Phase 1 baseline sweeps (step 4.3)**: about 20 minutes per machine, so they need the owner's OK before starting. On the Thor the `urban-edge-vllm` container may be stopped for them (owner's permission) and must be restarted afterwards; when last checked the container up was `physical-ai-vllm`, which that permission does not cover.
+2. **The end-to-end profile and `nsys` capture (step 4.4)** follow the baselines.
 
 ## Deferred by decision
 
@@ -74,13 +99,10 @@ Last updated 2026-10-02. Steps 1 and 2 (5090 and Thor) are done. The Orin is swi
 ## Open questions
 
 - **ONNX Runtime versions differ between machines.** The 5090 runs 1.30.0 (TensorRT 10.16.1.11) and the Thor runs 1.24.0 (system TensorRT 10.13.3.9), because no 1.30.0 wheel works on the Thor. Latency on the two is not a same-runtime comparison. Options: accept and record it, pin the 5090 to 1.24.0, or build 1.30.0 from source on the Thor (well over 15 minutes).
-- **No GPU or memory-controller load on the Thor.** With no `GR3D_FREQ` or `EMC_FREQ` from tegrastats, replay on the Thor can steer only the CPU stressor; the memory-bandwidth and GPU stressors run open-loop there. NVML on the Thor does report GPU utilisation, so the Jetson sampler could take that one channel from NVML. Not built; needs a decision.
-- **Bench machines were not idle.** The Thor had the `urban-edge-vllm` container loaded during bring-up, and an Ollama evaluation job started on the 5090 part-way through (one contaminated run was discarded). Nothing in `b2f run` checks that a `bench-idle` run is on an idle machine. Both need to be quiet for the phase 1 baselines.
+- **Memory-controller load is not measurable on either Jetson** (no `EMC_FREQ` on the Thor or the Orin NX), so the memory-bandwidth stressor is always open-loop there. GPU load: the Orin reports `GR3D_FREQ`; the Thor does not, though NVML on the Thor does report GPU utilisation, so the Jetson sampler could take that one channel from NVML. Not built; needs a decision.
+- **Bench machines were not idle.** The Thor had the `urban-edge-vllm` container loaded during bring-up, and an Ollama evaluation job started on the 5090 part-way through (one contaminated run was discarded). Reports now record the containers and busiest processes at run start, but nothing refuses to run; the operator still has to make the machine quiet.
 - **What the power budget means.** `rover_perception.yaml` describes `max_power_w: 15.0` as perception's share of the Orin NX envelope, but the gate compares it with total board power. Either the limit or the comment needs to change before a verdict on power means anything.
-- **Orin NX board-power rail.** Not mapped until confirmed against real output (expected `VDD_IN`). Until then the power gate on the rover reports no data.
 - **TensorRT minor version.** ONNX Runtime's docs do not say which 10.x minor 1.30.0 was built against (the table stops at 1.22). 10.16.1.11 loads and runs fp16 correctly on the 5090.
-
-- **Models with integer inputs.** `OnnxRuntimeBackend.synthetic_input` fills every input with random floats. RT-DETR's export has a second, int64 input (`orig_target_sizes`), which that would get wrong. Fix it if RT-DETR is picked.
 
 ## Ignored on purpose
 
