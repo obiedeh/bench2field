@@ -1,0 +1,294 @@
+{
+  "variant": {
+    "model": "yolox-s",
+    "backend": "onnxruntime",
+    "provider": "CUDAExecutionProvider",
+    "precision": "fp32",
+    "technique": "baseline",
+    "notes": ""
+  },
+  "environment": "bench-idle",
+  "tiers": [
+    {
+      "target_hz": 10.0,
+      "actual_hz": 10.016203727627795,
+      "duration_s": 59.9029349158518,
+      "deadline_ms": 33.3,
+      "deadline_misses": 0,
+      "latency": {
+        "n": 600,
+        "p50_ms": 2.7701326180249453,
+        "p95_ms": 3.937898157164454,
+        "p99_ms": 4.505037725903093,
+        "max_ms": 6.085042841732502,
+        "mean_ms": 2.95536107228448
+      },
+      "telemetry": {
+        "n_samples": 120,
+        "gpu_mem_used_mb": {
+          "p50": 2077.5625,
+          "peak": 13630.25
+        },
+        "gpu_mem_util_pct": {
+          "p50": 0.0,
+          "peak": 1.0
+        },
+        "gpu_util_pct": {
+          "p50": 2.0,
+          "peak": 19.0
+        },
+        "power_gpu_w": {
+          "p50": 68.1795,
+          "peak": 201.866
+        },
+        "sm_clock_mhz": {
+          "p50": 2445.0,
+          "peak": 2925.0
+        },
+        "temp_gpu_c": {
+          "p50": 41.0,
+          "peak": 52.0
+        }
+      },
+      "response": {
+        "n": 600,
+        "p50_ms": 2.936362288892269,
+        "p95_ms": 4.104975354857743,
+        "p99_ms": 4.696497586555778,
+        "max_ms": 6.2178438529372215,
+        "mean_ms": 3.11346140379707
+      },
+      "dropped": 0,
+      "drop_late": false
+    },
+    {
+      "target_hz": 26.0,
+      "actual_hz": 26.015489067180965,
+      "duration_s": 59.96427728002891,
+      "deadline_ms": 33.3,
+      "deadline_misses": 0,
+      "latency": {
+        "n": 1560,
+        "p50_ms": 2.6109039317816496,
+        "p95_ms": 4.7014037612825605,
+        "p99_ms": 6.854414772242308,
+        "max_ms": 7.416370324790478,
+        "mean_ms": 2.8355205482325685
+      },
+      "telemetry": {
+        "n_samples": 120,
+        "gpu_mem_used_mb": {
+          "p50": 13630.25,
+          "peak": 13630.25
+        },
+        "gpu_mem_util_pct": {
+          "p50": 0.0,
+          "peak": 48.0
+        },
+        "gpu_util_pct": {
+          "p50": 6.0,
+          "peak": 87.0
+        },
+        "power_gpu_w": {
+          "p50": 74.2405,
+          "peak": 347.171
+        },
+        "sm_clock_mhz": {
+          "p50": 2475.0,
+          "peak": 2925.0
+        },
+        "temp_gpu_c": {
+          "p50": 43.0,
+          "peak": 49.0
+        }
+      },
+      "response": {
+        "n": 1560,
+        "p50_ms": 2.7827308513224125,
+        "p95_ms": 4.877515370026229,
+        "p99_ms": 6.976219583302738,
+        "max_ms": 7.586624473333359,
+        "mean_ms": 3.0011733053610303
+      },
+      "dropped": 0,
+      "drop_late": false
+    },
+    {
+      "target_hz": 30.0,
+      "actual_hz": 30.015270727809874,
+      "duration_s": 59.96947408281267,
+      "deadline_ms": 33.3,
+      "deadline_misses": 0,
+      "latency": {
+        "n": 1800,
+        "p50_ms": 2.5494813453406096,
+        "p95_ms": 2.710626507177949,
+        "p99_ms": 4.111723857931793,
+        "max_ms": 7.267290260642767,
+        "mean_ms": 2.5984680944950216
+      },
+      "telemetry": {
+        "n_samples": 120,
+        "gpu_mem_used_mb": {
+          "p50": 13632.25,
+          "peak": 13632.25
+        },
+        "gpu_mem_util_pct": {
+          "p50": 0.0,
+          "peak": 46.0
+        },
+        "gpu_util_pct": {
+          "p50": 6.0,
+          "peak": 86.0
+        },
+        "power_gpu_w": {
+          "p50": 76.0435,
+          "peak": 321.888
+        },
+        "sm_clock_mhz": {
+          "p50": 2475.0,
+          "peak": 2925.0
+        },
+        "temp_gpu_c": {
+          "p50": 42.0,
+          "peak": 49.0
+        }
+      },
+      "response": {
+        "n": 1800,
+        "p50_ms": 2.726797480136156,
+        "p95_ms": 2.883980143815279,
+        "p99_ms": 4.2616643058136106,
+        "max_ms": 7.389911916106939,
+        "mean_ms": 2.769931669398728
+      },
+      "dropped": 0,
+      "drop_late": false
+    },
+    {
+      "target_hz": 100.0,
+      "actual_hz": 100.01184945456468,
+      "duration_s": 59.992891169618815,
+      "deadline_ms": 33.3,
+      "deadline_misses": 0,
+      "latency": {
+        "n": 6000,
+        "p50_ms": 2.528441371396184,
+        "p95_ms": 2.608874929137528,
+        "p99_ms": 2.661473825573921,
+        "max_ms": 2.833027858287096,
+        "mean_ms": 2.5320855173437544
+      },
+      "telemetry": {
+        "n_samples": 120,
+        "gpu_mem_used_mb": {
+          "p50": 13632.25,
+          "peak": 13632.25
+        },
+        "gpu_mem_util_pct": {
+          "p50": 1.0,
+          "peak": 1.0
+        },
+        "gpu_util_pct": {
+          "p50": 19.0,
+          "peak": 19.0
+        },
+        "power_gpu_w": {
+          "p50": 101.8535,
+          "peak": 102.408
+        },
+        "sm_clock_mhz": {
+          "p50": 2565.0,
+          "peak": 2572.0
+        },
+        "temp_gpu_c": {
+          "p50": 44.0,
+          "peak": 44.0
+        }
+      },
+      "response": {
+        "n": 6000,
+        "p50_ms": 2.699616365134716,
+        "p95_ms": 2.7938398998230696,
+        "p99_ms": 2.846670071594417,
+        "max_ms": 3.04168788716197,
+        "mean_ms": 2.698660843850424
+      },
+      "dropped": 0,
+      "drop_late": false
+    }
+  ],
+  "platform": {
+    "host": "bench-5090",
+    "machine": "x86_64",
+    "system": "Linux",
+    "kernel": "6.17.0-22-generic",
+    "python": "3.12.3",
+    "telemetry": "nvml",
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "driver": "580.178.04",
+    "backend": "onnxruntime",
+    "onnxruntime": "1.30.0",
+    "tensorrt": null,
+    "cudnn": "9.19.0",
+    "cuda_runtime": "13.0",
+    "provider_active": "CUDAExecutionProvider",
+    "precision": "fp32",
+    "intra_op_threads": "default",
+    "inter_op_threads": "default",
+    "allow_spinning": true,
+    "sweep": {
+      "name": "phase1-baseline-fp32-v2",
+      "label": "cuda_fp32",
+      "repeat": 3,
+      "order": 6
+    },
+    "background": {
+      "stopped_for_this_run": [],
+      "containers_running": [
+        {
+          "name": "telecom-pg",
+          "image": "pgvector/pgvector:pg16",
+          "status": "Up 4 days"
+        }
+      ],
+      "top_processes": [
+        {
+          "pid": 717893,
+          "cpu_pct": 19.2,
+          "mem_pct": 0.0,
+          "cmd": "/usr/bin/ssh -v -o BatchMode=yes -o ServerAliveInterval=15 -o ServerAliveCountMax=12 bench-thor sh -c 'if [ -z \"$SHELL\" "
+        },
+        {
+          "pid": 338994,
+          "cpu_pct": 9.9,
+          "mem_pct": 0.6,
+          "cmd": "/usr/bin/gnome-shell"
+        },
+        {
+          "pid": 2736988,
+          "cpu_pct": 1.3,
+          "mem_pct": 2.3,
+          "cmd": "~/.cache/uv/archive-v0/Ua4fnxOHvv4NuzPN/bin/python ~/.cache/uv/archive-v0/Ua4fnxOHvv4NuzPN/bin/chrom"
+        },
+        {
+          "pid": 338379,
+          "cpu_pct": 0.9,
+          "mem_pct": 1.0,
+          "cmd": "interactive dev tool"
+        },
+        {
+          "pid": 270909,
+          "cpu_pct": 0.8,
+          "mem_pct": 1.0,
+          "cmd": "interactive dev tool"
+        }
+      ],
+      "load_avg_1m": 0.4462890625
+    }
+  },
+  "accuracy": {},
+  "run_id": "f6384ee9d86f",
+  "created_at": "2026-10-03T01:52:42.435549+00:00",
+  "schema_version": "1.1"
+}
