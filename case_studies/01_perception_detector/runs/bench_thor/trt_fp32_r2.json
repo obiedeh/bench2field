@@ -1,0 +1,353 @@
+{
+  "variant": {
+    "model": "yolox-s",
+    "backend": "onnxruntime",
+    "provider": "TensorrtExecutionProvider",
+    "precision": "fp32",
+    "technique": "baseline",
+    "notes": ""
+  },
+  "environment": "bench-idle",
+  "tiers": [
+    {
+      "target_hz": 10.0,
+      "actual_hz": 10.014852440952055,
+      "duration_s": 59.91101751499809,
+      "deadline_ms": 33.3,
+      "deadline_misses": 0,
+      "latency": {
+        "n": 600,
+        "p50_ms": 10.91234150226228,
+        "p95_ms": 11.367251507181209,
+        "p99_ms": 11.566653722256888,
+        "max_ms": 12.016688997391611,
+        "mean_ms": 10.83318124122646
+      },
+      "telemetry": {
+        "n_samples": 120,
+        "cpu_cores_online": {
+          "p50": 14.0,
+          "peak": 14.0
+        },
+        "cpu_util_max_pct": {
+          "p50": 26.0,
+          "peak": 36.0
+        },
+        "cpu_util_mean_pct": {
+          "p50": 2.107142857142857,
+          "peak": 6.5
+        },
+        "power_board_w": {
+          "p50": 20.908,
+          "peak": 34.09
+        },
+        "power_vdd_cpu_soc_mss_w": {
+          "p50": 5.896,
+          "peak": 7.076
+        },
+        "power_vdd_gpu_w": {
+          "p50": 2.751,
+          "peak": 2.751
+        },
+        "power_vin_sys_5v0_w": {
+          "p50": 6.471,
+          "peak": 6.673
+        },
+        "power_vin_w": {
+          "p50": 20.908,
+          "peak": 34.09
+        },
+        "ram_total_mb": {
+          "p50": 125772.0,
+          "peak": 125772.0
+        },
+        "ram_used_mb": {
+          "p50": 44896.0,
+          "peak": 44980.0
+        },
+        "temp_cpu_c": {
+          "p50": 38.9525,
+          "peak": 40.625
+        },
+        "temp_gpu_c": {
+          "p50": 39.8275,
+          "peak": 41.343
+        },
+        "temp_soc012_c": {
+          "p50": 39.1405,
+          "peak": 40.812
+        },
+        "temp_soc345_c": {
+          "p50": 40.562,
+          "peak": 42.343
+        },
+        "temp_tj_c": {
+          "p50": 40.562,
+          "peak": 42.343
+        }
+      },
+      "response": {
+        "n": 600,
+        "p50_ms": 11.06495400017593,
+        "p95_ms": 11.527774792921264,
+        "p99_ms": 11.714270126249176,
+        "max_ms": 12.25078699644655,
+        "mean_ms": 11.015949301751485
+      },
+      "dropped": 0,
+      "drop_late": false
+    },
+    {
+      "target_hz": 30.0,
+      "actual_hz": 30.011426397426913,
+      "duration_s": 59.977155906002736,
+      "deadline_ms": 33.3,
+      "deadline_misses": 0,
+      "latency": {
+        "n": 1800,
+        "p50_ms": 10.22123300936073,
+        "p95_ms": 10.876906545308884,
+        "p99_ms": 11.214313128730282,
+        "max_ms": 11.481099005322903,
+        "mean_ms": 10.275052450855988
+      },
+      "telemetry": {
+        "n_samples": 120,
+        "cpu_cores_online": {
+          "p50": 14.0,
+          "peak": 14.0
+        },
+        "cpu_util_max_pct": {
+          "p50": 28.0,
+          "peak": 36.0
+        },
+        "cpu_util_mean_pct": {
+          "p50": 2.857142857142857,
+          "peak": 7.357142857142857
+        },
+        "power_board_w": {
+          "p50": 21.173000000000002,
+          "peak": 35.226
+        },
+        "power_vdd_cpu_soc_mss_w": {
+          "p50": 6.289,
+          "peak": 7.469
+        },
+        "power_vdd_gpu_w": {
+          "p50": 3.931,
+          "peak": 3.931
+        },
+        "power_vin_sys_5v0_w": {
+          "p50": 6.876,
+          "peak": 7.078
+        },
+        "power_vin_w": {
+          "p50": 21.173000000000002,
+          "peak": 35.226
+        },
+        "ram_total_mb": {
+          "p50": 125772.0,
+          "peak": 125772.0
+        },
+        "ram_used_mb": {
+          "p50": 44899.0,
+          "peak": 44912.0
+        },
+        "temp_cpu_c": {
+          "p50": 38.531,
+          "peak": 40.312
+        },
+        "temp_gpu_c": {
+          "p50": 39.406,
+          "peak": 39.593
+        },
+        "temp_soc012_c": {
+          "p50": 38.625,
+          "peak": 38.875
+        },
+        "temp_soc345_c": {
+          "p50": 40.109,
+          "peak": 40.281
+        },
+        "temp_tj_c": {
+          "p50": 40.093,
+          "peak": 40.312
+        }
+      },
+      "response": {
+        "n": 1800,
+        "p50_ms": 10.288743680575863,
+        "p95_ms": 10.94198053033324,
+        "p99_ms": 11.276362693752162,
+        "max_ms": 11.546945024747401,
+        "mean_ms": 10.3395564901843
+      },
+      "dropped": 0,
+      "drop_late": false
+    },
+    {
+      "target_hz": 100.0,
+      "actual_hz": 100.00987095594479,
+      "duration_s": 59.99407801099005,
+      "deadline_ms": 33.3,
+      "deadline_misses": 0,
+      "latency": {
+        "n": 6000,
+        "p50_ms": 4.017833998659626,
+        "p95_ms": 4.33710368233733,
+        "p99_ms": 4.795420514419676,
+        "max_ms": 5.677495006239042,
+        "mean_ms": 4.050528491706548
+      },
+      "telemetry": {
+        "n_samples": 120,
+        "cpu_cores_online": {
+          "p50": 14.0,
+          "peak": 14.0
+        },
+        "cpu_util_max_pct": {
+          "p50": 26.0,
+          "peak": 36.0
+        },
+        "cpu_util_mean_pct": {
+          "p50": 2.5,
+          "peak": 7.571428571428571
+        },
+        "power_board_w": {
+          "p50": 34.506,
+          "peak": 54.732
+        },
+        "power_vdd_cpu_soc_mss_w": {
+          "p50": 7.469,
+          "peak": 8.255
+        },
+        "power_vdd_gpu_w": {
+          "p50": 11.002,
+          "peak": 11.793
+        },
+        "power_vin_sys_5v0_w": {
+          "p50": 7.899,
+          "peak": 8.102
+        },
+        "power_vin_w": {
+          "p50": 34.506,
+          "peak": 54.732
+        },
+        "ram_total_mb": {
+          "p50": 125772.0,
+          "peak": 125772.0
+        },
+        "ram_used_mb": {
+          "p50": 44903.0,
+          "peak": 44914.0
+        },
+        "temp_cpu_c": {
+          "p50": 39.781,
+          "peak": 40.25
+        },
+        "temp_gpu_c": {
+          "p50": 41.062,
+          "peak": 41.437
+        },
+        "temp_soc012_c": {
+          "p50": 39.843,
+          "peak": 40.25
+        },
+        "temp_soc345_c": {
+          "p50": 41.5155,
+          "peak": 42.0
+        },
+        "temp_tj_c": {
+          "p50": 41.5,
+          "peak": 42.0
+        }
+      },
+      "response": {
+        "n": 6000,
+        "p50_ms": 4.078954996657558,
+        "p95_ms": 4.400215108762496,
+        "p99_ms": 4.859275718044956,
+        "max_ms": 5.7362210063729435,
+        "mean_ms": 4.111708434225875
+      },
+      "dropped": 0,
+      "drop_late": false
+    }
+  ],
+  "platform": {
+    "host": "bench-thor",
+    "machine": "aarch64",
+    "system": "Linux",
+    "kernel": "6.8.12-tegra",
+    "python": "3.12.3",
+    "l4t_release": "# R38 (release), REVISION: 4.0, GCID: 43443517, BOARD: generic, EABI: aarch64, DATE: Wed Dec 31 00:15:19 UTC 2025",
+    "is_jetson": true,
+    "telemetry": "tegrastats",
+    "nvpmodel": "NV Power Mode: 120W",
+    "backend": "onnxruntime",
+    "onnxruntime": "1.24.0",
+    "tensorrt": "10.13.3",
+    "cudnn": "9.12.0",
+    "cuda_runtime": "13.2",
+    "provider_active": "TensorrtExecutionProvider",
+    "precision": "fp32",
+    "intra_op_threads": "default",
+    "inter_op_threads": "default",
+    "allow_spinning": true,
+    "sweep": {
+      "name": "phase1-baseline-fp32",
+      "label": "trt_fp32",
+      "repeat": 2,
+      "order": 3
+    },
+    "background": {
+      "stopped_for_this_run": [
+        "docker container physical-ai-vllm (stopped before the sweep, started again after it)"
+      ],
+      "containers_running": [
+        {
+          "name": "physical-ai-vllm",
+          "image": "ghcr.io/nvidia-ai-iot/vllm:0.14.0-r38.3-arm64-sbsa-cu130-24.04",
+          "status": "Up 11 minutes"
+        }
+      ],
+      "top_processes": [
+        {
+          "pid": 1305205,
+          "cpu_pct": 100.0,
+          "mem_pct": 0.0,
+          "cmd": "ps -eo pid,pcpu,pmem,args --sort=-pcpu --no-headers"
+        },
+        {
+          "pid": 1264958,
+          "cpu_pct": 18.9,
+          "mem_pct": 0.0,
+          "cmd": "[kworker/u28:2-ext4-rsv-conversion]"
+        },
+        {
+          "pid": 1297064,
+          "cpu_pct": 7.2,
+          "mem_pct": 0.0,
+          "cmd": "[kworker/u28:0-devfreq_wq]"
+        },
+        {
+          "pid": 1300766,
+          "cpu_pct": 5.6,
+          "mem_pct": 2.1,
+          "cmd": "VLLM::EngineCore"
+        },
+        {
+          "pid": 1300613,
+          "cpu_pct": 2.3,
+          "mem_pct": 1.0,
+          "cmd": "/opt/venv/bin/python /opt/venv/bin/vllm serve /models/cosmos-reason2-2b --served-model-name nvidia/cosmos-reason2-2b --h"
+        }
+      ],
+      "load_avg_1m": 0.70703125
+    }
+  },
+  "accuracy": {},
+  "run_id": "31c07eaf9db0",
+  "created_at": "2026-10-03T00:52:47.973129+00:00",
+  "schema_version": "1.1"
+}

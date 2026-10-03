@@ -1,0 +1,18 @@
+# Export-time tools for case study 01, installed into the 5090 venv only:
+#   env -u PYTHONPATH .venv/bin/pip install -r case_studies/01_perception_detector/requirements-export.txt \
+#       --extra-index-url https://download.pytorch.org/whl/cu130
+# Not project dependencies: b2f never needs PyTorch or YOLOX to run a model.
+# YOLOX is installed without its own requirements list because that pins
+# onnx-simplifier==0.4.10, which has no Python 3.12 wheel; the imports it
+# needs at export time are listed instead.
+torch==2.11.0
+torchvision==0.26.0
+# install with --no-build-isolation (its setup.py imports torch):
+yolox @ git+https://github.com/Megvii-BaseDetection/YOLOX.git@6ddff4824372906469a7fae2dc3206c7aa4bbaee
+loguru
+tabulate
+thop
+psutil
+tqdm
+opencv-python-headless
+nvtx

@@ -17,7 +17,7 @@ Bench2Field measures that loss directly. Every optimization is run twice, once o
 | **Replay validity** | Does a recorded field load, replayed on the bench, reproduce field latency closely enough to stand in for the robot? |
 | **Readiness verdict** | GO / NO-GO / INCOMPLETE against a deployment budget written before testing: loop deadline, miss rate, power, temperature, accuracy floor. |
 
-Latency is measured open-loop at fixed request rates, the way camera frames arrive. A frame misses its deadline when it finishes late relative to when it arrived, so queueing behind a slow frame counts.
+Latency is measured open-loop at fixed request rates, the way camera frames arrive. Each tier reports response time (arrival to completion, queueing included) and service time (inference alone); comparisons use response p95. A frame misses its deadline when it finishes late relative to when it arrived, and `--drop-late` skips frames that are already stale, counting them separately.
 
 ## How it works
 
@@ -39,6 +39,9 @@ pytest
 b2f run models/detector_fp32.onnx --provider tensorrt --precision fp32 --tiers 10,30,100 --out runs/bench_fp32.json
 b2f run models/detector_fp32.onnx --provider tensorrt --precision int8 --technique ptq --out runs/bench_int8.json
 
+# or: three alternating repeats of both variants in one go, one report per run
+b2f sweep configs/sweeps/bringup_tiny.yaml --out-dir runs/sweep_tiny
+
 # on the robot, without the model running: record the background load
 b2f record-load rover-slam --duration 300
 
@@ -57,6 +60,20 @@ b2f attribute runs/bench_fp32.json runs/field_fp32.json --hz 30 --stressor therm
 
 b2f verdict runs/field_int8.json configs/budgets/rover_perception.yaml
 ```
+
+## Development setup
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -e ".[dev,tools,nvml]"     # add gpu-stress for the GPU stressor (PyTorch)
+.venv/bin/pytest
+```
+
+Install the ONNX Runtime build that matches the machine instead of the `ort` extra: `onnxruntime-gpu[cuda,cudnn]` on a discrete NVIDIA GPU (plus `tensorrt-cu13` for the TensorRT provider), the Jetson wheel on a Jetson. The exact versions validated on each machine are listed under `bringup/`.
+
+**If the shell has ROS 2 sourced, unset `PYTHONPATH` first.** ROS exports a `PYTHONPATH` that puts its own Python packages ahead of the venv's, and a venv does not override it. Prefix every command with `env -u PYTHONPATH`, for example `env -u PYTHONPATH .venv/bin/pytest`, or run from a shell that has not sourced ROS.
+
+Tests that need onnxruntime, a GPU, NVML or PyTorch skip on machines without them.
 
 ## Platforms
 
@@ -78,6 +95,7 @@ src/bench2field/
   runner.py        open-loop tiers, deadline accounting, cooldown gating
   metrics.py       field retention, gap attribution, replay validity
   verdict.py       readiness gates against a deployment budget
+  sweep.py         repeats of several variants, run alternately, with a manifest of the order
   telemetry/       tegrastats, NVML, rocm-smi samplers
   backends/        ONNX Runtime (CPU, CUDA, TensorRT, MIGraphX, ROCm)
   loadreplay/      record a field-load profile; replay it as CPU, memory-bandwidth, GPU and thermal stressors

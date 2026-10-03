@@ -1,0 +1,165 @@
+{
+  "variant": {
+    "model": "tiny_conv",
+    "backend": "onnxruntime",
+    "provider": "TensorrtExecutionProvider",
+    "precision": "fp16",
+    "technique": "baseline",
+    "notes": ""
+  },
+  "environment": "bench-replay:synth-cpu40-emc30",
+  "tiers": [
+    {
+      "target_hz": 30.0,
+      "actual_hz": 30.014550660469354,
+      "duration_s": 59.970912786999975,
+      "deadline_ms": 33.3,
+      "deadline_misses": 0,
+      "latency": {
+        "n": 1800,
+        "p50_ms": 4.072452000002613,
+        "p95_ms": 4.345413900051653,
+        "p99_ms": 4.493782200046326,
+        "max_ms": 7.790577000037047,
+        "mean_ms": 4.099178956109944
+      },
+      "telemetry": {
+        "n_samples": 120,
+        "cpu_cores_online": {
+          "p50": 6.0,
+          "peak": 6.0
+        },
+        "cpu_util_max_pct": {
+          "p50": 80.0,
+          "peak": 98.0
+        },
+        "cpu_util_mean_pct": {
+          "p50": 35.5,
+          "peak": 55.166666666666664
+        },
+        "gpu_util_pct": {
+          "p50": 11.5,
+          "peak": 20.0
+        },
+        "power_vdd_cpu_gpu_cv_w": {
+          "p50": 3.492,
+          "peak": 4.744
+        },
+        "power_vdd_in_w": {
+          "p50": 12.038,
+          "peak": 13.468
+        },
+        "power_vdd_soc_w": {
+          "p50": 3.495,
+          "peak": 3.594
+        },
+        "ram_total_mb": {
+          "p50": 7620.0,
+          "peak": 7620.0
+        },
+        "ram_used_mb": {
+          "p50": 4657.0,
+          "peak": 4665.0
+        },
+        "temp_cpu_c": {
+          "p50": 58.093,
+          "peak": 59.968
+        },
+        "temp_cv0_c": {
+          "p50": 53.828,
+          "peak": 55.531
+        },
+        "temp_cv1_c": {
+          "p50": 54.781,
+          "peak": 56.281
+        },
+        "temp_cv2_c": {
+          "p50": 52.0,
+          "peak": 53.468
+        },
+        "temp_gpu_c": {
+          "p50": 57.8275,
+          "peak": 59.218
+        },
+        "temp_soc0_c": {
+          "p50": 54.468,
+          "peak": 55.781
+        },
+        "temp_soc1_c": {
+          "p50": 54.437,
+          "peak": 55.843
+        },
+        "temp_soc2_c": {
+          "p50": 53.5155,
+          "peak": 54.906
+        },
+        "temp_tj_c": {
+          "p50": 58.1715,
+          "peak": 59.968
+        }
+      },
+      "response": {
+        "n": 1800,
+        "p50_ms": 4.149294999990616,
+        "p95_ms": 4.441289600009668,
+        "p99_ms": 4.776188503291223,
+        "max_ms": 7.987668666714853,
+        "mean_ms": 4.186409465581026
+      },
+      "dropped": 0,
+      "drop_late": false
+    }
+  ],
+  "platform": {
+    "host": "field-orin",
+    "machine": "aarch64",
+    "system": "Linux",
+    "kernel": "5.15.148-tegra",
+    "python": "3.10.12",
+    "l4t_release": "# R36 (release), REVISION: 4.7, GCID: 42132812, BOARD: generic, EABI: aarch64, DATE: Thu Sep 18 22:54:44 UTC 2025",
+    "is_jetson": true,
+    "telemetry": "tegrastats",
+    "nvpmodel": "NV Power Mode: MAXN_SUPER",
+    "backend": "onnxruntime",
+    "onnxruntime": "1.24.0",
+    "tensorrt": "10.7.0",
+    "cudnn": "9.3.0",
+    "cuda_runtime": "12.6",
+    "provider_active": "TensorrtExecutionProvider",
+    "precision": "fp16",
+    "intra_op_threads": "default",
+    "inter_op_threads": "default",
+    "allow_spinning": true,
+    "replay_profile": "synth-cpu40-emc30",
+    "replay_stressors": [
+      "cpu",
+      "membw"
+    ],
+    "replay_thermal_soak": true,
+    "replay_soak_reached_c": null,
+    "replay_calibration": {
+      "cpu": {
+        "channel": "cpu_util_mean_pct",
+        "target_pct": 40.0,
+        "duty": 0.118,
+        "achieved_pct": 41.666666666666664,
+        "source": "tegrastats",
+        "steered": true,
+        "converged": true
+      },
+      "membw": {
+        "channel": "emc_util_pct",
+        "target_pct": 30.0,
+        "duty": 0.3,
+        "achieved_pct": null,
+        "source": null,
+        "steered": false,
+        "converged": false
+      }
+    }
+  },
+  "accuracy": {},
+  "run_id": "2bdff0613994",
+  "created_at": "2026-10-03T00:18:14.758289+00:00",
+  "schema_version": "1.1"
+}

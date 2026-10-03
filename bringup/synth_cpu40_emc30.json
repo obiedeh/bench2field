@@ -1,0 +1,2 @@
+{"name": "synth-cpu40-emc30", "duration_s": 0, "interval_s": 0.5, "platform": {}, "samples": [],
+ "targets": {"cpu_util_mean_pct": 40.0, "emc_util_pct": 30.0}, "soak_temp_c": null, "notes": "synthetic bring-up profile, not a field recording"}

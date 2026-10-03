@@ -10,7 +10,10 @@ not a hidden default.
 
 from __future__ import annotations
 
+import ctypes
+import importlib.util
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -22,6 +25,94 @@ PROVIDER_ALIASES = {
     "migraphx": "MIGraphXExecutionProvider",
     "rocm": "ROCMExecutionProvider",
 }
+
+
+NVIDIA_PROVIDERS = ("CUDAExecutionProvider", "TensorrtExecutionProvider")
+
+
+def preload_gpu_libraries(ort: Any, provider: str) -> bool:
+    """Load CUDA and cuDNN before an NVIDIA session is created.
+
+    `pip install onnxruntime-gpu[cuda,cudnn]` puts those libraries under
+    site-packages/nvidia/, which is not on the loader path, so without this the
+    CUDA provider loads and then fails on its first cuDNN call ("dlopen failed
+    for libcudnn.so"). onnxruntime.preload_dlls() (1.21+) finds them there and
+    falls back to the system copies. Returns whether a preload was attempted.
+    """
+    if provider not in NVIDIA_PROVIDERS or not hasattr(ort, "preload_dlls"):
+        return False
+    ort.preload_dlls()
+    return True
+
+
+# Load order matters: the parser and plugin libraries depend on libnvinfer.
+TENSORRT_LIBRARIES = ("libnvinfer.so.10", "libnvinfer_plugin.so.10", "libnvonnxparser.so.10")
+
+
+def preload_tensorrt_libraries() -> list[str]:
+    """Load pip-installed TensorRT so onnxruntime's TensorRT provider finds it.
+
+    `pip install tensorrt-cu13` puts the libraries in site-packages/tensorrt_libs,
+    off the loader path, and onnxruntime.preload_dlls() does not cover
+    TensorRT. Loading them here by full path satisfies the provider's
+    dependency on their sonames. Returns the paths loaded: empty when the pip
+    package is absent, as on a Jetson, where TensorRT is a system library.
+    """
+    spec = importlib.util.find_spec("tensorrt_libs")
+    if spec is None or not spec.submodule_search_locations:
+        return []
+    libdir = Path(next(iter(spec.submodule_search_locations)))
+    loaded: list[str] = []
+    for name in TENSORRT_LIBRARIES:
+        path = libdir / name
+        if not path.exists():
+            continue
+        try:
+            ctypes.CDLL(str(path), mode=ctypes.RTLD_GLOBAL)
+        except OSError as exc:
+            raise RuntimeError(f"could not load TensorRT library {path}: {exc}") from exc
+        loaded.append(str(path))
+    return loaded
+
+
+def _decode_nv_version(v: int) -> str:
+    """TensorRT, cuDNN 9 and the CUDA runtime all encode major*10000 + minor*100 + patch
+    (TensorRT 10.16.1 -> 101601; cuDNN 9.19.0 -> 91900; CUDA 13.0 -> 13000)."""
+    return f"{v // 10000}.{v // 100 % 100}.{v % 100}"
+
+
+def loaded_nvidia_library_versions() -> dict[str, str | None]:
+    """Versions of the TensorRT, cuDNN and CUDA runtime libraries this process
+    has loaded, asked of the libraries themselves, so a report says which
+    copies actually ran. None for a library that is not loaded (there is no
+    TensorRT in a CUDA-provider run) or that cannot be asked.
+
+    dlopen by soname returns a library that is already loaded rather than
+    searching for another, so this reports the copies the provider is using.
+    """
+    out: dict[str, str | None] = {}
+    queries = (
+        ("tensorrt", "libnvinfer.so.10", "getInferLibVersion", ctypes.c_int32),
+        ("cudnn", "libcudnn.so.9", "cudnnGetVersion", ctypes.c_size_t),
+    )
+    for key, soname, symbol, restype in queries:
+        try:
+            fn = getattr(ctypes.CDLL(soname), symbol)
+            fn.restype = restype
+            out[key] = _decode_nv_version(int(fn()))
+        except (OSError, AttributeError):
+            out[key] = None
+    out["cuda_runtime"] = None
+    for soname in ("libcudart.so.13", "libcudart.so.12"):
+        try:
+            lib = ctypes.CDLL(soname)
+        except OSError:
+            continue
+        v = ctypes.c_int()
+        if lib.cudaRuntimeGetVersion(ctypes.byref(v)) == 0:
+            out["cuda_runtime"] = f"{v.value // 1000}.{v.value % 1000 // 10}"
+        break
+    return out
 
 
 @dataclass
@@ -36,6 +127,31 @@ class OrtOptions:
     extra_provider_options: dict[str, Any] = field(default_factory=dict)
 
 
+# onnxruntime input types ("tensor(float)") -> numpy dtypes.
+ONNX_DTYPES = {
+    "float": np.float32, "float16": np.float16, "double": np.float64, "bfloat16": np.float32,
+    "int8": np.int8, "int16": np.int16, "int32": np.int32, "int64": np.int64,
+    "uint8": np.uint8, "uint16": np.uint16, "uint32": np.uint32, "uint64": np.uint64,
+    "bool": np.bool_,
+}
+
+
+def synthetic_tensor(dims: list[int], onnx_type: str, rng: np.random.Generator) -> np.ndarray:
+    """A plausible stand-in input of the right shape and dtype. RT-DETR, for
+    example, takes `orig_target_sizes` as int64 next to the float image."""
+    kind = onnx_type.removeprefix("tensor(").removesuffix(")")
+    if kind not in ONNX_DTYPES:
+        raise ValueError(f"no synthetic input for ONNX type {onnx_type!r}")
+    dtype = ONNX_DTYPES[kind]
+    if dtype == np.bool_:
+        return np.ones(dims, dtype=np.bool_)
+    if np.issubdtype(dtype, np.integer):
+        if dtype == np.uint8:  # image bytes
+            return rng.integers(0, 256, size=dims, dtype=np.uint8)
+        return np.ones(dims, dtype=dtype)
+    return rng.standard_normal(dims).astype(dtype)
+
+
 class OnnxRuntimeBackend:
     name = "onnxruntime"
 
@@ -48,6 +164,10 @@ class OnnxRuntimeBackend:
         available = ort.get_available_providers()
         if prov not in available:
             raise RuntimeError(f"{prov} not available; this build has {available}")
+
+        preload_gpu_libraries(ort, prov)
+        if prov == "TensorrtExecutionProvider":
+            preload_tensorrt_libraries()
 
         so = ort.SessionOptions()
         if opts.intra_op_threads:
@@ -80,6 +200,15 @@ class OnnxRuntimeBackend:
         if prov != "CPUExecutionProvider":
             providers.append("CPUExecutionProvider")  # fallback for unsupported ops
         self.session = ort.InferenceSession(model_path, sess_options=so, providers=providers)
+        # If a provider's libraries are missing, onnxruntime prints an error,
+        # retries on CPU and carries on. A benchmark must not: a "TensorRT"
+        # run that quietly measured the CPU is worse than no run.
+        active = self.session.get_providers()[0]
+        if active != prov:
+            raise RuntimeError(
+                f"asked for {prov} but onnxruntime fell back to {active}; "
+                "its libraries failed to load (see the onnxruntime error above)"
+            )
         self.model_path = model_path
         self._inputs = self.session.get_inputs()
 
@@ -90,14 +219,15 @@ class OnnxRuntimeBackend:
         return [(i.name, list(i.shape), i.type) for i in self._inputs]
 
     def synthetic_input(self, batch: int = 1, seed: int = 0) -> dict[str, np.ndarray]:
-        """Random tensors matching the model's inputs (dynamic dims -> batch or 1)."""
+        """Tensors matching the model's inputs in shape and dtype (dynamic dims
+        -> batch or 1). Floats are standard normal; integers are 1 (a plausible
+        size or index); bools are True."""
         rng = np.random.default_rng(seed)
         feeds: dict[str, np.ndarray] = {}
         for name, shape, typ in self.input_specs():
             dims = [batch if i == 0 and not isinstance(d, int) else (d if isinstance(d, int) else 1)
                     for i, d in enumerate(shape)]
-            dtype = np.float16 if "float16" in typ else np.float32
-            feeds[name] = rng.standard_normal(dims).astype(dtype)
+            feeds[name] = synthetic_tensor(dims, typ, rng)
         return feeds
 
     def infer(self, inputs: dict[str, np.ndarray]) -> list[np.ndarray]:
@@ -105,9 +235,12 @@ class OnnxRuntimeBackend:
 
     def describe(self) -> dict[str, Any]:
         o = self.options
+        libs = (loaded_nvidia_library_versions() if self.provider() in NVIDIA_PROVIDERS
+                else {"tensorrt": None, "cudnn": None, "cuda_runtime": None})
         return {
             "backend": self.name,
             "onnxruntime": self._ort.__version__,
+            **libs,
             "provider_active": self.provider(),
             "precision": o.precision,
             "intra_op_threads": o.intra_op_threads or "default",

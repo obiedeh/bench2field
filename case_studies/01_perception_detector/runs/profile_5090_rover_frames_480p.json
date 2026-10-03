@@ -1,0 +1,196 @@
+{
+  "what": "end-to-end pipeline profile, one frame at a time, stages timed on the host clock",
+  "model": {
+    "file": "models/yolox_s.onnx",
+    "sha256": "00b70c44385bb5567e784b0c1efae213c4f2ec06efacfc8e3f52eca333356205"
+  },
+  "frames": {
+    "dir": "data/rover_frames_480p",
+    "n": 300,
+    "warmup": 30,
+    "set_sha256": "b39dce6618b8ae269beeedcadaa7dd34f5c4160534fc7f60e94c196717d088b5",
+    "decoded_shape": [
+      480,
+      640,
+      3
+    ],
+    "jpeg_bytes_mean": 38664.88
+  },
+  "stages": {
+    "decode": {
+      "n": 300,
+      "p50_ms": 0.5620489828288555,
+      "p95_ms": 0.622688140720129,
+      "p99_ms": 0.7001778855919838,
+      "mean_ms": 0.5732502633084854,
+      "max_ms": 0.8045039139688015
+    },
+    "preprocess": {
+      "n": 300,
+      "p50_ms": 1.5083912294358015,
+      "p95_ms": 1.9979243166744713,
+      "p99_ms": 2.8107635863125293,
+      "mean_ms": 1.3710690755397081,
+      "max_ms": 3.845728002488613
+    },
+    "h2d": {
+      "n": 300,
+      "p50_ms": 0.2647680230438709,
+      "p95_ms": 0.3329434897750616,
+      "p99_ms": 0.49707416445016855,
+      "mean_ms": 0.27599473639080924,
+      "max_ms": 0.7084761746227741
+    },
+    "inference": {
+      "n": 300,
+      "p50_ms": 1.1176364496350288,
+      "p95_ms": 1.3102806638926268,
+      "p99_ms": 1.4160618418827646,
+      "mean_ms": 1.1494370580961306,
+      "max_ms": 1.9051171839237213
+    },
+    "d2h": {
+      "n": 300,
+      "p50_ms": 0.22860337048768997,
+      "p95_ms": 0.30183978378772736,
+      "p99_ms": 0.4808108508586861,
+      "mean_ms": 0.25002954838176566,
+      "max_ms": 1.4330311678349972
+    },
+    "postprocess": {
+      "n": 300,
+      "p50_ms": 0.9923274628818035,
+      "p95_ms": 1.2971027055755258,
+      "p99_ms": 1.73571967985481,
+      "mean_ms": 1.0163686564192176,
+      "max_ms": 1.8211896531283855
+    }
+  },
+  "stage_share_of_total_p50": {
+    "decode": 0.12025587891985902,
+    "preprocess": 0.32273506152050696,
+    "h2d": 0.056649709000024064,
+    "inference": 0.23912925326769394,
+    "d2h": 0.0489119277534754,
+    "postprocess": 0.21231816953844065
+  },
+  "total_per_frame": {
+    "n": 300,
+    "p50_ms": 4.686157219111919,
+    "p95_ms": 5.667069577611984,
+    "p99_ms": 7.559883850626646,
+    "mean_ms": 4.636149338136117,
+    "max_ms": 8.178052958101034
+  },
+  "session_run_numpy": {
+    "n": 300,
+    "p50_ms": 1.524907536804676,
+    "p95_ms": 1.7188369296491146,
+    "p99_ms": 1.831458364613354,
+    "mean_ms": 1.5483321979021032,
+    "max_ms": 1.879712101072073
+  },
+  "copies_h2d_plus_d2h_p50_ms": 0.4933713935315609,
+  "throughput_fps_sequential": 211.9055796134935,
+  "detections_per_frame": {
+    "mean": 0.0,
+    "max": 0,
+    "frames_with_any": 0
+  },
+  "thresholds": {
+    "conf": 0.3,
+    "nms": 0.45
+  },
+  "telemetry": {
+    "n_samples": 3,
+    "gpu_mem_used_mb": {
+      "p50": 2061.8125,
+      "peak": 2061.8125
+    },
+    "gpu_mem_util_pct": {
+      "p50": 0.0,
+      "peak": 1.0
+    },
+    "gpu_util_pct": {
+      "p50": 1.0,
+      "peak": 28.0
+    },
+    "power_gpu_w": {
+      "p50": 97.531,
+      "peak": 127.718
+    },
+    "sm_clock_mhz": {
+      "p50": 2715.0,
+      "peak": 2722.0
+    },
+    "temp_gpu_c": {
+      "p50": 44.0,
+      "peak": 44.0
+    }
+  },
+  "platform": {
+    "host": "bench-5090",
+    "machine": "x86_64",
+    "system": "Linux",
+    "kernel": "6.17.0-22-generic",
+    "python": "3.12.3",
+    "telemetry": "nvml",
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "driver": "580.178.04",
+    "backend": "onnxruntime",
+    "onnxruntime": "1.30.0",
+    "tensorrt": "10.16.1",
+    "cudnn": "9.19.0",
+    "cuda_runtime": "13.0",
+    "provider_active": "TensorrtExecutionProvider",
+    "precision": "fp32",
+    "intra_op_threads": "default",
+    "inter_op_threads": "default",
+    "allow_spinning": true
+  },
+  "background": {
+    "stopped_for_this_run": [],
+    "containers_running": [
+      {
+        "name": "telecom-pg",
+        "image": "pgvector/pgvector:pg16",
+        "status": "Up 4 days"
+      }
+    ],
+    "top_processes": [
+      {
+        "pid": 684043,
+        "cpu_pct": 21.7,
+        "mem_pct": 0.3,
+        "cmd": ".venv/bin/python -m uvicorn apps.api.main:app --host 0.0.0.0 --port 8000"
+      },
+      {
+        "pid": 338994,
+        "cpu_pct": 9.9,
+        "mem_pct": 0.8,
+        "cmd": "/usr/bin/gnome-shell"
+      },
+      {
+        "pid": 683900,
+        "cpu_pct": 3.1,
+        "mem_pct": 0.7,
+        "cmd": "interactive dev tool"
+      },
+      {
+        "pid": 683386,
+        "cpu_pct": 1.6,
+        "mem_pct": 0.7,
+        "cmd": "interactive dev tool"
+      },
+      {
+        "pid": 2736988,
+        "cpu_pct": 1.2,
+        "mem_pct": 2.6,
+        "cmd": "~/.cache/uv/archive-v0/Ua4fnxOHvv4NuzPN/bin/python ~/.cache/uv/archive-v0/Ua4fnxOHvv4NuzPN/bin/chrom"
+      }
+    ],
+    "load_avg_1m": 0.4443359375
+  },
+  "nvtx": true,
+  "created_at": "2026-10-03T00:54:05.189323+00:00"
+}

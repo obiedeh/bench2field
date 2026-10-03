@@ -1,0 +1,14 @@
+NV Power Mode: MAXN_SUPER
+0
+NVPM ERROR: Error opening /sys/devices/system/cpu/cpu6/online: 2
+NVPM ERROR: failed to read PARAM CPU_ONLINE: ARG CORE_6: PATH /sys/devices/system/cpu/cpu6/online
+NVPM ERROR: Error opening /sys/devices/system/cpu/cpu7/online: 2
+NVPM ERROR: failed to read PARAM CPU_ONLINE: ARG CORE_7: PATH /sys/devices/system/cpu/cpu7/online
+NVPM ERROR: Error opening /sys/devices/system/cpu/cpu6/cpufreq/scaling_min_freq: 2
+NVPM ERROR: failed to read PARAM CPU_A78_6: ARG MIN_FREQ: PATH /sys/devices/system/cpu/cpu6/cpufreq/scaling_min_freq
+NVPM ERROR: Error opening /sys/devices/system/cpu/cpu6/cpufreq/scaling_max_freq: 2
+NVPM ERROR: failed to read PARAM CPU_A78_6: ARG MAX_FREQ: PATH /sys/devices/system/cpu/cpu6/cpufreq/scaling_max_freq
+NVPM ERROR: Error opening /sys/devices/system/cpu/cpu7/cpufreq/scaling_min_freq: 2
+NVPM ERROR: failed to read PARAM CPU_A78_7: ARG MIN_FREQ: PATH /sys/devices/system/cpu/cpu7/cpufreq/scaling_min_freq
+NVPM ERROR: Error opening /sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq: 2
+NVPM ERROR: failed to read PARAM CPU_A78_7: ARG MAX_FREQ: PATH /sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq

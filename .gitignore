@@ -5,10 +5,12 @@ __pycache__/
 .trt_cache/
 build/
 dist/
-runs/
+/runs/
 profiles/*.json
 !profiles/.gitkeep
 models/*.onnx
 models/*.engine
 *.nsys-rep
 *.ncu-rep
+models/weights/
+data/

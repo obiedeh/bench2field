@@ -4,6 +4,11 @@ A budget is what the robot needs, written down before testing: the control
 loop deadline, how often it may be missed, the power envelope, the thermal
 ceiling, the accuracy floor. A run passes only if every gate it can be
 checked against passes; a gate with no data is reported, never assumed.
+
+Latency gates read response time (scheduled arrival to completion), not
+service time, so a report without response stats (schema 1.0) leaves them
+INCOMPLETE. The miss gate counts frames that finished late and frames that
+were dropped: either way the robot had no result by the deadline.
 """
 
 from __future__ import annotations
@@ -19,6 +24,7 @@ from .schema import RunReport
 class Budget:
     name: str
     target_hz: float
+    p95_ms: float | None = None               # response-time limits
     p99_ms: float | None = None
     max_miss_rate: float | None = None
     max_power_w: float | None = None
@@ -85,10 +91,16 @@ def evaluate(report: RunReport, budget: Budget) -> Verdict:
             gates.append(Gate(name, fmt.format(limit), fmt.format(measured),
                               "pass" if ok(measured, limit) else "fail"))
 
+    resp = tier.response
+    if budget.p95_ms is not None:
+        gate("p95 response", budget.p95_ms, resp.p95_ms if resp else None,
+             "{:.2f} ms", lambda m, l: m <= l)
     if budget.p99_ms is not None:
-        gate("p99 latency", budget.p99_ms, tier.latency.p99_ms, "{:.2f} ms", lambda m, l: m <= l)
+        gate("p99 response", budget.p99_ms, resp.p99_ms if resp else None,
+             "{:.2f} ms", lambda m, l: m <= l)
     if budget.max_miss_rate is not None:
-        gate("deadline miss", budget.max_miss_rate, tier.miss_rate, "{:.3%}", lambda m, l: m <= l)
+        gate("late or dropped", budget.max_miss_rate, tier.miss_rate + tier.drop_rate,
+             "{:.3%}", lambda m, l: m <= l)
     if budget.max_power_w is not None:
         ch = tel.get(budget.power_channel or "", {})
         gate("power p50", budget.max_power_w, ch.get("p50") if isinstance(ch, dict) else None,

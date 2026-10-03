@@ -17,6 +17,7 @@ ort = ["onnxruntime>=1.18"]          # install onnxruntime-gpu / the Jetson whee
 nvml = ["nvidia-ml-py>=12"]
 gpu-stress = ["torch>=2.2"]
 dev = ["pytest>=8"]
+tools = ["onnx>=1.16"]               # tools/make_tiny_model.py, and building the test models for the ONNX Runtime tests
 
 [project.scripts]
 b2f = "bench2field.cli:main"

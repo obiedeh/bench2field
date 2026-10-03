@@ -1,0 +1,200 @@
+{
+  "what": "end-to-end pipeline profile, one frame at a time, stages timed on the host clock",
+  "model": {
+    "file": "models/yolox_s.onnx",
+    "sha256": "00b70c44385bb5567e784b0c1efae213c4f2ec06efacfc8e3f52eca333356205"
+  },
+  "frames": {
+    "dir": "data/rover_frames_720p",
+    "n": 300,
+    "warmup": 30,
+    "set_sha256": "4eb92662a7477da28206816836c084e36b5457b596b1d8a7f83b6718b1820c47",
+    "decoded_shape": [
+      720,
+      1280,
+      3
+    ],
+    "jpeg_bytes_mean": 115988.98666666666
+  },
+  "stages": {
+    "decode": {
+      "n": 300,
+      "p50_ms": 1.5653015580028296,
+      "p95_ms": 1.6336613800376654,
+      "p99_ms": 1.6626195143908262,
+      "mean_ms": 1.5728275089835126,
+      "max_ms": 1.7239553853869438
+    },
+    "preprocess": {
+      "n": 300,
+      "p50_ms": 1.974085345864296,
+      "p95_ms": 2.2299987263977528,
+      "p99_ms": 2.370844394899904,
+      "mean_ms": 1.6178510570898652,
+      "max_ms": 2.579118125140667
+    },
+    "h2d": {
+      "n": 300,
+      "p50_ms": 0.2580725122243166,
+      "p95_ms": 0.2971117617562413,
+      "p99_ms": 0.3280424838885665,
+      "mean_ms": 0.26021933027853567,
+      "max_ms": 0.341643113642931
+    },
+    "inference": {
+      "n": 300,
+      "p50_ms": 1.1095779482275248,
+      "p95_ms": 1.2237606570124626,
+      "p99_ms": 1.2723313737660646,
+      "mean_ms": 1.121505694463849,
+      "max_ms": 1.295669935643673
+    },
+    "d2h": {
+      "n": 300,
+      "p50_ms": 0.22889208048582077,
+      "p95_ms": 0.2681093290448189,
+      "p99_ms": 0.27903113048523664,
+      "mean_ms": 0.23490898621579012,
+      "max_ms": 0.2950807102024555
+    },
+    "postprocess": {
+      "n": 300,
+      "p50_ms": 0.96160639077425,
+      "p95_ms": 1.031211530789733,
+      "p99_ms": 1.1637462163344017,
+      "mean_ms": 0.9677273112659653,
+      "max_ms": 1.2964378111064434
+    }
+  },
+  "stage_share_of_total_p50": {
+    "decode": 0.2567105139209378,
+    "preprocess": 0.3237513315371654,
+    "h2d": 0.04232406650543438,
+    "inference": 0.18197153377158568,
+    "d2h": 0.03753845596941614,
+    "postprocess": 0.1577040982954606
+  },
+  "total_per_frame": {
+    "n": 300,
+    "p50_ms": 6.0878898948431015,
+    "p95_ms": 6.583850551396608,
+    "p99_ms": 6.906459918245673,
+    "mean_ms": 5.775039888297518,
+    "max_ms": 7.17221712693572
+  },
+  "session_run_numpy": {
+    "n": 300,
+    "p50_ms": 1.5672584995627403,
+    "p95_ms": 1.8145841779187322,
+    "p99_ms": 4.487324794754385,
+    "mean_ms": 1.677309211033086,
+    "max_ms": 5.317519884556532
+  },
+  "copies_h2d_plus_d2h_p50_ms": 0.48696459271013737,
+  "throughput_fps_sequential": 168.44041554678049,
+  "detections_per_frame": {
+    "mean": 0.0,
+    "max": 0,
+    "frames_with_any": 0
+  },
+  "thresholds": {
+    "conf": 0.3,
+    "nms": 0.45
+  },
+  "settings": {
+    "ort_allow_spinning": false,
+    "cv2_threads": 24
+  },
+  "telemetry": {
+    "n_samples": 4,
+    "gpu_mem_used_mb": {
+      "p50": 2061.8125,
+      "peak": 2061.8125
+    },
+    "gpu_mem_util_pct": {
+      "p50": 1.0,
+      "peak": 1.0
+    },
+    "gpu_util_pct": {
+      "p50": 24.0,
+      "peak": 27.0
+    },
+    "power_gpu_w": {
+      "p50": 109.881,
+      "peak": 124.72
+    },
+    "sm_clock_mhz": {
+      "p50": 2598.5,
+      "peak": 2640.0
+    },
+    "temp_gpu_c": {
+      "p50": 43.0,
+      "peak": 43.0
+    }
+  },
+  "platform": {
+    "host": "bench-5090",
+    "machine": "x86_64",
+    "system": "Linux",
+    "kernel": "6.17.0-22-generic",
+    "python": "3.12.3",
+    "telemetry": "nvml",
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "driver": "580.178.04",
+    "backend": "onnxruntime",
+    "onnxruntime": "1.30.0",
+    "tensorrt": "10.16.1",
+    "cudnn": "9.19.0",
+    "cuda_runtime": "13.0",
+    "provider_active": "TensorrtExecutionProvider",
+    "precision": "fp32",
+    "intra_op_threads": "default",
+    "inter_op_threads": "default",
+    "allow_spinning": false
+  },
+  "background": {
+    "stopped_for_this_run": [],
+    "containers_running": [
+      {
+        "name": "telecom-pg",
+        "image": "pgvector/pgvector:pg16",
+        "status": "Up 4 days"
+      }
+    ],
+    "top_processes": [
+      {
+        "pid": 338994,
+        "cpu_pct": 9.9,
+        "mem_pct": 0.8,
+        "cmd": "/usr/bin/gnome-shell"
+      },
+      {
+        "pid": 684043,
+        "cpu_pct": 4.2,
+        "mem_pct": 0.3,
+        "cmd": ".venv/bin/python -m uvicorn apps.api.main:app --host 0.0.0.0 --port 8000"
+      },
+      {
+        "pid": 684999,
+        "cpu_pct": 1.6,
+        "mem_pct": 0.0,
+        "cmd": "/bin/sh /snap/cups/1262/scripts/run-cups-browsed"
+      },
+      {
+        "pid": 683900,
+        "cpu_pct": 1.4,
+        "mem_pct": 0.7,
+        "cmd": "interactive dev tool"
+      },
+      {
+        "pid": 2736988,
+        "cpu_pct": 1.2,
+        "mem_pct": 2.6,
+        "cmd": "~/.cache/uv/archive-v0/Ua4fnxOHvv4NuzPN/bin/python ~/.cache/uv/archive-v0/Ua4fnxOHvv4NuzPN/bin/chrom"
+      }
+    ],
+    "load_avg_1m": 1.69580078125
+  },
+  "nvtx": true,
+  "created_at": "2026-10-03T00:54:46.696009+00:00"
+}

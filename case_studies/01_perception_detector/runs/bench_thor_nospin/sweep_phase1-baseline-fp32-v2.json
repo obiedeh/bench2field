@@ -1,0 +1,109 @@
+{
+  "sweep": "phase1-baseline-fp32-v2",
+  "config_file": "case_studies/01_perception_detector/sweeps/phase1_baseline.yaml",
+  "config": {
+    "name": "phase1-baseline-fp32-v2",
+    "variants": [
+      {
+        "label": "trt_fp32",
+        "model": "models/yolox_s.onnx",
+        "provider": "tensorrt",
+        "precision": "fp32",
+        "technique": "baseline",
+        "name": "yolox-s"
+      },
+      {
+        "label": "cuda_fp32",
+        "model": "models/yolox_s.onnx",
+        "provider": "cuda",
+        "precision": "fp32",
+        "technique": "baseline",
+        "name": "yolox-s"
+      }
+    ],
+    "repeats": 3,
+    "environment": "bench-idle",
+    "tiers_hz": [
+      10,
+      26,
+      30,
+      100
+    ],
+    "duration_s": 60,
+    "warmup_s": 5,
+    "deadline_ms": 33.3,
+    "drop_late": false,
+    "cooldown_c": null,
+    "replay": null,
+    "only": null,
+    "stopped": [
+      "systemd user unit physical-ai-safety.service (Safety Observability API on :8081) stopped with systemctl --user stop, then docker stop physical-ai-vllm (--rm, removed); confirmed no container and no GPU client after 3 min; both restored after the sweep"
+    ],
+    "no_spin": true
+  },
+  "host": "bench-thor",
+  "git": {
+    "commit": "6dad16b90d496e8f691ecae8b3bbe6c6f9fb3c4d",
+    "dirty": false,
+    "root": "~/github/bench2field"
+  },
+  "started_at": "2026-10-03T03:05:24.142210+00:00",
+  "finished_at": "2026-10-03T03:31:33.515977+00:00",
+  "complete": true,
+  "runs": [
+    {
+      "order": 1,
+      "label": "trt_fp32",
+      "repeat": 1,
+      "file": "trt_fp32_r1.json",
+      "started_at": "2026-10-03T03:05:24.142267+00:00",
+      "run_id": "69123edb77be",
+      "finished_at": "2026-10-03T03:09:46.489711+00:00"
+    },
+    {
+      "order": 2,
+      "label": "cuda_fp32",
+      "repeat": 1,
+      "file": "cuda_fp32_r1.json",
+      "started_at": "2026-10-03T03:09:46.490014+00:00",
+      "run_id": "c69139ff77e0",
+      "finished_at": "2026-10-03T03:14:07.432097+00:00"
+    },
+    {
+      "order": 3,
+      "label": "trt_fp32",
+      "repeat": 2,
+      "file": "trt_fp32_r2.json",
+      "started_at": "2026-10-03T03:14:07.432425+00:00",
+      "run_id": "1e7eeee5bc57",
+      "finished_at": "2026-10-03T03:18:29.609461+00:00"
+    },
+    {
+      "order": 4,
+      "label": "cuda_fp32",
+      "repeat": 2,
+      "file": "cuda_fp32_r2.json",
+      "started_at": "2026-10-03T03:18:29.609929+00:00",
+      "run_id": "25466b70ceae",
+      "finished_at": "2026-10-03T03:22:50.525002+00:00"
+    },
+    {
+      "order": 5,
+      "label": "trt_fp32",
+      "repeat": 3,
+      "file": "trt_fp32_r3.json",
+      "started_at": "2026-10-03T03:22:50.525464+00:00",
+      "run_id": "34270efa50ae",
+      "finished_at": "2026-10-03T03:27:12.654590+00:00"
+    },
+    {
+      "order": 6,
+      "label": "cuda_fp32",
+      "repeat": 3,
+      "file": "cuda_fp32_r3.json",
+      "started_at": "2026-10-03T03:27:12.655082+00:00",
+      "run_id": "7363a40f490a",
+      "finished_at": "2026-10-03T03:31:33.515459+00:00"
+    }
+  ]
+}

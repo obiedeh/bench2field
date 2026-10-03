@@ -6,7 +6,13 @@ target_hz: 30            # camera frame rate the detector must keep up with
 p99_ms: 25.0             # leaves headroom inside the 33.3 ms frame period
 max_miss_rate: 0.001     # at most 1 late frame in 1,000
 max_power_w: 15.0        # share of the Orin NX power envelope given to perception
-power_channel: power_vin_sys_5v0_w   # confirm the rail name from tegrastats on the rover
+power_channel: power_board_w   # total board input power, whichever rail the board reports it on
+# 2026-10-02: power_channel changed from power_vin_sys_5v0_w, before any run was
+# judged against this budget. VIN_SYS_5V0 is a 5 V sub-rail, not the board
+# total: on the AGX Thor it read about 6 W while the board drew over 20 W
+# (bringup/thor/). power_board_w is mapped from VIN on the Thor. The Orin NX's
+# total rail is still to be confirmed on the rover; until it is mapped, the
+# power gate there reports no data and the verdict is INCOMPLETE.
 max_temp_c: 85.0
 min_accuracy:
   map50: 0.0             # set once the baseline mAP on rover frames is measured

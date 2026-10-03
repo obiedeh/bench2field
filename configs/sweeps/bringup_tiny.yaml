@@ -1,0 +1,19 @@
+# Tooling check, not a study: the tiny bring-up model on two providers.
+# Make the model first:  python tools/make_tiny_model.py models/tiny_conv.onnx
+#   b2f sweep configs/sweeps/bringup_tiny.yaml --out-dir runs/sweep_tiny
+name: bringup-tiny
+environment: bench-idle
+repeats: 3
+tiers_hz: [30]
+duration_s: 10
+warmup_s: 5
+deadline_ms: 33.3
+variants:
+  - label: cuda_fp32
+    model: models/tiny_conv.onnx
+    provider: cuda
+    precision: fp32
+  - label: trt_fp16
+    model: models/tiny_conv.onnx
+    provider: tensorrt
+    precision: fp16

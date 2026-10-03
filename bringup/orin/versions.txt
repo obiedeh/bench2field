@@ -1,0 +1,21 @@
+# Jetson Orin NX (host field-orin), 2026-10-02
+# NVIDIA Jetson Orin NX Engineering Reference Developer Kit Super (/proc/device-tree/model)
+# R36 (release), REVISION: 4.7, GCID: 42132812, BOARD: generic, EABI: aarch64, DATE: Thu Sep 18 22:54:44 UTC 2025
+# Python 3.10.12 (system; no python3-venv, so the venv was made with --without-pip and pip bootstrapped into it)
+# driver 540.4.0, CUDA 12.6 per nvidia-smi
+# nvidia-l4t-core 36.4.7-20250918154033
+# cuda-toolkit-12-6 12.6.11-1
+# libcudnn9-cuda-12 9.11.0.98-1        <- installed, but NOT what runs:
+# libcudnn9-cross-aarch64-cuda-12 9.3.0.75-1
+#   ldconfig resolves libcudnn.so.9 to /usr/local/cuda/targets/aarch64-linux/lib/libcudnn.so.9 and
+#   cudnnGetVersion() on the library onnxruntime loads returns 9.3.0; every run report says cudnn 9.3.0.
+# libnvinfer-bin 10.7.0.23-1+cuda12.6  (TensorRT 10.7.0, system; getInferLibVersion agrees)
+# onnxruntime-gpu 1.24.0 from https://pypi.jetson-ai-lab.io/jp6/cu126 (CUDA and TensorRT providers)
+#
+# pip freeze of .venv (bench2field itself omitted):
+numpy==2.2.6
+nvidia-ml-py==13.615.71
+onnx==1.23.1
+onnxruntime-gpu==1.24.0
+pytest==9.1.1
+PyYAML==6.0.3

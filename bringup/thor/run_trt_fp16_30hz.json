@@ -1,0 +1,119 @@
+{
+  "variant": {
+    "model": "tiny_conv",
+    "backend": "onnxruntime",
+    "provider": "TensorrtExecutionProvider",
+    "precision": "fp16",
+    "technique": "baseline",
+    "notes": ""
+  },
+  "environment": "bench-idle",
+  "tiers": [
+    {
+      "target_hz": 30.0,
+      "actual_hz": 30.03160172694337,
+      "duration_s": 29.968431526998756,
+      "deadline_ms": 33.3,
+      "deadline_misses": 0,
+      "latency": {
+        "n": 900,
+        "p50_ms": 1.6541950171813369,
+        "p95_ms": 2.6123969975742507,
+        "p99_ms": 3.2936883592628874,
+        "max_ms": 3.47355697886087,
+        "mean_ms": 1.7947212330828834
+      },
+      "telemetry": {
+        "n_samples": 60,
+        "cpu_cores_online": {
+          "p50": 14.0,
+          "peak": 14.0
+        },
+        "cpu_util_max_pct": {
+          "p50": 29.5,
+          "peak": 35.0
+        },
+        "cpu_util_mean_pct": {
+          "p50": 2.4285714285714284,
+          "peak": 7.142857142857143
+        },
+        "power_vdd_cpu_soc_mss_w": {
+          "p50": 5.899,
+          "peak": 6.685
+        },
+        "power_vdd_gpu_w": {
+          "p50": 1.965,
+          "peak": 2.358
+        },
+        "power_vin_sys_5v0_w": {
+          "p50": 6.158,
+          "peak": 6.461
+        },
+        "power_vin_w": {
+          "p50": 20.587,
+          "peak": 24.24
+        },
+        "ram_total_mb": {
+          "p50": 125772.0,
+          "peak": 125772.0
+        },
+        "ram_used_mb": {
+          "p50": 47124.0,
+          "peak": 47144.0
+        },
+        "temp_cpu_c": {
+          "p50": 35.75,
+          "peak": 37.625
+        },
+        "temp_gpu_c": {
+          "p50": 36.625,
+          "peak": 36.781
+        },
+        "temp_soc012_c": {
+          "p50": 35.781,
+          "peak": 38.187
+        },
+        "temp_soc345_c": {
+          "p50": 37.125,
+          "peak": 37.312
+        },
+        "temp_tj_c": {
+          "p50": 37.156,
+          "peak": 38.187
+        }
+      },
+      "response": {
+        "n": 900,
+        "p50_ms": 1.7167765035992488,
+        "p95_ms": 2.8220357271493413,
+        "p99_ms": 3.3560375819797628,
+        "max_ms": 3.5524426493793726,
+        "mean_ms": 1.8656227773236524
+      },
+      "dropped": 0,
+      "drop_late": false
+    }
+  ],
+  "platform": {
+    "host": "bench-thor",
+    "machine": "aarch64",
+    "system": "Linux",
+    "kernel": "6.8.12-tegra",
+    "python": "3.12.3",
+    "l4t_release": "# R38 (release), REVISION: 4.0, GCID: 43443517, BOARD: generic, EABI: aarch64, DATE: Wed Dec 31 00:15:19 UTC 2025",
+    "is_jetson": true,
+    "telemetry": "tegrastats",
+    "nvpmodel": "NV Power Mode: 120W",
+    "backend": "onnxruntime",
+    "onnxruntime": "1.24.0",
+    "provider_active": "TensorrtExecutionProvider",
+    "precision": "fp16",
+    "intra_op_threads": "default",
+    "inter_op_threads": "default",
+    "allow_spinning": true
+  },
+  "accuracy": {},
+  "run_id": "bba5cf487997",
+  "created_at": "2026-10-02T11:50:23.189710+00:00",
+  "schema_version": "1.1"
+}
