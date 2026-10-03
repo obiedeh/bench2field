@@ -116,9 +116,9 @@ Files: `runs/profile_5090_rover_frames_720p.json`, `..._720p_nospin.json`, `..._
 
 ### The full frame on the Orin does not fit the 33.3 ms deadline
 
-On the rover's board, with its own 640x480 camera frames, the whole frame costs **43.9 ms p50 and 47.8 ms p95** (max 49.4 ms), a sequential throughput of 22.9 frames per second against a camera delivering 26. Every frame would miss the deadline; a pipeline built this way would have to drop at least one frame in three. Where it goes:
+On the rover's board, with its own 640x480 camera frames, the whole frame costs **43.9 ms p50 and 47.8 ms p95** (max 49.4 ms), a sequential throughput of 22.9 frames per second against a camera delivering 26. Every frame would miss the 33.3 ms deadline, and a pipeline built this way would fall behind the camera by about three frames a second, one in eight. Where it goes:
 
-- **Inference is 24.8 ms inside the frame but 16.8 ms back to back.** `session.run` in a tight loop (the second pass of the profiler, and roughly what the 26 Hz sweep measured at 22.8 ms p50) is far faster than the same call with 19 ms of host work between calls: the GPU drops its clocks while the host decodes and post-processes, then pays to come back for every frame. The inference-only sweep therefore understates the model's cost on this board by about a third.
+- **Inference is 24.8 ms inside the frame, 22.8 ms in the 26 Hz sweep, 16.8 ms back to back.** The same `session.run` costs 16.8 ms p50 in a tight loop (the profiler's second pass), 22.8 ms when frames arrive 38 ms apart (the sweep), and 24.8 ms with 19 ms of host work between calls: the GPU drops its clocks whenever the host is busy or waiting, then pays to come back for every frame. A flat-out benchmark understates the model's cost on this board by a third; the 26 Hz sweep by about 8%.
 - **Postprocess is 9.5 ms**, ten times the 5090's 1.0 ms: NumPy NMS over all 8,400 candidates on six A78 cores. It is 22% of the frame for zero detections.
 - **Decode is 4.3 ms** for the camera's 38 KB JPEGs (the 5090: 0.56 ms).
 - **Preprocess is 3.0 ms** (the 5090: 1.5 ms) and the two copies 2.4 ms together: the unified memory the phase 3 kernel can write into directly is worth 2.4 ms here before the kernel saves anything on the resize.
