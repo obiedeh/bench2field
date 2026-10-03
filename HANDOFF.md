@@ -96,6 +96,8 @@ Last updated 2026-10-02. Steps 1 and 2 (5090, Thor and Orin) are done. `b2f swee
 
 - **Thermal hold** (fix before phase 5). `--only thermal` soaks and then stops heating, so the device cools during the tiers. On a discrete GPU the soak heats the CPU but reads GPU temperature, so it would run to its 600 s timeout.
 
+- **Orin replay drift (explain before trusting replay validity, phase 5).** On the Orin, the CPU stressor was calibrated to a 40% target with the model idle: duty frozen at 0.118, 41.7% measured. During the 60 s tier that followed, CPU utilisation had a median of 35.5% with the duty unchanged. The rover's own services were still settling after boot, so the background load the calibration absorbed was not steady. Until this is explained (and the recording rule "steady-state background load" is enforced or checked), a replay's validity number should not be trusted on its own. No fix now.
+
 ## Open questions
 
 - **ONNX Runtime versions differ between machines.** The 5090 runs 1.30.0 (TensorRT 10.16.1.11) and the Thor runs 1.24.0 (system TensorRT 10.13.3.9), because no 1.30.0 wheel works on the Thor. Latency on the two is not a same-runtime comparison. Options: accept and record it, pin the 5090 to 1.24.0, or build 1.30.0 from source on the Thor (well over 15 minutes).
