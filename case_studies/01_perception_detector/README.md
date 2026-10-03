@@ -12,7 +12,9 @@ Plan and phases: [PLAN.md](PLAN.md). Findings: `PHASE1_FINDINGS.md` (pending).
 
 ```bash
 env -u PYTHONPATH .venv/bin/pip install -r case_studies/01_perception_detector/requirements-export.txt \
-    --extra-index-url https://download.pytorch.org/whl/cu130      # yolox needs --no-build-isolation, see the file
+    --extra-index-url https://download.pytorch.org/whl/cu130
+env -u PYTHONPATH .venv/bin/pip install --no-deps --no-build-isolation \
+    "yolox @ git+https://github.com/Megvii-BaseDetection/YOLOX.git@6ddff4824372906469a7fae2dc3206c7aa4bbaee"
 env -u PYTHONPATH .venv/bin/python case_studies/01_perception_detector/export_yolox.py s
 ```
 

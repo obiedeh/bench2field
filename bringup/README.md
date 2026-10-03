@@ -2,7 +2,7 @@
 
 Runs made while getting Bench2Field working on each machine. They use `tools/make_tiny_model.py`, not a real detector, so they validate the tooling and say nothing about any model. Every bring-up figure quoted in a commit message or in `HANDOFF.md` comes from a file here or from `tests/fixtures/`.
 
-## rtx5090/ (host `bench-5090`, 2026-10-02)
+## rtx5090/ (host bench-5090, 2026-10-02)
 
 RTX 5090, driver 580.178.04 (CUDA 13.0), Python 3.12.3, onnxruntime-gpu 1.30.0, TensorRT 10.16.1.11 (`tensorrt-cu13`), cuDNN 9.19.0.56, PyTorch 2.11.0+cu130, nvidia-ml-py 13.615.71. The full list is in `versions.txt`.
 
