@@ -16,7 +16,7 @@ Before trusting any tier, the rate the rover's camera topic actually delivers wa
 | Jetson AGX Thor | bench | **11.04 ms** (11.02–11.05) | 10.46 ms | 0 / 4,680 | 21.1 W board | `runs/bench_thor_nospin/` |
 | Jetson Orin NX (rover, idle) | field board | **26.9 ms** (23.1–26.9) | 26.6 ms | 0 / 4,680 | 9.2 W board | `runs/field_orin/` |
 
-The Orin row is the field headline: the detector fits the 33.3 ms frame at the rover's rate with about 6 ms to spare, and that margin is what every later optimization is measured against. The bench rows are what the same file does on the two bench machines.
+The Orin row is the field headline for **the model alone**: `b2f run` times inference plus the input and output copies, nothing else. On that measure the detector takes 26.9 ms of the 33.3 ms frame at the rover's rate. **The full frame on the Orin does not fit**: section 2 measures decode, preprocess, copies, inference and postprocess together on the rover's own 480p frames and gets 47.8 ms p95. On the 5090 the host stages had already taken about 4x the inference time; on the Orin they take about 0.7x, but inference itself is slower inside the frame than back to back. The bench rows are what the same file does on the two bench machines.
 
 ## 1. FP32 baseline, idle machines
 
@@ -77,7 +77,7 @@ onnxruntime 1.24.0, TensorRT 10.7.0, cuDNN 9.3.0, CUDA 12.6, power mode `MAXN_SU
 
 What the Orin shows:
 
-- **At 26 Hz the detector fits the frame, with little to spare:** response p95 26.9 ms against a 33.3 ms deadline, no misses. The three repeats split 23.1 / 26.9 / 26.9 ms: the first ran with the die at 59.7 °C and GPU load at 53%, the other two, after the CUDA runs had warmed the board, at 63.5 °C and 65–69% load for the same work, so the board was running its GPU slower. That is a 16% swing from thermal state alone, inside one sweep, on an idle board; the methodology's repeats and alternation are what caught it, and the phase 5 thermal-hold work is what it needs.
+- **At 26 Hz the model alone takes 26.9 ms of the 33.3 ms frame** (response p95, inference plus copies), with no misses in this inference-only sweep. The full frame, measured in section 2, is 47.8 ms and misses. The three repeats split 23.1 / 26.9 / 26.9 ms: the first ran with the die at 59.7 °C and GPU load at 53%, the other two, after the CUDA runs had warmed the board, at 63.5 °C and 65–69% load for the same work, so the board was running its GPU slower. That is a 16% swing from thermal state alone, inside one sweep, on an idle board; the methodology's repeats and alternation are what caught it, and the phase 5 thermal-hold work is what it needs.
 - **At 10 Hz the same model misses the deadline almost every frame** (service p95 33.8 ms, 1679 of 1800 late). The Orin clocks its GPU down hard between sparse frames; the 100 Hz tier, where the GPU never idles, serves a frame in 12.1 ms. So on this board the rate dependence is 2.8x between 10 and 100 Hz, versus 2.5x on the Thor and 1.2x on the 5090. A perception node that runs at 10 Hz to "save work" would be slower per frame than one running at 30.
 - **100 Hz cannot be served:** the board sustains 83.5 Hz with TensorRT and the open-loop queue grows for the whole tier (response p95 11.2 s). This is the no-`--drop-late` policy doing what it says; the tier is there to show where saturation is, and the field runs will use the rover's rate.
 - **TensorRT over CUDA:** 1.09x at 26 Hz, 1.06x at 30 Hz, 1.8x at 10 Hz, 1.7x at 100 Hz (p95). Far less than on the 5090 and the Thor at the rover's rate.
@@ -97,24 +97,36 @@ What the Orin shows:
 
 ## 2. End-to-end pipeline profile, RTX 5090
 
-`profile_pipeline.py`: one frame at a time through decode (`cv2.imdecode`), preprocess (letterbox to 640, HWC to CHW, float32: the unfused baseline), host-to-device copy, inference (TensorRT fp32, inputs and outputs bound on the GPU), device-to-host copy, and postprocess (score threshold 0.3, per-class NMS 0.45, NumPy). 300 frames after 30 of warmup; p50 and p95 per stage in ms.
+`profile_pipeline.py`: one frame at a time through decode (`cv2.imdecode`), preprocess (letterbox to 640, HWC to CHW, float32: the unfused baseline), host-to-device copy, inference (TensorRT fp32, inputs and outputs bound on the GPU), device-to-host copy, and postprocess (score threshold 0.3, per-class NMS 0.45, NumPy, YOLOX's own `multiclass_nms` code). 300 frames after 30 of warmup; p50 and p95 per stage in ms. The 5090 columns are spin-on unless marked; the Orin column is `--no-spin`, rover stack off, the same 480p frame set (same manifest hash) as the 5090's 480p column.
 
 Frame sets: 300 frames from the rover's own camera (Orbbec DaBai DCW2, MJPEG as the camera encodes it) at 1280x720 and 640x480, captured with `tools/capture_frames.py` while the camera happened to be looking at a blank wall (no detections, small JPEGs, so decode and NMS are at their cheapest), and 300 frames of a busy indoor scene at 640x640 cut from a video with `tools/frames_from_video.py` (1.1 detections per frame).
 
-| stage | rover 720p | rover 720p, no spin | rover 480p | scene 640 |
-|---|---|---|---|---|
-| decode | 1.579 / 1.771 | 1.565 / 1.634 | 0.562 / 0.623 | 0.449 / 0.470 |
-| preprocess | 3.286 / **39.985** | 1.974 / 2.230 | 1.508 / 1.998 | 1.421 / 1.627 |
-| h2d copy | 0.295 / 0.419 | 0.258 / 0.297 | 0.265 / 0.333 | 0.246 / 0.278 |
-| inference | 1.122 / 1.393 | 1.110 / 1.224 | 1.118 / 1.310 | 1.106 / 1.274 |
-| d2h copy | 0.248 / 0.297 | 0.229 / 0.268 | 0.229 / 0.302 | 0.222 / 0.256 |
-| postprocess | 0.970 / 1.199 | 0.962 / 1.031 | 0.992 / 1.297 | 0.976 / 1.052 |
-| **total per frame** | 7.536 / 44.748 | 6.088 / 6.584 | 4.686 / 5.667 | 4.409 / 4.829 |
-| share of total p50 that is inference | 15% | 18% | 24% | 25% |
+| stage | 5090, rover 720p | 5090, rover 720p, no spin | 5090, rover 480p | 5090, scene 640 | **Orin NX, rover 480p, no spin** |
+|---|---|---|---|---|---|
+| decode | 1.579 / 1.771 | 1.565 / 1.634 | 0.562 / 0.623 | 0.449 / 0.470 | 4.320 / 5.189 |
+| preprocess | 3.286 / **39.985** | 1.974 / 2.230 | 1.508 / 1.998 | 1.421 / 1.627 | 3.001 / 3.486 |
+| h2d copy | 0.295 / 0.419 | 0.258 / 0.297 | 0.265 / 0.333 | 0.246 / 0.278 | 1.227 / 1.366 |
+| inference | 1.122 / 1.393 | 1.110 / 1.224 | 1.118 / 1.310 | 1.106 / 1.274 | 24.828 / 25.104 |
+| d2h copy | 0.248 / 0.297 | 0.229 / 0.268 | 0.229 / 0.302 | 0.222 / 0.256 | 1.195 / 1.322 |
+| postprocess | 0.970 / 1.199 | 0.962 / 1.031 | 0.992 / 1.297 | 0.976 / 1.052 | 9.533 / 11.676 |
+| **total per frame** | 7.536 / 44.748 | 6.088 / 6.584 | 4.686 / 5.667 | 4.409 / 4.829 | **43.851 / 47.826** |
+| share of total p50 that is inference | 15% | 18% | 24% | 25% | 56% |
 
-Files: `runs/profile_5090_rover_frames_720p.json`, `..._720p_nospin.json`, `..._480p.json`, `runs/profile_5090_scene_frames_640.json`.
+Files: `runs/profile_5090_rover_frames_720p.json`, `..._720p_nospin.json`, `..._480p.json`, `runs/profile_5090_scene_frames_640.json`, `runs/profile_orin_rover_frames_480p.json`.
 
-### Where the time goes
+### The full frame on the Orin does not fit the 33.3 ms deadline
+
+On the rover's board, with its own 640x480 camera frames, the whole frame costs **43.9 ms p50 and 47.8 ms p95** (max 49.4 ms), a sequential throughput of 22.9 frames per second against a camera delivering 26. Every frame would miss the deadline; a pipeline built this way would have to drop at least one frame in three. Where it goes:
+
+- **Inference is 24.8 ms inside the frame but 16.8 ms back to back.** `session.run` in a tight loop (the second pass of the profiler, and roughly what the 26 Hz sweep measured at 22.8 ms p50) is far faster than the same call with 19 ms of host work between calls: the GPU drops its clocks while the host decodes and post-processes, then pays to come back for every frame. The inference-only sweep therefore understates the model's cost on this board by about a third.
+- **Postprocess is 9.5 ms**, ten times the 5090's 1.0 ms: NumPy NMS over all 8,400 candidates on six A78 cores. It is 22% of the frame for zero detections.
+- **Decode is 4.3 ms** for the camera's 38 KB JPEGs (the 5090: 0.56 ms).
+- **Preprocess is 3.0 ms** (the 5090: 1.5 ms) and the two copies 2.4 ms together: the unified memory the phase 3 kernel can write into directly is worth 2.4 ms here before the kernel saves anything on the resize.
+- Host stages together (decode, preprocess, postprocess): 16.9 ms, about 0.7x inference on the Orin against about 4x on the 5090 at 720p.
+
+The board drew 9.1 W during the profile, GPU load 71% p50, junction 56.7 °C.
+
+### Where the time goes on the 5090
 
 1. **Inference is 15–25% of the frame.** At the rover's 720p, the host-side stages (decode, preprocess, postprocess) take 4.5 ms with spinning off (5.8 ms with it) against 1.1 ms of inference. Optimizing the model alone cannot make this pipeline faster than about 5 ms per frame on the 5090; the host work has to shrink too.
 2. **Preprocessing rivals, and at 720p exceeds, inference.** The separate-pass letterbox, transpose and cast cost 2.0 ms at 720p and 1.4–1.5 ms at 480p and 640, against 1.1 ms of inference. That is the case for the phase 3 fused preprocessing kernel: a single pass that reads each source pixel once and writes the tensor straight into device memory removes both the preprocess stage and the host-to-device copy.
@@ -140,4 +152,5 @@ Files: `runs/profile_5090_rover_frames_720p.json`, `..._720p_nospin.json`, `..._
 
 - Accuracy (COCO subset and labelled rover frames) starts in phase 2 with the first optimized variant, per the methodology.
 - The Orin NX was baselined idle (section 1); the runs with the rover's stack up, the replay profile and attribution are phase 5.
-- Thermal state was not controlled (no `--cooldown-c`); temperatures stayed within 45–50 °C on the 5090 and 38–44 °C on the Thor across the sweeps, so it did not matter here.
+- Thermal state was not controlled (no `--cooldown-c`). On the 5090 (45–50 °C) and the Thor (38–44 °C) it made no visible difference across the sweeps. On the Orin it did: the 26 Hz TensorRT p95 went from 23.1 ms with the junction at 59.7 °C to 26.9 ms at 63.5 °C between repeats of one sweep, a 16% swing. The thermal-hold work is scheduled before phase 5.
+- Provenance: reports record the git commit they ran from since `0ac4fbf`. The `bench_5090_nospin` and `field_orin` sweeps predate that; their manifests carry the commit (`ac95271`) recorded afterwards from the session log, marked as such. The Orin profile ran at `86d0490`, likewise noted in its JSON.
