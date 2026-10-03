@@ -1,0 +1,8 @@
+# pynvml calls on Jetson Orin NX (L4T R36.4.7, driver 540.4.0, nvidia-ml-py), 2026-10-02
+nvmlDeviceGetName                 = Orin (nvgpu)
+nvmlSystemGetDriverVersion        = 540.4.0
+nvmlDeviceGetPowerUsage           FAILED NVMLError_NotSupported
+nvmlDeviceGetTemperature          FAILED NVMLError_NotSupported
+nvmlDeviceGetUtilizationRates     FAILED NVMLError_NotSupported
+nvmlDeviceGetMemoryInfo           FAILED NVMLError_NotSupported
+nvmlDeviceGetClockInfo(CLOCK_SM)  FAILED NVMLError_NotSupported

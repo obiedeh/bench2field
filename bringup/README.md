@@ -45,6 +45,28 @@ What the captures show:
 
 `synth_cpu40_emc30.json` is a hand-written profile, not a field recording.
 
-## orin/
+## orin/ (host `field-orin`, the ROSMASTER rover, 2026-10-02)
 
-Pending.
+Jetson Orin NX, "Engineering Reference Developer Kit Super", L4T R36.4.7 (JetPack 6), driver 540.4.0 (CUDA 12.6), system TensorRT 10.7.0, **Python 3.10.12** (the case the `timezone.utc` fix was for). Power mode `MAXN_SUPER` (mode 0), left as found; `nvpmodel -q` also prints errors about CPU cores 6 and 7, which are offline in this mode, so six cores are online. Details in `versions.txt`.
+
+The board had just been switched on and is the rover: its own services were running (`openclaw-gateway` was using more than one core while settling, plus the OLED script and desktop). It is the field machine, so that is expected. Disk was 93% full before the install (8.1 GB free after).
+
+**ONNX Runtime wheel:** `onnxruntime-gpu==1.24.0` from `https://pypi.jetson-ai-lab.io/jp6/cu126`, the same version as the Thor. The system has no `python3-venv`, so the venv was created with `--without-pip` and pip bootstrapped into it.
+
+**cuDNN that actually runs is 9.3.0, not the installed 9.11.0.98.** `ldconfig` resolves `libcudnn.so.9` to `/usr/local/cuda/targets/aarch64-linux/lib/`, which belongs to the `libcudnn9-cross-aarch64-cuda-12 9.3.0.75` package, and `cudnnGetVersion()` on the library onnxruntime loads says 9.3.0. Every run report records it. Not changed.
+
+| File | What it is |
+|---|---|
+| `tegrastats_idle.txt`, `tegrastats_cuda_load.txt`, `tegrastats_trt_load.txt` | 20 lines each at 500 ms: nothing of ours running, then during the CUDA and TensorRT runs. |
+| `nvpmodel.txt`, `device_tree_model.txt` | `nvpmodel -q` output (with its error lines) and the board model. |
+| `nvml_supported_calls.txt` | NVML on the Orin answers only the device name and driver version. |
+| `run_cuda_fp32_30hz.json` | `b2f run models/tiny_conv.onnx --provider cuda --tiers 30 --duration 30` |
+| `run_trt_fp16_30hz.json` | `b2f run models/tiny_conv.onnx --provider tensorrt --precision fp16 --tiers 30 --duration 30` |
+| `run_trt_fp16_30hz_replay_cpu40_emc30.json` | The TensorRT run for 60 s with `synth_cpu40_emc30.json` replayed. |
+
+What the captures show:
+
+- **Total board power is the `VDD_IN` rail** (reported as `power_board_w`): 5.4 W idle, 6 to 13 W in the runs, always above `VDD_CPU_GPU_CV` plus `VDD_SOC`. The rover budget's `power_channel: power_board_w` therefore resolves on the rover.
+- **tegrastats on the Orin prints `GR3D_FREQ`** (GPU load, visible during the runs) **but no `EMC_FREQ`**, with or without `--readall`. The memory-bandwidth stressor is open-loop on the Orin too.
+- **Replay steering, CPU target 40%:** calibration converged at a duty of only 0.118, measuring 41.7% with the model idle, because the rover's own services were already using CPU; the tier then ran at a median of 35.5% as those services settled. This is the calibrate-then-freeze design doing what it should on a machine whose background load is not ours, and a reminder that a field profile must be recorded with that load in its steady state.
+- **NVML is useless on the Orin** (every telemetry query is NotSupported), so the sampler now reports itself unavailable there rather than returning empty samples.
