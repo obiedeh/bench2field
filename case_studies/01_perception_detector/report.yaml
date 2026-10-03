@@ -1,0 +1,49 @@
+# What `b2f report` reads for this case study, and how it labels it. Every
+# number in the report comes from the files under runs/ and the two fixed
+# inputs named here (the budget and the camera-rate capture); nothing is
+# typed in.
+title: "Case study 01: YOLOX-s on the ROSMASTER rover"
+model: "YOLOX-s, FP32 ONNX, TensorRT provider"
+headline_variant: trt_fp32          # the baseline variant in every sweep
+reference_variant: cuda_fp32        # shown alongside it
+
+budget: ../../configs/budgets/rover_perception.yaml
+# The rate the rover's camera topic actually delivers, measured with
+# `ros2 topic hz`; the report takes the mean of the window averages in it and
+# rounds to the nearest tier that was swept.
+camera_rate_capture: ../../bringup/orin/ros2_topic_hz_color.txt
+
+boards:
+  bench-5090:
+    label: "RTX 5090"
+    role: bench
+    baseline: bench_5090_nospin
+    references:
+      bench_5090_rerun: "spin-on, four tiers"
+      bench_5090: "first sweep, three tiers, spin-on"
+  bench-thor:
+    label: "Jetson AGX Thor"
+    role: bench
+    baseline: bench_thor_nospin
+    references:
+      bench_thor_4tier_spin: "clean of vLLM but spin-on (stale checkout)"
+      bench_thor: "first sweep, three tiers, spin-on, vLLM container up"
+      bench_thor_rerun_stopped: "stopped after one run, not a baseline"
+  field-orin:
+    label: "Jetson Orin NX (rover)"
+    role: field
+    baseline: field_orin
+
+# Pipeline profiles: the same rover 480p frames on all three boards, plus the
+# 5090's other sets. `same_frames` is the cross-board comparison; `spin_pair`
+# is the spin-on / spin-off pair on the 5090.
+profiles:
+  profile_5090_rover_frames_720p: {board: bench-5090, label: "rover 720p, spin-on"}
+  profile_5090_rover_frames_720p_nospin: {board: bench-5090, label: "rover 720p, no spin"}
+  profile_5090_rover_frames_480p: {board: bench-5090, label: "rover 480p, spin-on"}
+  profile_5090_scene_frames_640: {board: bench-5090, label: "busy scene 640, spin-on"}
+  profile_thor_rover_frames_480p: {board: bench-thor, label: "rover 480p, no spin"}
+  profile_orin_rover_frames_480p: {board: field-orin, label: "rover 480p, no spin"}
+same_frames: [profile_5090_rover_frames_480p, profile_thor_rover_frames_480p, profile_orin_rover_frames_480p]
+headline_profile: profile_orin_rover_frames_480p
+spin_pair: [profile_5090_rover_frames_720p, profile_5090_rover_frames_720p_nospin]
