@@ -96,6 +96,7 @@ src/bench2field/
   metrics.py       field retention, gap attribution, replay validity
   verdict.py       readiness gates against a deployment budget
   sweep.py         repeats of several variants, run alternately, with a manifest of the order
+  report/          b2f report: one self-contained HTML page from a case study's committed runs
   telemetry/       tegrastats, NVML, rocm-smi samplers
   backends/        ONNX Runtime (CPU, CUDA, TensorRT, MIGraphX, ROCm)
   loadreplay/      record a field-load profile; replay it as CPU, memory-bandwidth, GPU and thermal stressors
