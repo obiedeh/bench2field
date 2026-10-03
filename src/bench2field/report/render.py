@@ -259,7 +259,9 @@ def thermal_repeats(cs: CaseStudy) -> str:
     p95s = [r[1] for r in rows]
     swing = (max(p95s) - min(p95s)) / min(p95s) if p95s else 0
     return (f"<p>{esc(field.label)}, {esc(variant)} at {cs.rate_hz:g} Hz, one row per repeat of the baseline sweep. "
-            f"Spread between repeats: <b>{swing:.0%}</b> of the fastest.</p>"
+            f"Spread between repeats: <b>{swing:.0%}</b> of the fastest. Temperature and GPU load are shown for each "
+            f"repeat as recorded; a difference between repeats is not attributed to either here, and the findings "
+            f"say what is and is not established about its cause.</p>"
             f"<table><thead><tr><th>repeat</th><th>position in sweep</th><th>response p95, ms</th><th>p50</th>"
             f"<th>junction °C p50</th><th>peak</th><th>GPU load %</th></tr></thead><tbody>{body}</tbody></table>")
 
@@ -432,7 +434,7 @@ def render(cs: CaseStudy) -> str:
 <p><code>{esc(variant)}</code>, p50 over each tier. Where the board reports a GPU rail or an SM clock, it is shown; the Jetsons report board power, the 5090 GPU power only, and the two are never compared.</p>
 {power_panels(cs)}
 
-<h2>Thermal state between repeats</h2>
+<h2>Repeat-to-repeat spread on the field board</h2>
 {thermal_repeats(cs)}
 
 <h2>The same frames on every board</h2>
