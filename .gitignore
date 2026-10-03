@@ -13,3 +13,4 @@ models/*.engine
 *.nsys-rep
 *.ncu-rep
 models/weights/
+data/
