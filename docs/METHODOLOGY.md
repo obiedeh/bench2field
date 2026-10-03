@@ -27,7 +27,7 @@ Run each comparison at least three times, alternating variants (A, B, A, B, A, B
 
 `b2f sweep` runs a comparison this way from one YAML file: each run is a separate process, reports are named `<label>_r<repeat>.json`, and a manifest records the order they ran in. It never overwrites an existing report.
 
-`b2f retention` takes the repeats of each run (a glob or a comma-separated list), computes speedups from the medians, prints each group's range, and warns when there are fewer than three repeats or when a gain is no larger than the spread. It refuses to compare runs whose deadline or drop-late policy differ, repeats that differ in variant, environment or power mode, and a baseline and optimized run taken in different power modes. A bench and a field run in different power modes are allowed with a warning, since they may be different boards.
+`b2f retention` takes the repeats of each run (a glob or a comma-separated list), computes speedups from the medians, prints each group's range, and warns when there are fewer than three repeats or when a gain is no larger than the spread. It refuses to compare runs whose deadline or drop-late policy differ, repeats that differ in variant, environment or power mode, and a baseline and optimized run taken in different power modes or with different onnxruntime, TensorRT or cuDNN versions. A bench and a field run that differ in any of those are allowed with a warning naming the difference, since they may be different boards (the Thor and the rover's Orin NX run JetPack 7 and 6, with different TensorRT and cuDNN).
 
 ## 5. Field retention
 

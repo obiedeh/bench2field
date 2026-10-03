@@ -8,10 +8,11 @@ from bench2field.schema import RunReport, TierResult
 from test_core import BASE, OPT
 
 
-def rep(variant, env, p95, nvpmodel=None, deadline_ms=33.3, drop_late=False, ort=None):
+def rep(variant, env, p95, nvpmodel=None, deadline_ms=33.3, drop_late=False, ort=None, trt=None, cudnn=None):
     lat = latency_stats([p95 * 0.8] * 94 + [p95] * 6)
     tier = TierResult(30.0, 30.0, 10.0, deadline_ms, 0, lat, {}, response=lat, drop_late=drop_late)
-    platform = {k: v for k, v in (("nvpmodel", nvpmodel), ("onnxruntime", ort)) if v is not None}
+    platform = {k: v for k, v in (("nvpmodel", nvpmodel), ("onnxruntime", ort), ("tensorrt", trt),
+                                  ("cudnn", cudnn)) if v is not None}
     return RunReport(variant, env, [tier], platform=platform)
 
 
@@ -133,3 +134,21 @@ def test_onnxruntime_version_gets_the_same_treatment_as_power_mode():
         field_retention(bb, bo, fb, group(OPT, "field", (6.0, 6.2, 5.9), ort="1.23.0"), 30.0)
     with pytest.raises(ValueError, match="repeats of bench_baseline differ in onnxruntime version"):
         field_retention(bb[:2] + group(BASE, "bench-idle", (9.1,), ort="1.29.0"), bo, fb, fo, 30.0)
+
+
+def test_tensorrt_and_cudnn_versions_get_the_same_treatment_as_onnxruntime():
+    """Thor bench (JetPack 7) vs Orin field (JetPack 6): same onnxruntime,
+    different TensorRT and cuDNN. Allowed, and both differences are named."""
+    thor = dict(ort="1.24.0", trt="10.13.3", cudnn="9.12.0")
+    orin = dict(ort="1.24.0", trt="10.7.0", cudnn="9.3.0")
+    bb, bo = group(BASE, "bench-idle", (9.0, 9.2, 8.9), **thor), group(OPT, "bench-idle", (3.0, 3.1, 2.9), **thor)
+    fb, fo = group(BASE, "field", (12.0, 12.5, 11.8), **orin), group(OPT, "field", (6.0, 6.2, 5.9), **orin)
+    r = field_retention(bb, bo, fb, fo, 30.0)
+    assert r.retention == pytest.approx(0.5, rel=1e-3)
+    assert any("different TensorRT versions ('10.13.3' vs '10.7.0')" in w for w in r.warnings)
+    assert any("different cuDNN versions ('9.12.0' vs '9.3.0')" in w for w in r.warnings)
+    assert not any("onnxruntime" in w for w in r.warnings)
+    with pytest.raises(ValueError, match="field baseline and optimized runs used different cuDNN versions"):
+        field_retention(bb, bo, fb, group(OPT, "field", (6.0, 6.2, 5.9), **{**orin, "cudnn": "9.11.0"}), 30.0)
+    with pytest.raises(ValueError, match="repeats of bench_optimized differ in TensorRT version"):
+        field_retention(bb, bo[:2] + group(OPT, "bench-idle", (3.0,), **{**thor, "trt": "10.16.1"}), fb, fo, 30.0)

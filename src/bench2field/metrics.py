@@ -14,6 +14,7 @@ any backend, model or vendor.
 from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
+from typing import Any
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -64,6 +65,17 @@ def speedup(baseline: RunReport, optimized: RunReport, target_hz: float, stat: s
 
 
 MIN_REPEATS = 3  # docs/METHODOLOGY.md, section 4
+
+# RunReport.platform keys that must agree between runs compared directly, and
+# that a reader should be warned about when bench and field differ in them.
+# (The Thor and the rover's Orin NX differ in all three library versions
+# because they run JetPack 7 and 6.)
+PLATFORM_FACTS = {
+    "nvpmodel": "power mode",
+    "onnxruntime": "onnxruntime version",
+    "tensorrt": "TensorRT version",
+    "cudnn": "cuDNN version",
+}
 
 @dataclass
 class RepeatStat:
@@ -195,13 +207,16 @@ def _one(values: set, what: str, where: str):
 def _check_comparable(groups: dict[str, list[RunReport]], target_hz: float) -> list[str]:
     """Refuse comparisons docs/METHODOLOGY.md does not allow; return warnings
     for the ones it allows but a reader should know about."""
-    key, env, mode, ort, deadline, drop = {}, {}, {}, {}, {}, {}
+    key, env, deadline, drop = {}, {}, {}, {}
+    # Platform facts that must agree within a comparison and are worth a
+    # warning across bench and field: power mode and the runtime stack.
+    facts: dict[str, dict[str, Any]] = {f: {} for f in PLATFORM_FACTS}
     for name, runs in groups.items():
         where = f"the repeats of {name}"
         key[name] = _one({r.variant.key for r in runs}, "variant", where)
         env[name] = _one({r.environment for r in runs}, "environment", where)
-        mode[name] = _one({r.platform.get("nvpmodel") for r in runs}, "power mode", where)
-        ort[name] = _one({r.platform.get("onnxruntime") for r in runs}, "onnxruntime version", where)
+        for fact, label in PLATFORM_FACTS.items():
+            facts[fact][name] = _one({r.platform.get(fact) for r in runs}, label, where)
         deadline[name] = _one({r.tier(target_hz).deadline_ms for r in runs}, "deadline", where)
         drop[name] = _one({r.tier(target_hz).drop_late for r in runs}, "drop-late policy", where)
 
@@ -212,25 +227,20 @@ def _check_comparable(groups: dict[str, list[RunReport]], target_hz: float) -> l
     for side in ("bench", "field"):
         if env[f"{side}_baseline"] != env[f"{side}_optimized"]:
             raise ValueError(f"{side} baseline and optimized runs are from different environments")
-        if mode[f"{side}_baseline"] != mode[f"{side}_optimized"]:
-            raise ValueError(
-                f"{side} baseline and optimized runs used different power modes: "
-                f"{mode[f'{side}_baseline']!r} vs {mode[f'{side}_optimized']!r}")
-        if ort[f"{side}_baseline"] != ort[f"{side}_optimized"]:
-            raise ValueError(
-                f"{side} baseline and optimized runs used different onnxruntime versions: "
-                f"{ort[f'{side}_baseline']!r} vs {ort[f'{side}_optimized']!r}")
+        for fact, label in PLATFORM_FACTS.items():
+            b, o = facts[fact][f"{side}_baseline"], facts[fact][f"{side}_optimized"]
+            if b != o:
+                raise ValueError(f"{side} baseline and optimized runs used different {label}s: {b!r} vs {o!r}")
     _one(set(deadline.values()), "deadline (ms)", "the runs being compared")
     _one(set(drop.values()), "drop-late policy", "the runs being compared")
 
     warnings = []
-    if mode["bench_baseline"] != mode["field_baseline"]:
-        warnings.append(f"bench and field used different power modes ({mode['bench_baseline']!r} vs "
-                        f"{mode['field_baseline']!r}); expected if they are different boards, "
-                        "a mistake if they are the same one")
-    if ort["bench_baseline"] != ort["field_baseline"]:
-        warnings.append(f"bench and field used different onnxruntime versions ({ort['bench_baseline']!r} vs "
-                        f"{ort['field_baseline']!r}); the runtime, not only the machine, differs")
+    for fact, label in PLATFORM_FACTS.items():
+        b, f = facts[fact]["bench_baseline"], facts[fact]["field_baseline"]
+        if b != f:
+            why = ("expected if they are different boards, a mistake if they are the same one"
+                   if fact == "nvpmodel" else "the software stack, not only the machine, differs")
+            warnings.append(f"bench and field used different {label}s ({b!r} vs {f!r}); {why}")
     return warnings
 
 
