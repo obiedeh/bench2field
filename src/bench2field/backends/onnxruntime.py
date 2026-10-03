@@ -196,6 +196,7 @@ class OnnxRuntimeBackend:
         # CPU, CUDA and ROCm providers run whatever precision the graph was
         # exported in, so for them `precision` is a label for the report.
 
+        self.provider_options_requested = dict(prov_opts)
         providers: list[Any] = [(prov, prov_opts)] if prov_opts else [prov]
         if prov != "CPUExecutionProvider":
             providers.append("CPUExecutionProvider")  # fallback for unsupported ops
@@ -233,6 +234,16 @@ class OnnxRuntimeBackend:
     def infer(self, inputs: dict[str, np.ndarray]) -> list[np.ndarray]:
         return self.session.run(None, inputs)
 
+    def provider_options(self) -> dict[str, Any]:
+        """The active provider's options as the session reports them: for
+        TensorRT these are the engine build options (precision flags,
+        workspace, optimisation level, cache settings), whether set here or
+        left at the runtime's defaults."""
+        try:
+            return dict(self.session.get_provider_options().get(self.provider(), {}))
+        except Exception:
+            return {}
+
     def describe(self) -> dict[str, Any]:
         o = self.options
         libs = (loaded_nvidia_library_versions() if self.provider() in NVIDIA_PROVIDERS
@@ -246,4 +257,8 @@ class OnnxRuntimeBackend:
             "intra_op_threads": o.intra_op_threads or "default",
             "inter_op_threads": o.inter_op_threads or "default",
             "allow_spinning": o.allow_spinning,
+            # Engine build provenance: what this run asked the provider for,
+            # and every option the session ended up with.
+            "provider_options_requested": self.provider_options_requested,
+            "provider_options": self.provider_options(),
         }
