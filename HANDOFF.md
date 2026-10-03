@@ -129,6 +129,19 @@ Commit `236aefc` (`b2f sweep --stopped`) accidentally includes two in-progress r
 - **What the power budget means.** `rover_perception.yaml` describes `max_power_w: 15.0` as perception's share of the Orin NX envelope, but the gate compares it with total board power. Either the limit or the comment needs to change before a verdict on power means anything.
 - **TensorRT minor version.** ONNX Runtime's docs do not say which 10.x minor 1.30.0 was built against (the table stops at 1.22). 10.16.1.11 loads and runs fp16 correctly on the 5090.
 
+## Future direction (after case study 01)
+
+Logged by the owner's instruction; not to be built until case study 01 is done.
+
+**Model fit matrix (`b2f evaluate`)**
+
+- Goal: one command that takes a newly released model and answers whether it can run on our robots and at what cost.
+- Input: a model plus a target list of boards, precisions and a budget.
+- Steps: export to ONNX where supported, build fp32/fp16/int8 variants, run each on every available board at the robot's real request rate, check accuracy against the fp32 reference.
+- Output: a board x precision matrix with response p95/p99 at the robot's rate, accuracy delta, memory footprint, power, and the GO / NO-GO verdict per cell. Rendered by `b2f report`.
+- Prerequisites, in order: phase 2 accuracy harness and quantization ladder validated on YOLOX; per-process memory measurement on Jetson (currently only NVML on the 5090); per-frame samples in the RunReport schema (needed by the report anyway).
+- Out of scope for this path: models that don't go through ONNX (vLLM, TensorRT-LLM served VLA/LLM models). Note it as a separate track if needed later.
+
 ## Ignored on purpose
 
 - An external automated review was offered during this session; the owner chose not to run it. Nothing in this repo has been through one.
