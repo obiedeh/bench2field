@@ -102,7 +102,8 @@ Commit `236aefc` (`b2f sweep --stopped`) accidentally includes two in-progress r
 
 ## Blocked, waiting on the owner
 
-Nothing for phase 1. Phase 2 needs the decisions under open questions (TF32, spinning, the kernel's output scale) before its first variant is measured.
+- **Thor four-tier baseline (`--no-spin`)**: wait for the owner to say the Safety Observability API and its `physical-ai-vllm` container are down, then run `phase1_baseline.yaml` on the Thor into `runs/bench_thor_rerun/` and check `platform.background` in every report shows no vLLM process or container. A re-run started before that stand-down was stopped by the owner after one run; its output is `runs/bench_thor_rerun_stopped/` with the manifest marked incomplete and why. The first Thor sweep (`runs/bench_thor/`) is also not the baseline (container up, spinning on).
+- Phase 2 needs the decisions under open questions (TF32, the kernel's output scale) before its first variant is measured.
 
 ## Deferred by decision
 
@@ -110,10 +111,12 @@ Nothing for phase 1. Phase 2 needs the decisions under open questions (TF32, spi
 
 - **Orin replay drift (explain before trusting replay validity, phase 5).** On the Orin, the CPU stressor was calibrated to a 40% target with the model idle: duty frozen at 0.118, 41.7% measured. During the 60 s tier that followed, CPU utilisation had a median of 35.5% with the duty unchanged. The rover's own services were still settling after boot, so the background load the calibration absorbed was not steady. Until this is explained (and the recording rule "steady-state background load" is enforced or checked), a replay's validity number should not be trusted on its own. No fix now.
 
+- **Field-load profile must be recorded without rviz2 (phase 5).** `bringup/orin/tegrastats_rover_stack.txt` (60 s with micro-ROS agent, `car_base.launch.py` with the camera, and `slam_stack.sh`) includes `rviz2`, which `slam_stack.sh` starts and which took a full core; rviz does not run on the rover in the field. Record the replay profile with the field stack only: micro-ROS agent, `car_base` with the camera, SLAM, no rviz. Keep the existing capture as a reference, not as the profile.
+
 ## Open questions
 
 - **TF32 in the fp32 baseline.** TensorRT runs the fp32 graph with TF32 tensor-core kernels on the 5090 by default (76% of GPU kernel time in the nsys capture). Phase 2's fp16 and INT8 gains will be measured against TF32, not true fp32. Keep that (it is what a deployment gets), or also build a TF32-off engine (`trt_builder_optimization_level`/`TF32` flags via `extra_provider_options`) for the write-up? The Thor's kernels were not profiled.
-- **Spinning off by default?** `allow_spinning=True` is onnxruntime's default and so Bench2Field's. Phase 1 shows it costs the host stages dearly. Proposal: run every phase 2 variant with `--no-spin` and say so in the variant notes, rather than changing the default silently.
+- **Spinning.** Decided: baselines and every phase 2 variant run with `--no-spin` (`no_spin: true` in the sweep config; reports record `platform.allow_spinning = false`). The library default is unchanged.
 - **Request-rate dependence.** Latency at 10 and 30 Hz is far worse than at 100 Hz on both machines because the GPU drops power states between frames. Retention at 30 Hz will therefore compare numbers dominated by clock ramp, not by the model. Options for the owner: accept (it is what the robot sees), add `jetson_clocks`/locked clocks as a recorded setting (changes the board, so not without asking), or report both tiers. Nothing changed.
 - **Kernel spec versus the model.** `kernels/README.md` says the fused preprocessing kernel scales pixels to [0, 1]; YOLOX takes raw 0..255. The kernel's scale (and BGR/RGB order) should match `export_yolox.py`'s input convention before phase 3.
 - **Postprocess cost.** NumPy NMS over all 8400 candidates costs 1.0 ms per frame even with no detections. Thresholding before decoding would make it near zero. Left as is so phase 2 measures against the same baseline; worth fixing in the pipeline before phase 5.
