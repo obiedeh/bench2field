@@ -1,12 +1,12 @@
 # Handoff
 
-State of the hardware bring-up and case study 01 phase 1. Work is on the `hardware-bringup` branch; `master` is still the v0.1 commit and has not been merged into or pushed.
+State of Bench2Field at the v1.0 release. Phase 1 is v1.0 (measure and diagnose); phases 2 to 5 continue on `master` afterwards as v2.
 
-The GitHub repo exists: `github.com/obiedeh/bench2field`, **private**, with only `hardware-bringup` pushed (the owner's choice). CI has not run yet, because the workflow triggers on `master`/`main` and on pull requests. Before making the repo public, note that this file and `bringup/` name the owner's hosts and a LAN address.
+The GitHub repo is `github.com/obiedeh/bench2field`, **private** until the owner publishes it. PR #1 (`hardware-bringup`) merged into `master`; the v1.0 release work is on `v1-release` with its own PR. CI runs pytest on CPU for Python 3.10 and 3.12.
 
-**Before the repo goes public:** scrub hostnames (`bench-5090`, `bench-thor`, `field-orin`) and the LAN address (`192.0.2.10`) from this file and from `bringup/` (the README, `versions.txt` files and the `host` field in every run JSON). Not done; logged here so it is not forgotten.
+**Identifiers:** machine hostnames, the rover's LAN address and home-directory paths were replaced in every tracked file with the board labels `bench-5090`, `bench-thor` and `field-orin` (`tools/scrub_identifiers.py`; `--check` reports leftovers). Where this file shows `bench-thor:` or `field-orin:` in an `rsync`/`ssh` command, that is the operator's SSH alias for the board. Git history from before the scrub still contains the originals; see the v1.0 PR for what remains.
 
-Last updated 2026-10-02 (late evening). Steps 1 to 4 are done: bring-up on all three machines, publish (private repo, PR #1 open), and case study 01 phase 1: `--no-spin` FP32 baselines at 10/26/30/100 Hz on the 5090, the Thor (clean of vLLM) and the idle Orin NX, the end-to-end profile, the nsys capture, and `PHASE1_FINDINGS.md` with 26 Hz (the rover camera's delivered rate) as the headline tier. The owner reviews the findings against the reports before the PR merges. Phase 2 has not started.
+Last updated 2026-10-03, v1.0 release candidate. Steps 1 to 4 are done: bring-up on all three machines, publish (private repo, PR #1 open), and case study 01 phase 1: `--no-spin` FP32 baselines at 10/26/30/100 Hz on the 5090, the Thor (clean of vLLM) and the idle Orin NX, the end-to-end profile, the nsys capture, and `PHASE1_FINDINGS.md` with 26 Hz (the rover camera's delivered rate) as the headline tier. The owner reviews the findings against the reports before the PR merges. Phase 2 has not started.
 
 ## Done
 
@@ -135,6 +135,13 @@ Commit `236aefc` (`b2f sweep --stopped`) accidentally includes two in-progress r
 - **What the power budget means.** `rover_perception.yaml` describes `max_power_w: 15.0` as perception's share of the Orin NX envelope, but the gate compares it with total board power. Either the limit or the comment needs to change before a verdict on power means anything.
 - **TensorRT minor version.** ONNX Runtime's docs do not say which 10.x minor 1.30.0 was built against (the table stops at 1.22). 10.16.1.11 loads and runs fp16 correctly on the 5090.
 
+## v1.0 release work (branch `v1-release`)
+
+- `b2f report <case_study_dir> --out <file.html>`: one self-contained page from the committed runs, driven by `report.yaml` in the case study folder (which run sets are baselines, references, profiles). Generated output committed under `case_studies/01_perception_detector/report/` (`index.html`, `headline.svg`). The page footer records the generator's commit; because the generated file is itself tracked, the tree reads "dirty" at generation time whenever the report changed, so that flag on the footer is expected.
+- README rewritten as the entry point; `bringup/clean_clone/TRANSCRIPT.md` records the clean-clone test (two passes, second clean) and the two README fixes it forced.
+- Identifiers scrubbed (see above). What git history still contains: the original hostnames (`bench-5090`, `bench-thor`, `field-orin`, the `field-orin` ssh alias), the rover's LAN address and `/home/<user>` paths appear in every commit from the first bring-up commits up to the scrub commit `b9e6256`, in `HANDOFF.md`, `bringup/`, the run JSONs and `exports.json`; the LAN address is in `HANDOFF.md` from `e3ee918` to `7fd8a69`. Commit messages do not contain them. The owner decides whether to rewrite history before publishing; nothing was rewritten.
+- Tagging v1.0 and the GitHub Release (with the report attached) are the owner's call after review.
+
 ## Future direction (after case study 01)
 
 Logged by the owner's instruction; not to be built until case study 01 is done.
@@ -150,7 +157,7 @@ Logged by the owner's instruction; not to be built until case study 01 is done.
 
 ## Ignored on purpose
 
-- An external automated review was offered during this session; the owner chose not to run it. Nothing in this repo has been through one.
+- An external, billed, multi-agent cloud code review was offered by the development tooling during this work. The owner chose not to run it. Nothing in this repo has been through an external review.
 
 ## Pull request
 

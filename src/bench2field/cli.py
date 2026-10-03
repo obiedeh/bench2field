@@ -7,6 +7,7 @@
   b2f attribute    split the bench-to-field gap across stressors
   b2f validity     check a replay against the real field run
   b2f verdict      go/no-go against a deployment budget
+  b2f report       one self-contained HTML page from a case study's committed runs
 """
 
 from __future__ import annotations
@@ -232,12 +233,34 @@ def build_parser() -> argparse.ArgumentParser:
             s.add_argument("field")
             s.add_argument("--tolerance", type=float, default=0.10)
 
+    rp = sub.add_parser("report", help="one self-contained HTML page from a case study's committed runs")
+    rp.add_argument("case_study", help="case study directory containing report.yaml and runs/")
+    rp.add_argument("--out", required=True, help="HTML file to write")
+    rp.add_argument("--headline-svg", help="also write the headline chart as a standalone SVG")
+    rp.set_defaults(fn=_cmd_report)
+
     v = sub.add_parser("verdict", help="go/no-go against a deployment budget")
     v.add_argument("report")
     v.add_argument("budget")
     v.set_defaults(fn=_cmd_verdict)
 
     return p
+
+
+def _cmd_report(a: argparse.Namespace) -> int:
+    from .report import headline_svg, load_case_study, render
+
+    cs = load_case_study(a.case_study)
+    out = Path(a.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(render(cs), encoding="utf-8")
+    print(f"wrote {out} ({out.stat().st_size / 1024:.0f} KB)")
+    if a.headline_svg:
+        Path(a.headline_svg).write_text(headline_svg(cs), encoding="utf-8")
+        print(f"wrote {a.headline_svg}")
+    for w in cs.warnings:
+        print(f"warning: {w}", file=sys.stderr)
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
