@@ -1,0 +1,30 @@
+# Phase 2, step 1: FP16 against FP32 on the rover's Orin NX.
+# SPEED ONLY, ACCURACY NOT YET MEASURED. Nothing from this sweep goes into the
+# findings or the README until the accuracy harness exists.
+#
+# Same ONNX file for both variants; FP16 is TensorRT's trt_fp16_enable, the
+# engine built by the provider (build options are recorded in each report as
+# platform.provider_options). The two variants alternate, so both see the
+# same thermal history. Rover stack off, MAXN_SUPER untouched.
+#   .venv/bin/b2f sweep case_studies/01_perception_detector/sweeps/phase2_orin_fp16.yaml \
+#       --out-dir case_studies/01_perception_detector/runs/phase2_orin_fp16 --expect-commit <hash>
+name: phase2-orin-fp16
+environment: bench-idle
+repeats: 3
+tiers_hz: [10, 26, 30, 100]
+duration_s: 60
+warmup_s: 5
+deadline_ms: 33.3
+no_spin: true
+variants:
+  - label: trt_fp32
+    model: models/yolox_s.onnx
+    name: yolox-s
+    provider: tensorrt
+    precision: fp32
+  - label: trt_fp16
+    model: models/yolox_s.onnx
+    name: yolox-s
+    provider: tensorrt
+    precision: fp16
+    technique: fp16
