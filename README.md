@@ -41,12 +41,15 @@ Needs Python 3.10+ and an NVIDIA GPU. On a Jetson, use its own ONNX Runtime whee
 ```bash
 git clone https://github.com/obiedeh/bench2field.git && cd bench2field
 python3 -m venv .venv && .venv/bin/pip install -e ".[dev,tools,nvml]"
-.venv/bin/pip install "onnxruntime-gpu[cuda,cudnn]" tensorrt-cu13   # discrete NVIDIA GPU, CUDA 13 driver
+.venv/bin/pip install "onnxruntime-gpu[cuda,cudnn]==1.30.0" "tensorrt-cu13==10.16.1.11"   # discrete NVIDIA GPU, CUDA 13 driver; this pair is validated, TensorRT 11 does not load
 .venv/bin/pytest                                                   # hardware tests skip where hardware is missing
 
-# the detector used in case study 01 (downloads the YOLOX-s checkpoint, ~70 MB; needs PyTorch, see the file)
+# the detector used in case study 01: PyTorch first (large download), then YOLOX built against it, then the export
+# (downloads the YOLOX-s checkpoint, ~70 MB)
 .venv/bin/pip install -r case_studies/01_perception_detector/requirements-export.txt --extra-index-url https://download.pytorch.org/whl/cu130
+.venv/bin/pip install --no-deps --no-build-isolation "yolox @ git+https://github.com/Megvii-BaseDetection/YOLOX.git@6ddff4824372906469a7fae2dc3206c7aa4bbaee"
 .venv/bin/python case_studies/01_perception_detector/export_yolox.py s
+git checkout -- case_studies/01_perception_detector/exports.json   # the export rewrites this provenance file; keep the committed one
 
 # one tier at the rover's camera rate, 60 s, TensorRT fp32, threads not spin-waiting
 .venv/bin/b2f run models/yolox_s.onnx --name yolox-s --provider tensorrt --precision fp32 --tiers 26 --no-spin --out runs/my_first.json
