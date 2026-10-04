@@ -352,6 +352,20 @@ def provenance_table(cs: CaseStudy) -> str:
 
 # --- page --------------------------------------------------------------------
 
+def title_html(title: str) -> str:
+    """Page title in the lab's two accents: the model under test in blue, the field platform in green.
+
+    "Case study 01: YOLOX-s on the ROSMASTER rover" -> blue "YOLOX-s", green "ROSMASTER rover".
+    Titles without that shape are returned escaped and unaccented.
+    """
+    head, sep, rest = title.partition(": ")
+    model, on, platform = rest.partition(" on the ")
+    if not (sep and on and model and platform):
+        return esc(title)
+    return (f'{esc(head)}: <span class="ee-b">{esc(model)}</span> on the '
+            f'<span class="ee-g">{esc(platform)}</span>')
+
+
 CSS = """
 :root{--bg:#202224;--fg:#eef1e8;--muted:#a3aa9c;--dim:#7c8378;--line:#393d3f;--line-strong:#4a4f52;--card:#181b1d;
 --field:#b7f34a;--sim:#68b7ff;--signal:#ff9c59;--accent:#b7f34a;
@@ -370,10 +384,10 @@ a{color:var(--sim);text-decoration:none}a:hover{text-decoration:underline}
 .ee-mark i{display:inline-block;width:14px;height:14px;background:linear-gradient(135deg,var(--field) 0 50%,var(--sim) 50% 100%);border-radius:2px}
 .ee-mark span{color:var(--muted);font-weight:400}.ee-band nav{display:flex;gap:16px}.ee-band nav a{color:var(--muted)}.ee-band nav a:hover{color:var(--fg)}
 main{max-width:960px;margin:0 auto;padding:24px 16px 48px}
-.eyebrow{color:var(--field);font-size:.74rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin:0 0 8px}
+.eyebrow{color:var(--field);font:600 12px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;margin:0 0 8px}
 header{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:flex-end;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:8px}
-h1{font-size:2.1rem;line-height:1.1;font-weight:500;letter-spacing:-.04em;margin:0}
-h2{font-size:1.35rem;font-weight:500;letter-spacing:-.02em;margin:40px 0 8px;padding-top:16px;border-top:1px solid var(--line)}h4{margin:0 0 6px;font-size:.95rem;font-weight:600}
+h1{font-size:clamp(44px,4.6vw,66px);line-height:1;font-weight:500;letter-spacing:-.06em;margin:0}h1 .ee-g{color:var(--field)}h1 .ee-b{color:var(--sim)}
+h2{font-size:clamp(28px,3.2vw,42px);line-height:1.08;font-weight:500;letter-spacing:-.04em;margin:40px 0 8px;padding-top:16px;border-top:1px solid var(--line)}h4{margin:0 0 6px;font-size:.95rem;font-weight:600}
 .sub{color:var(--muted);margin-top:6px}button.theme{background:transparent;color:var(--fg);border:1px solid var(--line-strong);border-radius:0;padding:6px 12px;cursor:pointer;font:600 .8rem var(--sans)}
 .big{display:flex;flex-wrap:wrap;gap:12px;margin:16px 0}.big .n{flex:1 1 200px;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:14px 16px}
 .big .n b{display:block;font-size:2rem;line-height:1.1;font-weight:500;letter-spacing:-.03em}.big .n.bad b{color:var(--signal)}.big .n.ok b{color:var(--field)}.big .n span{color:var(--muted);font-size:.9rem}
@@ -431,7 +445,7 @@ def render(cs: CaseStudy) -> str:
 <title>{esc(cs.title)} – Bench2Field report</title><style>{CSS}</style></head><body>
 <div class="ee-band"><div class="in"><a class="ee-mark" href="{LAB_URL}"><i></i>EmbodiedEdge <span>Labs · Evidence</span></a>
 <nav><a href="{REPO_URL}">Repository</a><a href="{LAB_URL}">Lab</a><a href="{PROFILE_URL}">Obinna Edeh</a></nav></div></div><main>
-<header><div><p class="eyebrow">Bench2Field · Case study</p><h1>{esc(cs.title)}</h1><div class="sub">{esc(cs.config.get('model', ''))} · Bench2Field {esc(__version__)} report, generated from <code>{esc(cs.root.name)}/runs/</code></div></div>
+<header><div><p class="eyebrow">Bench2Field · Case study</p><h1>{title_html(cs.title)}</h1><div class="sub">{esc(cs.config.get('model', ''))} · Bench2Field {esc(__version__)} report, generated from <code>{esc(cs.root.name)}/runs/</code></div></div>
 <button class="theme" id="theme">Light theme</button></header>
 
 <div class="big">{''.join(big)}</div>
