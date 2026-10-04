@@ -353,35 +353,50 @@ def provenance_table(cs: CaseStudy) -> str:
 # --- page --------------------------------------------------------------------
 
 CSS = """
-:root{--bg:#fbfbf9;--fg:#1c1c1a;--muted:#6b6b66;--line:#dcdcd6;--card:#ffffff;--accent:#2a6fdb;
---c1:#2a6fdb;--c2:#e8842a;--c3:#c93c3c;--c4:#3a9c62;--c5:#8a5bd4;--c6:#8a8a84;--deadline:#c93c3c;--rate:#3a9c62;color-scheme:light}
-:root[data-theme="dark"]{--bg:#141413;--fg:#ededea;--muted:#a3a39c;--line:#33332f;--card:#1c1c1a;--accent:#7aa6f0;
---c1:#7aa6f0;--c2:#f0a35c;--c3:#ef6f6f;--c4:#6fcf92;--c5:#b596ea;--c6:#a3a39c;--deadline:#ef6f6f;--rate:#6fcf92;color-scheme:dark}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141413;--fg:#ededea;--muted:#a3a39c;--line:#33332f;--card:#1c1c1a;--accent:#7aa6f0;
---c1:#7aa6f0;--c2:#f0a35c;--c3:#ef6f6f;--c4:#6fcf92;--c5:#b596ea;--c6:#a3a39c;--deadline:#ef6f6f;--rate:#6fcf92;color-scheme:dark}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-main{max-width:960px;margin:0 auto;padding:16px 16px 48px}
-header{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:8px}
-h1{font-size:1.5rem;margin:0}h2{font-size:1.2rem;margin:36px 0 8px;padding-top:12px;border-top:1px solid var(--line)}h4{margin:0 0 6px;font-size:.95rem}
-.sub{color:var(--muted)}button.theme{background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 10px;cursor:pointer}
-.big{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0}.big .n{flex:1 1 200px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
-.big .n b{display:block;font-size:1.9rem;line-height:1.1}.big .n.bad b{color:var(--c3)}.big .n.ok b{color:var(--c4)}.big .n span{color:var(--muted);font-size:.9rem}
-.chartbox{overflow-x:auto}svg.chart{width:100%;min-width:600px;height:auto;display:block;margin:8px 0;font:13px system-ui,sans-serif}
+:root{--bg:#202224;--fg:#eef1e8;--muted:#a3aa9c;--dim:#7c8378;--line:#393d3f;--line-strong:#4a4f52;--card:#181b1d;
+--field:#b7f34a;--sim:#68b7ff;--signal:#ff9c59;--accent:#b7f34a;
+--c1:#68b7ff;--c2:#ff9c59;--c3:#ff7a6b;--c4:#b7f34a;--c5:#c3a6ff;--c6:#8d948a;--deadline:#ff7a6b;--rate:#b7f34a;
+--sans:"Helvetica Neue",Helvetica,Arial,sans-serif;--mono:ui-monospace,"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;color-scheme:dark}
+:root[data-theme="light"]{--bg:#f6f7f3;--fg:#1a1c1e;--muted:#5d6459;--dim:#7c8378;--line:#d8dbd2;--line-strong:#b9bdb3;--card:#ffffff;
+--field:#4d7c0f;--sim:#1f6fd1;--signal:#c2560c;--accent:#4d7c0f;
+--c1:#1f6fd1;--c2:#c2560c;--c3:#c62828;--c4:#4d7c0f;--c5:#6d4bc4;--c6:#7c8378;--deadline:#c62828;--rate:#4d7c0f;color-scheme:light}
+@media print{:root{--bg:#ffffff;--fg:#1a1c1e;--muted:#5d6459;--line:#d8dbd2;--line-strong:#b9bdb3;--card:#ffffff;--field:#4d7c0f;--sim:#1f6fd1;--signal:#c2560c;--accent:#4d7c0f;
+--c1:#1f6fd1;--c2:#c2560c;--c3:#c62828;--c4:#4d7c0f;--c5:#6d4bc4;--c6:#7c8378;--deadline:#c62828;--rate:#4d7c0f;color-scheme:light}button.theme{display:none}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 var(--sans)}
+a{color:var(--sim);text-decoration:none}a:hover{text-decoration:underline}
+.ee-band{border-bottom:1px solid var(--line);background:var(--card)}
+.ee-band .in{max-width:960px;margin:0 auto;padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;justify-content:space-between;font-size:.85rem}
+.ee-mark{display:inline-flex;align-items:center;gap:8px;color:var(--fg);font-weight:600;letter-spacing:-.01em}.ee-mark:hover{text-decoration:none}
+.ee-mark i{display:inline-block;width:14px;height:14px;background:linear-gradient(135deg,var(--field) 0 50%,var(--sim) 50% 100%);border-radius:2px}
+.ee-mark span{color:var(--muted);font-weight:400}.ee-band nav{display:flex;gap:16px}.ee-band nav a{color:var(--muted)}.ee-band nav a:hover{color:var(--fg)}
+main{max-width:960px;margin:0 auto;padding:24px 16px 48px}
+.eyebrow{color:var(--field);font-size:.74rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin:0 0 8px}
+header{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:flex-end;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:8px}
+h1{font-size:2.1rem;line-height:1.1;font-weight:500;letter-spacing:-.04em;margin:0}
+h2{font-size:1.35rem;font-weight:500;letter-spacing:-.02em;margin:40px 0 8px;padding-top:16px;border-top:1px solid var(--line)}h4{margin:0 0 6px;font-size:.95rem;font-weight:600}
+.sub{color:var(--muted);margin-top:6px}button.theme{background:transparent;color:var(--fg);border:1px solid var(--line-strong);border-radius:0;padding:6px 12px;cursor:pointer;font:600 .8rem var(--sans)}
+.big{display:flex;flex-wrap:wrap;gap:12px;margin:16px 0}.big .n{flex:1 1 200px;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:14px 16px}
+.big .n b{display:block;font-size:2rem;line-height:1.1;font-weight:500;letter-spacing:-.03em}.big .n.bad b{color:var(--signal)}.big .n.ok b{color:var(--field)}.big .n span{color:var(--muted);font-size:.9rem}
+.chartbox{overflow-x:auto}svg.chart{width:100%;min-width:600px;height:auto;display:block;margin:8px 0;font:13px var(--sans)}
 svg .grid{stroke:var(--line);stroke-width:1}svg .tick,svg .axis{fill:var(--muted)}svg .label{fill:var(--fg);font-size:13px}svg .value{fill:var(--fg)}
 svg .deadline{stroke:var(--deadline);stroke-width:1.5;stroke-dasharray:6 4}svg .deadline-label{fill:var(--deadline);font-size:11px}
 svg .rate{stroke:var(--rate);stroke-width:1.5;stroke-dasharray:2 4}svg .mean{stroke:var(--fg);stroke-width:1;stroke-dasharray:3 3}
 svg .series{fill:none;stroke-width:2}svg .range{stroke-width:1.5;opacity:.6}svg .marker{stroke:var(--fg);stroke-width:1}svg .sat{font-size:16px;font-weight:700}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.85rem;color:var(--muted);margin:4px 0 12px}.key i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:5px;vertical-align:-1px}
-table{border-collapse:collapse;width:100%;font-size:.9rem;margin:8px 0}th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:600}
-tr.total td{font-weight:700}tr.baseline td:nth-child(3){color:var(--c4)}tr.stopped td:nth-child(3){color:var(--c3)}
-.scroll{overflow-x:auto}table.prov{width:auto;min-width:100%;font-size:.82rem}.prov td,.prov th,.cards td,.cards th{white-space:nowrap}.prov td:nth-child(3){white-space:normal;min-width:180px}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
-.note{border-left:3px solid var(--accent);padding:4px 12px;color:var(--muted);margin:8px 0}code{font-size:.9em}
-footer{color:var(--muted);font-size:.85rem;margin-top:40px;border-top:1px solid var(--line);padding-top:10px}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:8px 0}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:600;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase}
+tr.total td{font-weight:700}tr.baseline td:nth-child(3){color:var(--field)}tr.stopped td:nth-child(3){color:var(--signal)}
+.scroll{overflow-x:auto}table.prov{width:auto;min-width:100%;font-size:.82rem}.prov td,.prov th,.cards td,.cards th{white-space:nowrap}.prov td:nth-child(3){white-space:normal;min-width:180px}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}.card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:12px 14px}
+.note{border-left:3px solid var(--signal);padding:4px 12px;color:var(--muted);margin:8px 0}code{font:.88em var(--mono);color:var(--fg)}
+footer{color:var(--muted);font-size:.85rem;margin-top:48px;border-top:1px solid var(--line);padding-top:12px}footer .lab{display:block;margin-top:6px;color:var(--dim)}
 """
+
+LAB_URL = "https://embodiededge.ai"
+REPO_URL = "https://github.com/obiedeh/bench2field"
+PROFILE_URL = "https://github.com/obiedeh"
 
 JS = """
 (function(){var r=document.documentElement,b=document.getElementById('theme');
-function cur(){return r.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}
+function cur(){return r.getAttribute('data-theme')||'dark'}
 function label(){b.textContent=cur()==='dark'?'Light theme':'Dark theme'}
 b.addEventListener('click',function(){r.setAttribute('data-theme',cur()==='dark'?'light':'dark');label()});label()})();
 """
@@ -413,9 +428,11 @@ def render(cs: CaseStudy) -> str:
     gen = git_state()
     warn = "".join(f"<li>{esc(w)}</li>" for w in cs.warnings)
     page = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{esc(cs.title)} – Bench2Field report</title><style>{CSS}</style></head><body><main>
-<header><div><h1>{esc(cs.title)}</h1><div class="sub">{esc(cs.config.get('model', ''))} · Bench2Field {esc(__version__)} report, generated from <code>{esc(cs.root.name)}/runs/</code></div></div>
-<button class="theme" id="theme">Dark theme</button></header>
+<title>{esc(cs.title)} – Bench2Field report</title><style>{CSS}</style></head><body>
+<div class="ee-band"><div class="in"><a class="ee-mark" href="{LAB_URL}"><i></i>EmbodiedEdge <span>Labs · Evidence</span></a>
+<nav><a href="{REPO_URL}">Repository</a><a href="{LAB_URL}">Lab</a><a href="{PROFILE_URL}">Obinna Edeh</a></nav></div></div><main>
+<header><div><p class="eyebrow">Bench2Field · Case study</p><h1>{esc(cs.title)}</h1><div class="sub">{esc(cs.config.get('model', ''))} · Bench2Field {esc(__version__)} report, generated from <code>{esc(cs.root.name)}/runs/</code></div></div>
+<button class="theme" id="theme">Light theme</button></header>
 
 <div class="big">{''.join(big)}</div>
 <h2>Model alone versus the full frame</h2>
@@ -452,7 +469,7 @@ def render(cs: CaseStudy) -> str:
 <div class="scroll">{provenance_table(cs)}</div>
 {('<div class="note"><b>Loader warnings</b><ul>' + warn + '</ul></div>') if warn else ''}
 
-<footer>Generated {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')} by <code>b2f report</code> (Bench2Field {esc(__version__)}, commit {esc((gen.get('commit') or 'unknown')[:8])}{' dirty' if gen.get('dirty') else ''}). Budget: <code>{esc(cs.budget.name)}</code>. No number on this page was typed in.</footer>
+<footer>Generated {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')} by <code>b2f report</code> (Bench2Field {esc(__version__)}, commit {esc((gen.get('commit') or 'unknown')[:8])}{' dirty' if gen.get('dirty') else ''}). Budget: <code>{esc(cs.budget.name)}</code>. No number on this page was typed in.<span class="lab">An <a href="{LAB_URL}">EmbodiedEdge Labs</a> project. Measured on real hardware, published as found.</span></footer>
 </main><script>{JS}</script></body></html>"""
     return page
 
@@ -461,11 +478,11 @@ def headline_svg(cs: CaseStudy) -> str:
     """The headline chart as a standalone SVG (for the README), with the
     colour tokens resolved to fixed light-theme values."""
     svg, _ = headline_bars(cs)
-    fixed = {"var(--c1)": "#2a6fdb", "var(--c3)": "#c93c3c", "var(--line)": "#dcdcd6", "var(--muted)": "#6b6b66",
-             "var(--fg)": "#1c1c1a", "var(--deadline)": "#c93c3c"}
-    style = ("<style>text{font:12px system-ui,sans-serif}.grid{stroke:#dcdcd6}.tick,.axis{fill:#6b6b66}.label{fill:#1c1c1a;font-size:13px}"
-             ".value{fill:#1c1c1a}.deadline{stroke:#c93c3c;stroke-width:1.5;stroke-dasharray:6 4}.deadline-label{fill:#c93c3c;font-size:11px}</style>")
+    fixed = {"var(--c1)": "#1f6fd1", "var(--c3)": "#c62828", "var(--line)": "#d8dbd2", "var(--muted)": "#5d6459",
+             "var(--fg)": "#1a1c1e", "var(--deadline)": "#c62828"}
+    style = ("<style>text{font:12px 'Helvetica Neue',Helvetica,Arial,sans-serif}.grid{stroke:#d8dbd2}.tick,.axis{fill:#5d6459}.label{fill:#1a1c1e;font-size:13px}"
+             ".value{fill:#1a1c1e}.deadline{stroke:#c62828;stroke-width:1.5;stroke-dasharray:6 4}.deadline-label{fill:#c62828;font-size:11px}</style>")
     for k, v in fixed.items():
         svg = svg.replace(k, v)
-    svg = svg.replace('<svg class="chart"', '<svg xmlns="http://www.w3.org/2000/svg" style="background:#fbfbf9"', 1)
+    svg = svg.replace('<svg class="chart"', '<svg xmlns="http://www.w3.org/2000/svg" style="background:#f6f7f3"', 1)
     return svg.replace("</title>", "</title>" + style, 1)
