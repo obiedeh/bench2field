@@ -144,10 +144,21 @@ def test_incomplete_sweep_is_marked_stopped(synthetic_case_study):
     assert {s.name: s.status for s in cs.boards["bench-a"].references} == {"bench_a_old": "reference", "bench_a_stopped": "stopped"}
 
 
+
+def _fetches_nothing(page: str) -> bool:
+    """Self-contained: nothing on the page is loaded from the network. Plain
+    navigation links (<a href>) are allowed; scripts, styles, images, fonts and
+    frames must all be inline."""
+    import re
+    loads = re.findall(r'<(?:script|img|link|iframe|source|video|audio)\b[^>]*\b(?:src|href)=["\']https?://', page, re.I)
+    css = re.findall(r'(?:@import|url\()\s*["\']?https?://', page, re.I)
+    return not loads and not css
+
+
 def test_render_synthetic_is_self_contained_and_says_the_frame_misses(synthetic_case_study):
     cs = load_case_study(synthetic_case_study)
     page = render(cs)
-    assert page.startswith("<!doctype html>") and "http://" not in page and "https://" not in page
+    assert page.startswith("<!doctype html>") and _fetches_nothing(page)
     assert "46.2 ms" in page and "does not fit" in page and "25.0 ms" in page
     assert page.count("<svg") == 4 and "✕" in page  # no spin pair configured; the saturated tier is marked
     assert "stopped, not a baseline" not in page and "reference" in page
@@ -159,7 +170,7 @@ def test_cli_report_on_the_real_case_study(tmp_path):
     svg = tmp_path / "h.svg"
     assert cli.main(["report", str(CASE_STUDY), "--out", str(out), "--headline-svg", str(svg)]) == 0
     page = out.read_text()
-    assert "Case study 01" in page and "does not fit" in page and "http" not in page.replace("http-equiv", "")
+    assert "Case study 01" in page and "does not fit" in page and _fetches_nothing(page)
     cs = load_case_study(CASE_STUDY)
     assert cs.rate_hz == 26.0 and cs.warnings == []
     assert {k: b.baseline.name for k, b in cs.boards.items()} == {
