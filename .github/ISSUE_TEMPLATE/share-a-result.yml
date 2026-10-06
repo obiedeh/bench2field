@@ -1,0 +1,40 @@
+name: Share a result
+description: Ran Bench2Field on your own model or board? Post what the full frame cost.
+title: "[Result] <model> on <board>"
+labels: ["result"]
+body:
+  - type: input
+    id: board
+    attributes:
+      label: Board and power mode
+      placeholder: Jetson Orin NX 16 GB, MAXN_SUPER
+    validations:
+      required: true
+  - type: input
+    id: software
+    attributes:
+      label: JetPack or CUDA, TensorRT and ONNX Runtime versions
+      placeholder: JetPack 6.2, TensorRT 10.7.0, onnxruntime 1.24.0
+  - type: input
+    id: model
+    attributes:
+      label: Model, precision and input size
+      placeholder: YOLOX-s, FP16, 640x640
+    validations:
+      required: true
+  - type: input
+    id: rate
+    attributes:
+      label: Camera or request rate tested (Hz)
+      placeholder: "26"
+  - type: textarea
+    id: numbers
+    attributes:
+      label: Model-only p95 and full-frame p95
+      description: Paste the summary, or attach the run JSON.
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything that surprised you
