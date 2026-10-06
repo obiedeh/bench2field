@@ -1,0 +1,33 @@
+name: Bug report
+description: Something failed to install, run or report.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: input
+    id: board
+    attributes:
+      label: Board or GPU
+      placeholder: RTX 4090 / Jetson AGX Orin
+    validations:
+      required: true
+  - type: input
+    id: software
+    attributes:
+      label: OS, Python, JetPack or CUDA, TensorRT and ONNX Runtime versions
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command you ran
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: error
+    attributes:
+      label: What happened
+      description: The error output, or what you expected instead.
+      render: text
+    validations:
+      required: true
