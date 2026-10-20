@@ -1,0 +1,24 @@
+{
+  "source_files": {
+    "infer_person_diagnostic.py": "f7480351889a0c809e2b04e4affd93a615891cc621d5237d33c853895d5a547a",
+    "person_detector_contract.py": "93a0bd791a4e091e9608e938e8941ce295c58e9df83b80256f70356e4f714148"
+  },
+  "source_bundle_hash_definition": "SHA256 of sorted JSON file-to-source-hash map",
+  "adapter_sha256": "e3d1d6bce12224b012c6b927633a43cb56be724264ad32e1461a6720c2b9f737",
+  "truth_sha256": "1ec972270a86b57c5bbd71e7b786920f1ca05839da7dfcfca841f9057a453576",
+  "prediction_sha256": "48798fed2af991f78e146641561a5c43ea79cb484f7ea2795dd791944d5126af",
+  "accuracy_sha256": "71890b4724983810c81f776085c9e71a4b994c8975ca3f5924257233edbf1012",
+  "new_model_calls": 0,
+  "image_derivation": "frozen original60 frame ID and dimensions bind JPEG inference inputs to PNG rendering sidecars; both byte hashes verified; lossy encoding is not pixel identity",
+  "label_conversion": "recorded semantic xyxy to xywh by subtraction; no clipping or padding",
+  "license_scope": "existing owner-generated local simulation; generator repository MIT; background asset redistribution not separately established; no images redistributed",
+  "verified_original60_records": 60,
+  "source_records_manifest_sha256": "41f9e3891a9e0f2aac34d4f739e4e2b056ec3e33f9e0c2062cced16899d56b28",
+  "scored_at": "2026-10-20T04:37:04.680006+00:00",
+  "raw_person_score_maximum_over_images": {
+    "minimum": 0.00025106515255668427,
+    "maximum": 0.004164173951997974
+  },
+  "all_images_below_frozen_strict_confidence_0_3": true,
+  "claims": "Local exposed generated semantic labels, person-only thresholded predictions, no independent human/field/held-out or full COCO accuracy, no new inference or speed promotion"
+}

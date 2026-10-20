@@ -1,0 +1,100 @@
+.............................................................s....F..... [ 42%]
+....................................................s................... [ 84%]
+.........................s                                               [100%]
+=================================== FAILURES ===================================
+__________________ test_tensorrt_provider_runs_a_conv_in_fp16 __________________
+
+conv_model = '/tmp/pytest-of-oedeh/pytest-425/test_tensorrt_provider_runs_a_0/conv.onnx'
+tmp_path = PosixPath('/tmp/pytest-of-oedeh/pytest-425/test_tensorrt_provider_runs_a_0')
+
+    def test_tensorrt_provider_runs_a_conv_in_fp16(conv_model, tmp_path):
+        """Real hardware only: needs a TensorRT-enabled onnxruntime and TensorRT 10."""
+        import ctypes
+        import importlib.util
+    
+        import onnxruntime as ort
+    
+        if "TensorrtExecutionProvider" not in ort.get_available_providers():
+            pytest.skip("this onnxruntime build has no TensorRT provider")
+        if importlib.util.find_spec("tensorrt_libs") is None:
+            try:
+                ctypes.CDLL("libnvinfer.so.10")
+            except OSError:
+                pytest.skip("TensorRT 10 is not installed")
+>       be = OnnxRuntimeBackend(conv_model, OrtOptions(provider="tensorrt", precision="fp16",
+                                                       trt_cache_dir=str(tmp_path / "trt")))
+
+tests/test_onnxruntime_backend.py:182: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <bench2field.backends.onnxruntime.OnnxRuntimeBackend object at 0x7464542d0620>
+model_path = '/tmp/pytest-of-oedeh/pytest-425/test_tensorrt_provider_runs_a_0/conv.onnx'
+options = OrtOptions(provider='tensorrt', precision='fp16', intra_op_threads=0, inter_op_threads=0, allow_spinning=True, trt_cac...ytest-of-oedeh/pytest-425/test_tensorrt_provider_runs_a_0/trt', int8_calibration_table=None, extra_provider_options={})
+
+    def __init__(self, model_path: str, options: OrtOptions | None = None) -> None:
+        import onnxruntime as ort
+    
+        self.options = opts = options or OrtOptions()
+        self._ort = ort
+        prov = PROVIDER_ALIASES.get(opts.provider, opts.provider)
+        available = ort.get_available_providers()
+        if prov not in available:
+            raise RuntimeError(f"{prov} not available; this build has {available}")
+    
+        preload_gpu_libraries(ort, prov)
+        if prov == "TensorrtExecutionProvider":
+            preload_tensorrt_libraries()
+    
+        so = ort.SessionOptions()
+        if opts.intra_op_threads:
+            so.intra_op_num_threads = opts.intra_op_threads
+        if opts.inter_op_threads:
+            so.inter_op_num_threads = opts.inter_op_threads
+        so.add_session_config_entry(
+            "session.intra_op.allow_spinning", "1" if opts.allow_spinning else "0"
+        )
+    
+        prov_opts: dict[str, Any] = dict(opts.extra_provider_options)
+        if prov == "TensorrtExecutionProvider":
+            prov_opts.setdefault("trt_engine_cache_enable", True)
+            prov_opts.setdefault("trt_engine_cache_path", opts.trt_cache_dir)
+            if opts.precision == "fp16":
+                prov_opts["trt_fp16_enable"] = True
+            elif opts.precision == "int8":
+                prov_opts["trt_int8_enable"] = True
+                if opts.int8_calibration_table:
+                    prov_opts["trt_int8_calibration_table_name"] = opts.int8_calibration_table
+        elif prov == "MIGraphXExecutionProvider":
+            if opts.precision == "fp16":
+                prov_opts["migraphx_fp16_enable"] = True
+            elif opts.precision == "int8":
+                prov_opts["migraphx_int8_enable"] = True
+        # CPU, CUDA and ROCm providers run whatever precision the graph was
+        # exported in, so for them `precision` is a label for the report.
+    
+        providers: list[Any] = [(prov, prov_opts)] if prov_opts else [prov]
+        if prov != "CPUExecutionProvider":
+            providers.append("CPUExecutionProvider")  # fallback for unsupported ops
+        self.session = ort.InferenceSession(model_path, sess_options=so, providers=providers)
+        # If a provider's libraries are missing, onnxruntime prints an error,
+        # retries on CPU and carries on. A benchmark must not: a "TensorRT"
+        # run that quietly measured the CPU is worse than no run.
+        active = self.session.get_providers()[0]
+        if active != prov:
+>           raise RuntimeError(
+                f"asked for {prov} but onnxruntime fell back to {active}; "
+                "its libraries failed to load (see the onnxruntime error above)"
+            )
+E           RuntimeError: asked for TensorrtExecutionProvider but onnxruntime fell back to CPUExecutionProvider; its libraries failed to load (see the onnxruntime error above)
+
+src/bench2field/backends/onnxruntime.py:208: RuntimeError
+----------------------------- Captured stdout call -----------------------------
+*************** EP Error ***************
+EP Error /onnxruntime_src/onnxruntime/core/providers/cuda/cuda_call.cc:154 std::conditional_t<THRW, void, onnxruntime::common::Status> onnxruntime::CudaCall(ERRTYPE, const char*, const char*, SUCCTYPE, const char*, const char*, int) [with ERRTYPE = cudaError; bool THRW = true; SUCCTYPE = cudaError; std::conditional_t<THRW, void, common::Status> = void] /onnxruntime_src/onnxruntime/core/providers/cuda/cuda_call.cc:146 std::conditional_t<THRW, void, onnxruntime::common::Status> onnxruntime::CudaCall(ERRTYPE, const char*, const char*, SUCCTYPE, const char*, const char*, int) [with ERRTYPE = cudaError; bool THRW = true; SUCCTYPE = cudaError; std::conditional_t<THRW, void, common::Status> = void] CUDA failure 100: no CUDA-capable device is detected ; GPU=-1 ; hostname=rtx-5090-workstation ; file=/onnxruntime_src/onnxruntime/core/providers/tensorrt/tensorrt_execution_provider.cc ; line=1341 ; expr=cudaSetDevice(device_id_); 
+
+ when using [('TensorrtExecutionProvider', {'trt_engine_cache_enable': True, 'trt_engine_cache_path': '/tmp/pytest-of-oedeh/pytest-425/test_tensorrt_provider_runs_a_0/trt', 'trt_fp16_enable': True}), 'CPUExecutionProvider']
+Falling back to ['CPUExecutionProvider'] and retrying.
+****************************************
+=========================== short test summary info ============================
+FAILED tests/test_onnxruntime_backend.py::test_tensorrt_provider_runs_a_conv_in_fp16
+1 failed, 166 passed, 3 skipped in 4.26s

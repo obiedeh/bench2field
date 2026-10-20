@@ -1,0 +1,61 @@
+{
+  "protocol": {
+    "iou": 0.5,
+    "score_threshold": 0.0,
+    "max_detections_per_image": 100,
+    "interpolation_points": 101,
+    "tie_order": "input order",
+    "crowd_policy": "reject"
+  },
+  "images": 60,
+  "images_with_predictions": 0,
+  "tp": 0,
+  "fp": 0,
+  "fn": 45,
+  "precision": null,
+  "recall": 0.0,
+  "mean_ap_at_declared_iou": 0.0,
+  "per_class": [
+    {
+      "category_id": 1,
+      "positives": 45,
+      "tp": 0,
+      "fp": 0,
+      "fn": 45,
+      "ap": 0.0
+    }
+  ],
+  "schema_version": "detection-accuracy-1",
+  "created_at": "2026-10-20T04:36:26.000261+00:00",
+  "device": "bench-5090",
+  "machine": "x86_64",
+  "python": "3.12.3",
+  "evaluation_source_commit": "02cc55262f73b48b0f0aebe0798b09d04d4e2ebe",
+  "evaluation_source_dirty": false,
+  "evaluator_sha256": "ccea964e2ef13ed4d68144361312bad8917759616527c5d22fd846d68d3d4b56",
+  "dataset_sha256": "1ec972270a86b57c5bbd71e7b786920f1ca05839da7dfcfca841f9057a453576",
+  "predictions_sha256": "48798fed2af991f78e146641561a5c43ea79cb484f7ea2795dd791944d5126af",
+  "model_sha256": "00b70c44385bb5567e784b0c1efae213c4f2ec06efacfc8e3f52eca333356205",
+  "configuration": {
+    "task": "person only",
+    "model": "YOLOX-s FP32",
+    "preprocessing": "top-left letterbox,BGR0..255,640square",
+    "confidence_strict_gt": 0.3,
+    "nms_strict_gt": 0.45,
+    "raw_run_sha256": "4c5388fe91c6dac1b46a19785abb3af34240257cbe03da065bbbd7a3a45aa6b1"
+  },
+  "prediction_kind": "measured",
+  "inference_provenance": {
+    "recorded_at": "2026-10-18T04:04:38.445991+00:00",
+    "device": "bench-thor",
+    "source_sha256": "35b579e2d716e6f778169c287a9beb394a63cf00b6f0d9e5870abd38488e0226",
+    "source_commit": "9483b3ca4dd2b9cbc0164e66edb47ce284a95e47"
+  },
+  "reference_review": {
+    "status": "generated tight semantic boxes; human review unsigned",
+    "scope": "exposed correlated simulation,not field/held-out evidence"
+  },
+  "scope": "fixed-IoU saved-output evaluation; no inference or speed promotion",
+  "full_coco_map": false,
+  "promotion_accepted": false
+}
