@@ -1,0 +1,8 @@
+src/bench2field/accuracy.py:80: error: Incompatible types in assignment (expression has type "int", variable has type "dict[str, Any]")  [assignment]
+src/bench2field/accuracy.py:83: error: Argument 1 to "setdefault" of "MutableMapping" has incompatible type "tuple[dict[str, Any], int]"; expected "tuple[int, int]"  [arg-type]
+src/bench2field/accuracy.py:83: error: Invalid index type "dict[str, Any]" for "dict[int, dict[str, Any]]"; expected type "int"  [index]
+src/bench2field/accuracy.py:87: error: Incompatible types in assignment (expression has type "int", variable has type "dict[str, Any]")  [assignment]
+src/bench2field/accuracy.py:93: error: Invalid index type "dict[str, Any]" for "dict[int, dict[str, Any]]"; expected type "int"  [index]
+src/bench2field/accuracy.py:95: error: Argument 1 to "setdefault" of "MutableMapping" has incompatible type "dict[str, Any]"; expected "int"  [arg-type]
+src/bench2field/accuracy.py:123: error: Generator has incompatible item type "float | None"; expected "bool"  [misc]
+Found 7 errors in 1 file (checked 1 source file)

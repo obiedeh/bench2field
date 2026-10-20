@@ -1,0 +1,30 @@
+{
+  "date_utc": "2026-10-20T03:58:14.943403+00:00",
+  "device": "bench-5090",
+  "execution": "CPU saved-output scorer, no model inference",
+  "evaluated_source_sha256": "ccea964e2ef13ed4d68144361312bad8917759616527c5d22fd846d68d3d4b56",
+  "dataset_sha256": "aca866d94ebb84101b3e8f92a3cbb5ce788a1b9e54ab65a22b69febc85496753",
+  "prediction_sha256": "5bed2009aa5560c72c3513dba477e3e9836ae5076b5403e857994c6b2865eb62",
+  "prediction_kind": "synthetic",
+  "metric_scope": "fixed-IoU101pointAP, not fullCOCO",
+  "counts": {
+    "tp": 1,
+    "fp": 2,
+    "fn": 1,
+    "precision": 0.3333333333333333,
+    "recall": 0.5,
+    "mean_ap_at_declared_iou": 0.504950495049505
+  },
+  "accuracy_promotion": false,
+  "actual_model_accuracy": "blocked:no independently reviewed evaluation dataset located in inspected repository",
+  "checks": {
+    "focused_tests": 14,
+    "full_suite_log": "full-suite.log",
+    "ruff": "pass",
+    "full_tests": 161,
+    "full_seconds": 7.19,
+    "scoped_mypy": "pass; Python3.10target"
+  },
+  "retained_failure": "Initial caller used python -m bench2field; package has no __main__. Correct entrypoint is python -m bench2field.cli. No product change needed.",
+  "retained_type_failure": "Seven type diagnostics from a reused local variable and mixed dictionary inference; variable renamed and report row type made explicit. Prior run and diagnostics retained."
+}
