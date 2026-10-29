@@ -53,9 +53,11 @@ home directory changed: no JetPack, apt, driver or `nvpmodel` change (120W mode,
 as found).
 
 ```bash
-# on the 5090 host: copy the repository (no .git, venvs, data or models) to the Thor
+# on the 5090 host: copy the repository (no .git, venvs, data or models) to the Thor,
+# with the source commit in a file so the Thor's records can name it
+cd ~/github/bench2field && git rev-parse HEAD > SOURCE_COMMIT
 rsync -a --exclude .git --exclude '.venv' --exclude '*/.venv' --exclude data --exclude models \
-      --exclude .trt_cache --exclude __pycache__ ~/github/bench2field/ thor:~/alpamayo-work/bench2field/
+      --exclude .trt_cache --exclude __pycache__ ./ thor:~/alpamayo-work/bench2field/ && rm SOURCE_COMMIT
 # on the Thor
 bash ~/alpamayo-work/bench2field/case_studies/02_alpamayo_av_reasoning/setup_env_thor.sh
 ~/.venv/alpamayo/bin/python ~/alpamayo-work/bench2field/case_studies/02_alpamayo_av_reasoning/capture_env.py --board bench-thor
