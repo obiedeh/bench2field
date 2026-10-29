@@ -1,0 +1,103 @@
+{
+  "attention": {
+    "flash_attn_importable": true,
+    "flash_attn_version": "2.8.3"
+  },
+  "background": {
+    "containers_running": [],
+    "load_avg_1m": 3.689453125,
+    "stopped_for_this_run": [],
+    "top_processes": [
+      {
+        "cpu_pct": 400.0,
+        "exe": "python3",
+        "mem_pct": 38.0,
+        "pid": 259592
+      },
+      {
+        "cpu_pct": 24.5,
+        "exe": "python",
+        "mem_pct": 4.3,
+        "pid": 266684
+      },
+      {
+        "cpu_pct": 16.6,
+        "exe": "python",
+        "mem_pct": 2.1,
+        "pid": 273188
+      },
+      {
+        "cpu_pct": 3.8,
+        "exe": "chrome",
+        "mem_pct": 1.7,
+        "pid": 97211
+      },
+      {
+        "cpu_pct": 2.4,
+        "exe": "chrome",
+        "mem_pct": 1.1,
+        "pid": 96831
+      }
+    ]
+  },
+  "board": "bench-5090",
+  "captured_at": "2026-10-29T20:46:47+00:00",
+  "gpu": {
+    "compute_capability": "12.0",
+    "cuda_available": true,
+    "driver": "580.196.07",
+    "multiprocessors": 170,
+    "name": "NVIDIA GeForce RTX 5090",
+    "nvml_name": "NVIDIA GeForce RTX 5090",
+    "total_memory_gib": 31.33
+  },
+  "os": {
+    "machine": "x86_64",
+    "release": "6.17.0-22-generic",
+    "system": "Linux"
+  },
+  "packages": {
+    "alpamayo_r1": {
+      "commit": "11a0e01c13a5622377c45ee37d653351453ec43b",
+      "installed": true,
+      "source": "https://github.com/nvlabs/alpamayo",
+      "version": "0.1.0"
+    },
+    "bench2field": {
+      "commit": "0f34616a3fd6b982ea85703dd8d9b6c5b74e1096",
+      "dirty": false,
+      "installed": true,
+      "source": "file://~/github/bench2field",
+      "version": "1.0.1"
+    },
+    "flash_attn": {
+      "installed": true,
+      "source": "https://github.com/Dao-AILab/flash-attention/releases/download/v2.8.3/flash_attn-2.8.3+cu12torch2.8cxx11abiTRUE-cp312-cp312-linux_x86_64.whl",
+      "version": "2.8.3"
+    },
+    "physical_ai_av": {
+      "installed": true,
+      "version": "0.2.3"
+    },
+    "torch": {
+      "cuda_runtime": "12.8",
+      "installed": true,
+      "version": "2.8.0+cu128"
+    },
+    "torchvision": {
+      "installed": true,
+      "version": "0.23.0+cu128"
+    },
+    "transformers": {
+      "installed": true,
+      "version": "4.57.1"
+    }
+  },
+  "python": "3.12.3",
+  "resources": {
+    "disk_free_gib_under_hf_cache": 956.7,
+    "disk_total_gib_under_hf_cache": 1831.7,
+    "ram_total_gib": 30.9
+  },
+  "schema": "bench2field.case_study_02.env/1"
+}
