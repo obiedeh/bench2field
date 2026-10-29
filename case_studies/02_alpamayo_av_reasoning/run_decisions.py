@@ -17,9 +17,11 @@ PLAN.md) and adds the measurement around them:
                     peak torch allocated/reserved and NVML used memory,
                     the trace text and the 64 waypoints, minADE against the
                     dataset's future as a sanity value only
-    telemetry       NVML power, utilisation, clocks and temperature sampled at
-                    0.5 s for the whole run by bench2field's NvmlSampler, with the
-                    sample window of every decision recorded
+    telemetry       sampled at 0.5 s for the whole run by bench2field's samplers,
+                    with the sample window of every decision recorded: NVML on the
+                    5090 (GPU rail power, utilisation, clocks, temperature, memory),
+                    tegrastats on the Thor (VIN board power as power_board_w, GPU
+                    load, temperatures), as PLAN.md fixes it
 
 Timing is done without changing upstream code: the VLM's ``generate`` is wrapped
 to add a stopping criterion that timestamps every generated token (it never
@@ -209,20 +211,25 @@ def nvml_handle() -> Any | None:
         return None
 
 
-def start_sampler(interval_s: float = 0.5) -> Any | None:
-    """bench2field's telemetry sampler for this board: NVML where it answers (the
-    5090), tegrastats where it does not (Jetsons; the Thor's NVML has no power,
-    memory or clock channels). Returns None when neither is available."""
+def start_sampler(board: str, interval_s: float = 0.5) -> Any | None:
+    """bench2field's telemetry sampler for this board. The 5090 uses NVML (GPU rail
+    power, utilisation, clocks, temperature, memory). The Thor uses tegrastats,
+    because PLAN.md fixes Thor power as the VIN board rail (`power_board_w`):
+    the Thor's NVML does answer power, utilisation and temperature queries,
+    but for the GPU rail only, and it has no memory or clock channels. Returns
+    None when the board's sampler is not available."""
     try:
         from bench2field.telemetry.nvml import NvmlSampler
         from bench2field.telemetry.tegrastats import TegrastatsSampler
 
-        if NvmlSampler.available():
-            s = NvmlSampler(interval_s=interval_s)
-        elif TegrastatsSampler.available():
+        if board == "bench-thor":
+            if not TegrastatsSampler.available():
+                return None
             s = TegrastatsSampler(interval_s=interval_s)
         else:
-            return None
+            if not NvmlSampler.available():
+                return None
+            s = NvmlSampler(interval_s=interval_s)
         s.start()
         return s
     except Exception:
@@ -349,6 +356,11 @@ def provenance(env_path: Path) -> dict[str, Any]:
         from bench2field import background, provenance as prov
 
         out["bench2field"] = prov.git_state()
+        if not out["bench2field"].get("commit"):
+            # a copy of the tree without .git (the Thor): the copier leaves the source commit in a file
+            marker = HERE.parents[1] / "SOURCE_COMMIT"
+            if marker.exists():
+                out["bench2field"] = {"commit": marker.read_text().strip(), "dirty": None, "root": "copied tree, see SOURCE_COMMIT"}
         snap = background.snapshot()
         snap["top_processes"] = [
             {**{k: v for k, v in p.items() if k != "cmd"}, "exe": Path(str(p.get("cmd", "")).split()[0]).name if str(p.get("cmd", "")).split() else ""}
@@ -394,7 +406,7 @@ def main(argv: list[str] | None = None) -> int:
     traces_dir.mkdir(parents=True, exist_ok=True)
     loader = synthetic_sample if args.synthetic else dataset_sample
 
-    sampler = start_sampler()
+    sampler = start_sampler(args.board)
     h = nvml_handle()
     started = datetime.now(timezone.utc).isoformat(timespec="seconds")
     print(f"[run] loading {MODEL_ID} with attn={VARIANTS[args.variant]}", flush=True)

@@ -156,7 +156,7 @@ def main(argv: list[str] | None = None) -> int:
     out.parent.mkdir(parents=True, exist_ok=True)
     trace_dir.mkdir(parents=True, exist_ok=True)
 
-    sampler = rd.start_sampler(interval_s=0.25)
+    sampler = rd.start_sampler(args.board, interval_s=0.25)
     h = rd.nvml_handle()
 
     model, processor, load = rd.load_model(rd.VARIANTS[args.variant])

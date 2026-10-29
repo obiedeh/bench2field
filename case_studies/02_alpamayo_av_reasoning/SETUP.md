@@ -72,9 +72,10 @@ What differs from the 5090, and why:
 - Weights: the Hugging Face download stalled on this board (name resolution),
   so the 21 GB were copied from the 5090's cache with rsync into the same cache
   layout. The loader reads it unchanged.
-- Power comes from tegrastats (`VIN`, reported as `power_board_w`), because the
-  Thor's NVML answers no power, memory or clock query. GPU memory comes from
-  torch's own counters.
+- Power comes from tegrastats (`VIN`, reported as `power_board_w`), the board
+  rail PLAN.md fixed before the first run. The Thor's NVML does answer power,
+  utilisation and temperature queries, but for the GPU rail only, and it has no
+  memory or clock channels; GPU memory comes from torch's own counters.
 
 Setup took 329 s, 263 s of it the torch download.
 
