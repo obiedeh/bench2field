@@ -47,13 +47,36 @@ hf auth login          # the model is not gated; the dataset is (terms accepted 
 
 ## Thor (`bench-thor`, Jetson AGX Thor developer kit, JetPack 7.1)
 
-Planned for phase 4; not yet performed. The system Python is 3.12.3, which
-meets the pin. `torch==2.8.0` cannot be met on JetPack's CUDA 13 aarch64 stack:
-use the Jetson torch wheel the board already runs for other work and record
-the version in `runs/env_bench-thor.json`. Install without flash-attn and load
-with `attn_implementation="sdpa"`. Power is read from tegrastats (`VIN` rail,
-reported as `power_board_w`, as in case study 01). No JetPack change, no
-`nvpmodel` change, no reflash.
+Done on 2026-10-29; environment record in `runs/env_bench-thor.json`. This is
+Jetson AGX Thor on JetPack, not DRIVE AGX Thor on DriveOS. Nothing outside the
+home directory changed: no JetPack, apt, driver or `nvpmodel` change (120W mode,
+as found).
+
+```bash
+# on the 5090 host: copy the repository (no .git, venvs, data or models) to the Thor
+rsync -a --exclude .git --exclude '.venv' --exclude '*/.venv' --exclude data --exclude models \
+      --exclude .trt_cache --exclude __pycache__ ~/github/bench2field/ thor:~/alpamayo-work/bench2field/
+# on the Thor
+bash ~/alpamayo-work/bench2field/case_studies/02_alpamayo_av_reasoning/setup_env_thor.sh
+~/.venv/alpamayo/bin/python ~/alpamayo-work/bench2field/case_studies/02_alpamayo_av_reasoning/capture_env.py --board bench-thor
+```
+
+What differs from the 5090, and why:
+
+- `torch 2.11.0+cu130` instead of the upstream `torch==2.8.0`: 2.8.0 has no
+  wheel for CUDA 13 on aarch64. The 2.11.0 wheel is the `manylinux_2_28_aarch64`
+  build from the PyTorch cu130 index, the same one the board's other venvs use.
+  The environment record names it; every Thor result carries this difference.
+- No flash-attn; `attn_implementation="sdpa"`, which the upstream README supports.
+  `alpamayo_r1` is installed with `--no-deps` so pip never tries to build it.
+- Weights: the Hugging Face download stalled on this board (name resolution),
+  so the 21 GB were copied from the 5090's cache with rsync into the same cache
+  layout. The loader reads it unchanged.
+- Power comes from tegrastats (`VIN`, reported as `power_board_w`), because the
+  Thor's NVML answers no power, memory or clock query. GPU memory comes from
+  torch's own counters.
+
+Setup took 329 s, 263 s of it the torch download.
 
 ## Orin NX (`field-orin`)
 
