@@ -43,6 +43,7 @@ the run that produces them is committed.
 
 ```text
 README.md            this file
+PLAN.md              question, protocol fixed before the first run, phases
 SETUP.md             exact setup per board
 FRICTION_LOG.md      what broke, how it was found, what fixed it, with times
 setup_env.sh         builds .venv on the 5090 host
