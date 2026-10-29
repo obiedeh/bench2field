@@ -48,3 +48,15 @@ the vision encoder's activations and the KV cache. With 2.5 GB already in use
 by the desktop and the rover's services, neither fits, and the disk cannot hold
 the download to quantize from. bitsandbytes development wheels do exist on the
 Jetson AI Lab jp6/cu126 index, but memory and disk block before tooling matters.
+
+## 2026-10-29, phase 2: the runner, 5090 host, and the Thor environment
+
+| Time | Entry |
+|---|---|
+| 17 s | First load of the 22.2 GB checkpoint in bf16 on the 5090: 17.4 s from `from_pretrained` to the model on the GPU with the shards in the page cache, 20.6 GiB allocated after load. The upstream README's 24 GB requirement is right: the 5090's 32 GB leaves room for one decision, not for `num_traj_samples` above a few. |
+| 10 min | The upstream call pops `input_ids` out of the tokenized dict it is given, so anything read from that dict after the call is gone. First smoke run crashed on the prompt token count after a successful decision. Fix: read the prompt length inside the `generate` hook, where the ids still exist. |
+| 5 min | `TelemetrySampler.samples` is a property in bench2field, not a method; the runner called it. Found on the second smoke run, after the decisions had completed. Fix: attribute access. Both found by running on synthetic input before the dataset was available, which is what the `--synthetic` flag is for. |
+| 0 s | Synthetic frames give a 15-token trace ("keep lane, nothing needs attention"), so synthetic latency says nothing about real clips, where traces are longer. Smoke numbers stay in `runs/scratch/` and are labelled as not a result. |
+| 0 s | NVML on the 5090 reports the GPU rail only (`power_gpu_w`); the Thor's NVML answers no power, memory or clock query at all, as case study 01 found. The runner uses bench2field's NVML sampler where it answers and the tegrastats sampler (`VIN` as `power_board_w`) where it does not, and records which channel each power number came from. |
+| 329 s | Thor venv (`~/.venv/alpamayo`, system Python 3.12.3): `torch==2.8.0` is not available for this stack, so the decision in PLAN.md stands: `torch 2.11.0+cu130`, the `manylinux_2_28_aarch64` wheel from the PyTorch cu130 index, the same one the board's other venvs use. 263 s of the 329 s was that download. CUDA 13.0 visible, compute capability 11.0, `transformers 4.57.1`, `alpamayo_r1` at `11a0e01` installed with `--no-deps` so pip does not try to build flash-attn. |
+| 25 min | The weight download on the Thor stalled at 129 MB: pypi and Hugging Face name resolution failed intermittently from that board (`Temporary failure in name resolution` in the pip log, zero bytes in 10 s on the model shards). Fix: stop it and copy the 21 GB from the 5090's Hugging Face cache over the LAN with rsync into the same cache layout (`blobs/`, `snapshots/`, `refs/`), which the Hugging Face loader reads unchanged. |

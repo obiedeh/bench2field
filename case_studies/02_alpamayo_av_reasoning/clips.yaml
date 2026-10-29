@@ -1,0 +1,17 @@
+# Clips for case study 02, chosen by rule before any run (see PLAN.md):
+# the upstream example clip, then the first seven clip ids of
+# notebooks/clip_ids.parquet in NVlabs/alpamayo (commit 11a0e01), in file order.
+# t0_us is the upstream default. The clips themselves are streamed from the
+# gated PhysicalAI-Autonomous-Vehicles dataset and never committed.
+dataset: nvidia/PhysicalAI-Autonomous-Vehicles
+t0_us: 5100000
+num_frames: 4
+clips:
+  - 030c760c-ae38-49aa-9ad8-f5650a545d26
+  - 0347d9f9-1493-4954-865d-1d8464e28501
+  - 06b483cf-6d9c-4b18-b54b-4429c80867e3
+  - 09ad74a2-a499-4355-a302-da69ff7d0a57
+  - 0a1ef808-c891-4da2-919d-c44aa3be5085
+  - 0ea6fd88-dcdd-434e-9fa3-56ce0fb35bf2
+  - 174407b0-b040-475b-8c1e-512b0bab4675
+  - 195f1fc6-2a7b-4833-9b7f-753530fda044
