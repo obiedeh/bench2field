@@ -135,7 +135,7 @@ def plot_latency_per_clip(runs: list[dict[str, Any]]) -> None:
 
 
 def plot_stage_split(runs: list[dict[str, Any]]) -> None:
-    f, ax = fig(7.2, 1.2 + 0.7 * len(runs))
+    f, ax = fig(7.2, 1.9 + 0.7 * len(runs))
     for i, rec in enumerate(runs):
         meds = stage_medians(rec)
         left = 0.0
@@ -151,8 +151,8 @@ def plot_stage_split(runs: list[dict[str, Any]]) -> None:
     style(ax, "", "seconds (medians over all decisions)")
     ax.xaxis.grid(True, color=GRID, linewidth=0.8)
     ax.yaxis.grid(False)
-    ax.legend(frameon=False, fontsize=8, ncol=4, loc="upper center", bbox_to_anchor=(0.5, -0.35), labelcolor=INK2)
-    ax.set_title("Where a decision's time goes", color=INK, fontsize=10, loc="left")
+    ax.legend(frameon=False, fontsize=8, ncol=4, loc="lower center", bbox_to_anchor=(0.5, 1.02), labelcolor=INK2)
+    ax.set_title("Where a decision's time goes", color=INK, fontsize=10, loc="left", pad=28)
     save(f, "stage_split.svg")
 
 
