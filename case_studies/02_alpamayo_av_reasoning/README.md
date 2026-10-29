@@ -19,7 +19,7 @@ the run that produces them is committed.
 |---|---|---|---|
 | RTX 5090 (`bench-5090`) | bench | full-precision run, profile, plots | environment built and recorded |
 | Jetson AGX Thor (`bench-thor`) | edge bench | same clips, with power | planned (phase 4); JetPack, not DriveOS |
-| Jetson Orin NX 8 GB (`field-orin`) | field | nothing | does not fit; documented in the friction log |
+| Jetson Orin NX 8 GB (`field-orin`) | field | nothing | does not fit; measured facts in [ORIN_NX.md](ORIN_NX.md) |
 
 ## Results (pending)
 
@@ -37,7 +37,7 @@ the run that produces them is committed.
 2. 5090 run on a handful of PhysicalAI-AV clips: load time, latency per decision, peak memory, throughput, sample reasoning traces.
 3. Profile: where the time goes between the vision encoder, the language rollout and the diffusion trajectory head, with plots.
 4. Thor, same clips, power from tegrastats, compared with the 5090.
-5. Orin NX: why a quantized run is not feasible on this module.
+5. Orin NX: why a quantized run is not feasible on this module. Done: [ORIN_NX.md](ORIN_NX.md).
 
 ## Layout
 
@@ -46,6 +46,7 @@ README.md            this file
 PLAN.md              question, protocol fixed before the first run, phases
 SETUP.md             exact setup per board
 FRICTION_LOG.md      what broke, how it was found, what fixed it, with times
+ORIN_NX.md           why the field computer is not a target, with measured facts
 setup_env.sh         builds .venv on the 5090 host
 capture_env.py       writes runs/env_<board>.json
 requirements.txt     the pins, for reading; setup_env.sh installs them in the right order

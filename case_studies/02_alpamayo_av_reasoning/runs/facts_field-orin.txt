@@ -1,0 +1,27 @@
+# Orin NX facts, captured read-only on 2026-10-29T20:59Z
+## /proc/device-tree/model
+NVIDIA Jetson Orin NX Engineering Reference Developer Kit Super
+## /etc/nv_tegra_release
+# R36 (release), REVISION: 4.7, GCID: 42132812, BOARD: generic, EABI: aarch64, DATE: Thu Sep 18 22:54:44 UTC 2025
+## nvidia-l4t-core
+nvidia-l4t-core	36.4.7-20250918154033
+## free -m
+               total        used        free      shared  buff/cache   available
+Mem:            7619        2599         298         157        4722        4630
+Swap:          12001           6       11995
+## tegrastats (one line)
+RAM 2837/7620MB (lfb 51x1MB)
+## df -h /
+/dev/nvme0n1p1  117G  105G  6.6G  95% /
+## python
+Python 3.10.12
+/usr/bin/python3.10
+/usr/bin/python3.10-config
+/usr/bin/python3.10-coverage
+## cuda
+cuda-12
+cuda-12.6
+## torch (system)
+2.5.0a0+872d972e41.nv24.08 12.6
+## kernel
+5.15.148-tegra
