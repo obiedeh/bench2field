@@ -39,6 +39,13 @@ tests/             Pytest suite, runs on a CPU-only machine
 7. **One concern per commit**, with a message that says what changed and why.
 8. **No new dependencies without a stated reason.** Optional ones go in an
    extra in `pyproject.toml`.
+9. **No private identifiers in the tree.** Reports, logs, fixtures and scripts
+   carry a machine label (`bench-thor`, `field-orin`, `rtx-5090-workstation`,
+   set with `B2F_HOST_LABEL`), `<lan-address>` and `<home>`, never a host
+   name, a LAN address or a home-directory path. `describe_platform()` writes
+   the label and `background.scrub_private()` cleans command lines;
+   `tests/test_private_identifiers.py` fails on any home path or private-range
+   address in a tracked text file.
 
 ## Tests
 

@@ -666,7 +666,7 @@
   "evaluation_source_dirty": true,
   "evaluator_sha256": "ccea964e2ef13ed4d68144361312bad8917759616527c5d22fd846d68d3d4b56",
   "dataset_sha256": "6ec360f41b57ed65ce7f3422acc6f37023a7df74b9d0bdde27b4608f793f0b19",
-  "predictions_sha256": "64ab40faea0f2942137e04a3e8da287268ccc225bcd17298c4760a1ede7376ca",
+  "predictions_sha256": "2ec200decd9d1c7107ac882df53f59f5b506af2d28d8536bbdbdb0d1003d9241",
   "model_sha256": "00b70c44385bb5567e784b0c1efae213c4f2ec06efacfc8e3f52eca333356205",
   "configuration": {
     "model": "yolox_s.onnx",
@@ -718,5 +718,7 @@
   },
   "scope": "fixed-IoU saved-output evaluation; no inference or speed promotion",
   "full_coco_map": false,
-  "promotion_accepted": false
+  "promotion_accepted": false,
+  "predictions_sha256_as_measured": "64ab40faea0f2942137e04a3e8da287268ccc225bcd17298c4760a1ede7376ca",
+  "predictions_scrub_note": "predictions.json had home directories replaced by <home> after scoring; detections are unchanged. predictions_sha256_as_measured reproduces when the substitution is reversed."
 }

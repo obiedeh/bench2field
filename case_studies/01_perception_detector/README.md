@@ -102,6 +102,11 @@ and the speed from `runs/bench_thor_precision/` and `runs/bench_orin_precision/`
   Thor: onnxruntime 1.24.0, TensorRT 10.13.3, CUDA 13.2, 120 W mode. Orin NX:
   onnxruntime 1.24.0, TensorRT 10.7.0, CUDA 12.6, MAXN_SUPER.
 
+Home directories in the Thor and Orin NX `predictions.json` files were replaced by
+`<home>` after scoring. Each accuracy record keeps the hash as measured
+(`predictions_sha256_as_measured`) beside the hash of the committed file; the first
+reproduces when the substitution is reversed, and the detections did not change.
+
 ### What it shows
 
 - fp16 costs nothing in accuracy on either board: mean AP 0.6530 (Thor) and
