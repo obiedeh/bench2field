@@ -4,6 +4,16 @@ What changed in each Bench2Field release, newest first. Versions follow
 `pyproject.toml` and the git tags. A result named here came from a committed
 run file on named hardware, as the project rules require.
 
+## 1.1 (release notes drafted 2026-10-29, not yet tagged)
+
+Alpamayo 1 on the bench and the edge, with a custom CUDA preprocessing kernel.
+
+- Case study 02: NVIDIA's open Alpamayo 1 (`nvidia/Alpamayo-R1-10B`) measured on the RTX 5090 (sdpa and flash-attn) and the Jetson AGX Thor (sdpa, board power) on the same eight PhysicalAI-AV clips under a protocol fixed before the first run: 0.89 s against 4.38 s per decision, 377 W GPU rail against 64 W whole board, 316 J against 290 J per decision, 16 to 25 percent retention on every stage. `torch.profiler` stage split and kernel tables on both boards, six plots, a per-clip trajectory error table, and an Orin NX feasibility note.
+- Phase 3b, a CUDA preprocessing kernel for the camera frames: a fused one-pass version and a separable two-pass version of the processor's resize, normalize and patch layout, a C++ host side (PyTorch binding with input checks, stream and launch check) and a standalone C++ driver built with CMake and the CUDA toolkit alone. Both variants agree with PyTorch's GPU path within one uint8 step on every committed record, which a test enforces; the standalone driver matches the extension bit for bit. Measured against PyTorch's own ops on both boards, with the kernel time under the profiler recorded.
+- Tutorial: `docs/tutorials/run-alpamayo-1-on-jetson-agx-thor.md`, a numbered walk with the numbers to expect at each step.
+- Findings worth reading in the case study friction log: upstream's flash-attention default does not run under its own pins, and forcing it crashes the trajectory head; torch 2.8.0+cu128 runs sm80 kernels on the Blackwell 5090 while the Thor's torch 2.11 runs native sm110 GEMMs; the 5090 host's only CUDA 12 nvcc wheel contains no compiler.
+- Repository: CHANGELOG, `AGENTS.md`, issue templates, the EmbodiedEdge Labs report theme, `docs/COMMIT_MAP.md`, and the `phase2` handoff branch archived as a tag.
+
 ## Unreleased
 
 - Case study 02, Alpamayo 1 on the bench and the edge: measured decision latency, memory and power on the RTX 5090 (sdpa and flash-attn) and the Jetson AGX Thor (sdpa, board power), a torch.profiler stage split with plots, and an Orin NX feasibility note. Findings in the case study README and friction log, including that upstream's flash-attention default does not run under its own pins.
