@@ -1,0 +1,26 @@
+# R36 (release), REVISION: 4.7, GCID: 42132812, BOARD: generic, EABI: aarch64, DATE: Thu Sep 18 22:54:44 UTC 2025
+# KERNEL_VARIANT: oot
+TARGET_USERSPACE_LIB_DIR=nvidia
+TARGET_USERSPACE_LIB_DIR_PATH=usr/lib/aarch64-linux-gnu/nvidia
+cuda-toolkit-12-6 12.6.11-1
+cuda-toolkit-12-6-config-common 12.6.77-1
+cuda-toolkit-12-config-common 12.9.79-1
+deepstream-7.1 7.1.0-1
+tensorrt 10.7.0.23-1+cuda12.6
+NV Power Mode: MAXN_SUPER
+0
+NVPM ERROR: Error opening /sys/devices/system/cpu/cpu6/online: 2
+NVPM ERROR: failed to read PARAM CPU_ONLINE: ARG CORE_6: PATH /sys/devices/system/cpu/cpu6/online
+NVPM ERROR: Error opening /sys/devices/system/cpu/cpu7/online: 2
+NVPM ERROR: failed to read PARAM CPU_ONLINE: ARG CORE_7: PATH /sys/devices/system/cpu/cpu7/online
+NVPM ERROR: Error opening /sys/devices/system/cpu/cpu6/cpufreq/scaling_min_freq: 2
+NVPM ERROR: failed to read PARAM CPU_A78_6: ARG MIN_FREQ: PATH /sys/devices/system/cpu/cpu6/cpufreq/scaling_min_freq
+NVPM ERROR: Error opening /sys/devices/system/cpu/cpu6/cpufreq/scaling_max_freq: 2
+NVPM ERROR: failed to read PARAM CPU_A78_6: ARG MAX_FREQ: PATH /sys/devices/system/cpu/cpu6/cpufreq/scaling_max_freq
+NVPM ERROR: Error opening /sys/devices/system/cpu/cpu7/cpufreq/scaling_min_freq: 2
+NVPM ERROR: failed to read PARAM CPU_A78_7: ARG MIN_FREQ: PATH /sys/devices/system/cpu/cpu7/cpufreq/scaling_min_freq
+NVPM ERROR: Error opening /sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq: 2
+NVPM ERROR: failed to read PARAM CPU_A78_7: ARG MAX_FREQ: PATH /sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq
+/usr/local/lib/python3.10/dist-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+ultralytics 8.3.65 torch 2.5.0a0+872d972e41.nv24.08 onnx 1.17.0
