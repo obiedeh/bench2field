@@ -1,0 +1,1100 @@
+{
+ "summary": {
+  "frames": 60,
+  "person_frames": 45,
+  "empty_frames": 15,
+  "max_person_score_over_person_frames": 0.007,
+  "median_person_score_over_person_frames": 0.00076,
+  "max_objectness_over_person_frames": 0.59863,
+  "max_person_score_over_empty_frames": 0.00061,
+  "top_classes_over_person_frames": [
+   9,
+   32,
+   41,
+   61,
+   72,
+   75
+  ],
+  "label_person_box_size_px_median": [
+   251.0,
+   425.0
+  ],
+  "image_hw": [
+   720,
+   1280
+  ],
+  "provider": "CUDAExecutionProvider",
+  "model_sha256": "00b70c44385bb5567e784b0c1efae213c4f2ec06efacfc8e3f52eca333356205",
+  "ground_truth_sha256": "6fe444e7b3d64b61f6833ce8c730f2e70567424d47550e00fdffb4490836b42f",
+  "input": "PNG originals, letterbox 640, BGR 0..255, no score threshold",
+  "recorded_at": "2026-10-29T22:25:34-0500",
+  "device": "bench-5090"
+ },
+ "frames": [
+  {
+   "frame_id": "compliant_000",
+   "condition": "compliant",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    174,
+    140,
+    432,
+    578
+   ],
+   "max_person_score": 0.00076,
+   "max_objectness": 0.11555,
+   "top_class_index": 75,
+   "top_class_score": 0.07301
+  },
+  {
+   "frame_id": "compliant_001",
+   "condition": "compliant",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    178,
+    139,
+    435,
+    577
+   ],
+   "max_person_score": 0.00056,
+   "max_objectness": 0.12269,
+   "top_class_index": 75,
+   "top_class_score": 0.09042
+  },
+  {
+   "frame_id": "compliant_002",
+   "condition": "compliant",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    182,
+    139,
+    438,
+    575
+   ],
+   "max_person_score": 0.0006,
+   "max_objectness": 0.1294,
+   "top_class_index": 41,
+   "top_class_score": 0.09073
+  },
+  {
+   "frame_id": "compliant_003",
+   "condition": "compliant",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    186,
+    138,
+    441,
+    573
+   ],
+   "max_person_score": 0.00052,
+   "max_objectness": 0.14842,
+   "top_class_index": 72,
+   "top_class_score": 0.08346
+  },
+  {
+   "frame_id": "compliant_004",
+   "condition": "compliant",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    190,
+    138,
+    444,
+    571
+   ],
+   "max_person_score": 0.00086,
+   "max_objectness": 0.16905,
+   "top_class_index": 72,
+   "top_class_score": 0.13503
+  },
+  {
+   "frame_id": "compliant_005",
+   "condition": "compliant",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    194,
+    137,
+    447,
+    569
+   ],
+   "max_person_score": 0.00109,
+   "max_objectness": 0.15553,
+   "top_class_index": 72,
+   "top_class_score": 0.11359
+  },
+  {
+   "frame_id": "compliant_006",
+   "condition": "compliant",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    199,
+    137,
+    450,
+    567
+   ],
+   "max_person_score": 0.00171,
+   "max_objectness": 0.16803,
+   "top_class_index": 72,
+   "top_class_score": 0.08545
+  },
+  {
+   "frame_id": "compliant_007",
+   "condition": "compliant",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    203,
+    136,
+    453,
+    565
+   ],
+   "max_person_score": 0.00104,
+   "max_objectness": 0.16811,
+   "top_class_index": 72,
+   "top_class_score": 0.09965
+  },
+  {
+   "frame_id": "compliant_008",
+   "condition": "compliant",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    207,
+    136,
+    456,
+    563
+   ],
+   "max_person_score": 0.0007,
+   "max_objectness": 0.18714,
+   "top_class_index": 72,
+   "top_class_score": 0.12402
+  },
+  {
+   "frame_id": "compliant_009",
+   "condition": "compliant",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    211,
+    135,
+    459,
+    562
+   ],
+   "max_person_score": 0.00093,
+   "max_objectness": 0.18618,
+   "top_class_index": 61,
+   "top_class_score": 0.14436
+  },
+  {
+   "frame_id": "compliant_010",
+   "condition": "compliant",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    215,
+    135,
+    462,
+    560
+   ],
+   "max_person_score": 0.00197,
+   "max_objectness": 0.13968,
+   "top_class_index": 61,
+   "top_class_score": 0.10342
+  },
+  {
+   "frame_id": "compliant_011",
+   "condition": "compliant",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    219,
+    135,
+    465,
+    558
+   ],
+   "max_person_score": 0.00079,
+   "max_objectness": 0.12192,
+   "top_class_index": 61,
+   "top_class_score": 0.06388
+  },
+  {
+   "frame_id": "compliant_012",
+   "condition": "compliant",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    223,
+    134,
+    468,
+    556
+   ],
+   "max_person_score": 0.00063,
+   "max_objectness": 0.15769,
+   "top_class_index": 72,
+   "top_class_score": 0.07646
+  },
+  {
+   "frame_id": "compliant_013",
+   "condition": "compliant",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    227,
+    134,
+    471,
+    554
+   ],
+   "max_person_score": 0.00042,
+   "max_objectness": 0.12545,
+   "top_class_index": 72,
+   "top_class_score": 0.05551
+  },
+  {
+   "frame_id": "compliant_014",
+   "condition": "compliant",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    231,
+    133,
+    473,
+    553
+   ],
+   "max_person_score": 0.00048,
+   "max_objectness": 0.11193,
+   "top_class_index": 72,
+   "top_class_score": 0.059
+  },
+  {
+   "frame_id": "missing-ppe_000",
+   "condition": "missing-ppe",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    175,
+    158,
+    432,
+    578
+   ],
+   "max_person_score": 0.00173,
+   "max_objectness": 0.58099,
+   "top_class_index": 32,
+   "top_class_score": 0.54516
+  },
+  {
+   "frame_id": "missing-ppe_001",
+   "condition": "missing-ppe",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    180,
+    157,
+    435,
+    577
+   ],
+   "max_person_score": 0.00117,
+   "max_objectness": 0.43892,
+   "top_class_index": 32,
+   "top_class_score": 0.41365
+  },
+  {
+   "frame_id": "missing-ppe_002",
+   "condition": "missing-ppe",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    184,
+    157,
+    438,
+    575
+   ],
+   "max_person_score": 0.00232,
+   "max_objectness": 0.41739,
+   "top_class_index": 32,
+   "top_class_score": 0.39276
+  },
+  {
+   "frame_id": "missing-ppe_003",
+   "condition": "missing-ppe",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    188,
+    156,
+    441,
+    573
+   ],
+   "max_person_score": 0.00417,
+   "max_objectness": 0.59863,
+   "top_class_index": 32,
+   "top_class_score": 0.56729
+  },
+  {
+   "frame_id": "missing-ppe_004",
+   "condition": "missing-ppe",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    192,
+    156,
+    444,
+    571
+   ],
+   "max_person_score": 0.00401,
+   "max_objectness": 0.59267,
+   "top_class_index": 32,
+   "top_class_score": 0.56274
+  },
+  {
+   "frame_id": "missing-ppe_005",
+   "condition": "missing-ppe",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    196,
+    155,
+    447,
+    569
+   ],
+   "max_person_score": 0.007,
+   "max_objectness": 0.48459,
+   "top_class_index": 32,
+   "top_class_score": 0.45973
+  },
+  {
+   "frame_id": "missing-ppe_006",
+   "condition": "missing-ppe",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    200,
+    154,
+    450,
+    567
+   ],
+   "max_person_score": 0.00379,
+   "max_objectness": 0.26979,
+   "top_class_index": 32,
+   "top_class_score": 0.26018
+  },
+  {
+   "frame_id": "missing-ppe_007",
+   "condition": "missing-ppe",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    204,
+    154,
+    453,
+    565
+   ],
+   "max_person_score": 0.00249,
+   "max_objectness": 0.38996,
+   "top_class_index": 32,
+   "top_class_score": 0.37444
+  },
+  {
+   "frame_id": "missing-ppe_008",
+   "condition": "missing-ppe",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    208,
+    153,
+    456,
+    563
+   ],
+   "max_person_score": 0.00207,
+   "max_objectness": 0.38897,
+   "top_class_index": 32,
+   "top_class_score": 0.37015
+  },
+  {
+   "frame_id": "missing-ppe_009",
+   "condition": "missing-ppe",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    212,
+    153,
+    459,
+    562
+   ],
+   "max_person_score": 0.0023,
+   "max_objectness": 0.42077,
+   "top_class_index": 32,
+   "top_class_score": 0.39726
+  },
+  {
+   "frame_id": "missing-ppe_010",
+   "condition": "missing-ppe",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    216,
+    152,
+    462,
+    560
+   ],
+   "max_person_score": 0.00292,
+   "max_objectness": 0.32214,
+   "top_class_index": 32,
+   "top_class_score": 0.30093
+  },
+  {
+   "frame_id": "missing-ppe_011",
+   "condition": "missing-ppe",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    220,
+    152,
+    465,
+    558
+   ],
+   "max_person_score": 0.0032,
+   "max_objectness": 0.16549,
+   "top_class_index": 32,
+   "top_class_score": 0.15801
+  },
+  {
+   "frame_id": "missing-ppe_012",
+   "condition": "missing-ppe",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    224,
+    151,
+    468,
+    556
+   ],
+   "max_person_score": 0.00303,
+   "max_objectness": 0.25243,
+   "top_class_index": 32,
+   "top_class_score": 0.241
+  },
+  {
+   "frame_id": "missing-ppe_013",
+   "condition": "missing-ppe",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    228,
+    151,
+    471,
+    554
+   ],
+   "max_person_score": 0.00168,
+   "max_objectness": 0.33439,
+   "top_class_index": 32,
+   "top_class_score": 0.31893
+  },
+  {
+   "frame_id": "missing-ppe_014",
+   "condition": "missing-ppe",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    231,
+    150,
+    473,
+    553
+   ],
+   "max_person_score": 0.00212,
+   "max_objectness": 0.24927,
+   "top_class_index": 32,
+   "top_class_score": 0.23716
+  },
+  {
+   "frame_id": "restricted-entry_000",
+   "condition": "restricted-entry",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    847,
+    140,
+    1105,
+    578
+   ],
+   "max_person_score": 0.00022,
+   "max_objectness": 0.20935,
+   "top_class_index": 9,
+   "top_class_score": 0.11801
+  },
+  {
+   "frame_id": "restricted-entry_001",
+   "condition": "restricted-entry",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    848,
+    139,
+    1106,
+    577
+   ],
+   "max_person_score": 0.00036,
+   "max_objectness": 0.16721,
+   "top_class_index": 75,
+   "top_class_score": 0.10029
+  },
+  {
+   "frame_id": "restricted-entry_002",
+   "condition": "restricted-entry",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    850,
+    139,
+    1107,
+    575
+   ],
+   "max_person_score": 0.00026,
+   "max_objectness": 0.15876,
+   "top_class_index": 9,
+   "top_class_score": 0.08157
+  },
+  {
+   "frame_id": "restricted-entry_003",
+   "condition": "restricted-entry",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    852,
+    139,
+    1108,
+    574
+   ],
+   "max_person_score": 0.00039,
+   "max_objectness": 0.12537,
+   "top_class_index": 75,
+   "top_class_score": 0.06584
+  },
+  {
+   "frame_id": "restricted-entry_004",
+   "condition": "restricted-entry",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    854,
+    138,
+    1110,
+    572
+   ],
+   "max_person_score": 0.00033,
+   "max_objectness": 0.15657,
+   "top_class_index": 9,
+   "top_class_score": 0.07795
+  },
+  {
+   "frame_id": "restricted-entry_005",
+   "condition": "restricted-entry",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    855,
+    138,
+    1111,
+    571
+   ],
+   "max_person_score": 0.00037,
+   "max_objectness": 0.16912,
+   "top_class_index": 9,
+   "top_class_score": 0.09115
+  },
+  {
+   "frame_id": "restricted-entry_006",
+   "condition": "restricted-entry",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    857,
+    137,
+    1112,
+    569
+   ],
+   "max_person_score": 0.00046,
+   "max_objectness": 0.21236,
+   "top_class_index": 9,
+   "top_class_score": 0.15839
+  },
+  {
+   "frame_id": "restricted-entry_007",
+   "condition": "restricted-entry",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    859,
+    137,
+    1113,
+    568
+   ],
+   "max_person_score": 0.00034,
+   "max_objectness": 0.33909,
+   "top_class_index": 9,
+   "top_class_score": 0.29128
+  },
+  {
+   "frame_id": "restricted-entry_008",
+   "condition": "restricted-entry",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    861,
+    137,
+    1114,
+    566
+   ],
+   "max_person_score": 0.00043,
+   "max_objectness": 0.35364,
+   "top_class_index": 9,
+   "top_class_score": 0.29659
+  },
+  {
+   "frame_id": "restricted-entry_009",
+   "condition": "restricted-entry",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    862,
+    136,
+    1115,
+    564
+   ],
+   "max_person_score": 0.00037,
+   "max_objectness": 0.31199,
+   "top_class_index": 9,
+   "top_class_score": 0.25807
+  },
+  {
+   "frame_id": "restricted-entry_010",
+   "condition": "restricted-entry",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    864,
+    136,
+    1116,
+    563
+   ],
+   "max_person_score": 0.00058,
+   "max_objectness": 0.24106,
+   "top_class_index": 9,
+   "top_class_score": 0.18412
+  },
+  {
+   "frame_id": "restricted-entry_011",
+   "condition": "restricted-entry",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    866,
+    135,
+    1117,
+    561
+   ],
+   "max_person_score": 0.00041,
+   "max_objectness": 0.32084,
+   "top_class_index": 9,
+   "top_class_score": 0.27218
+  },
+  {
+   "frame_id": "restricted-entry_012",
+   "condition": "restricted-entry",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    868,
+    135,
+    1118,
+    560
+   ],
+   "max_person_score": 0.00046,
+   "max_objectness": 0.39471,
+   "top_class_index": 9,
+   "top_class_score": 0.34333
+  },
+  {
+   "frame_id": "restricted-entry_013",
+   "condition": "restricted-entry",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    869,
+    135,
+    1120,
+    558
+   ],
+   "max_person_score": 0.00043,
+   "max_objectness": 0.34723,
+   "top_class_index": 9,
+   "top_class_score": 0.29664
+  },
+  {
+   "frame_id": "restricted-entry_014",
+   "condition": "restricted-entry",
+   "person_present": true,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": [
+    871,
+    134,
+    1121,
+    557
+   ],
+   "max_person_score": 0.00043,
+   "max_objectness": 0.27825,
+   "top_class_index": 9,
+   "top_class_score": 0.2422
+  },
+  {
+   "frame_id": "empty_000",
+   "condition": "empty",
+   "person_present": false,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": null,
+   "max_person_score": 0.00042,
+   "max_objectness": 0.1075,
+   "top_class_index": 59,
+   "top_class_score": 0.07665
+  },
+  {
+   "frame_id": "empty_001",
+   "condition": "empty",
+   "person_present": false,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": null,
+   "max_person_score": 0.00037,
+   "max_objectness": 0.07783,
+   "top_class_index": 59,
+   "top_class_score": 0.0533
+  },
+  {
+   "frame_id": "empty_002",
+   "condition": "empty",
+   "person_present": false,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": null,
+   "max_person_score": 0.00041,
+   "max_objectness": 0.06174,
+   "top_class_index": 59,
+   "top_class_score": 0.04093
+  },
+  {
+   "frame_id": "empty_003",
+   "condition": "empty",
+   "person_present": false,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": null,
+   "max_person_score": 0.00032,
+   "max_objectness": 0.05351,
+   "top_class_index": 13,
+   "top_class_score": 0.04189
+  },
+  {
+   "frame_id": "empty_004",
+   "condition": "empty",
+   "person_present": false,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": null,
+   "max_person_score": 0.0003,
+   "max_objectness": 0.06421,
+   "top_class_index": 59,
+   "top_class_score": 0.04197
+  },
+  {
+   "frame_id": "empty_005",
+   "condition": "empty",
+   "person_present": false,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": null,
+   "max_person_score": 0.00039,
+   "max_objectness": 0.06501,
+   "top_class_index": 73,
+   "top_class_score": 0.05359
+  },
+  {
+   "frame_id": "empty_006",
+   "condition": "empty",
+   "person_present": false,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": null,
+   "max_person_score": 0.00059,
+   "max_objectness": 0.08035,
+   "top_class_index": 73,
+   "top_class_score": 0.05895
+  },
+  {
+   "frame_id": "empty_007",
+   "condition": "empty",
+   "person_present": false,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": null,
+   "max_person_score": 0.00061,
+   "max_objectness": 0.0983,
+   "top_class_index": 59,
+   "top_class_score": 0.0689
+  },
+  {
+   "frame_id": "empty_008",
+   "condition": "empty",
+   "person_present": false,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": null,
+   "max_person_score": 0.00053,
+   "max_objectness": 0.07769,
+   "top_class_index": 59,
+   "top_class_score": 0.05123
+  },
+  {
+   "frame_id": "empty_009",
+   "condition": "empty",
+   "person_present": false,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": null,
+   "max_person_score": 0.00045,
+   "max_objectness": 0.07578,
+   "top_class_index": 59,
+   "top_class_score": 0.04997
+  },
+  {
+   "frame_id": "empty_010",
+   "condition": "empty",
+   "person_present": false,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": null,
+   "max_person_score": 0.00044,
+   "max_objectness": 0.08225,
+   "top_class_index": 59,
+   "top_class_score": 0.05422
+  },
+  {
+   "frame_id": "empty_011",
+   "condition": "empty",
+   "person_present": false,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": null,
+   "max_person_score": 0.00038,
+   "max_objectness": 0.09324,
+   "top_class_index": 59,
+   "top_class_score": 0.064
+  },
+  {
+   "frame_id": "empty_012",
+   "condition": "empty",
+   "person_present": false,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": null,
+   "max_person_score": 0.00038,
+   "max_objectness": 0.10614,
+   "top_class_index": 59,
+   "top_class_score": 0.07404
+  },
+  {
+   "frame_id": "empty_013",
+   "condition": "empty",
+   "person_present": false,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": null,
+   "max_person_score": 0.00028,
+   "max_objectness": 0.12004,
+   "top_class_index": 59,
+   "top_class_score": 0.08635
+  },
+  {
+   "frame_id": "empty_014",
+   "condition": "empty",
+   "person_present": false,
+   "image_hw": [
+    720,
+    1280
+   ],
+   "label_person_bbox": null,
+   "max_person_score": 0.00025,
+   "max_objectness": 0.07205,
+   "top_class_index": 73,
+   "top_class_score": 0.05151
+  }
+ ]
+}

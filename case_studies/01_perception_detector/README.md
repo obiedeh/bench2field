@@ -39,7 +39,42 @@ The same file (same SHA-256) is on the 5090 host, the Thor and the Orin under `m
 
 ## Accuracy
 
-Pending: mAP on the COCO validation subset and on labelled rover frames, reported with every variant from phase 2 on (docs/METHODOLOGY.md, rule 9).
+Measured on a labelled COCO val2017 subset with the repository's saved-output
+scorer (`b2f accuracy`, docs/ACCURACY.md): the first 500 images by id that
+carry no crowd annotation, 2,918 boxes over 80 classes, every image hashed
+into the truth manifest (`accuracy/val2017_subset500/truth.json`). The
+detections come from `eval_coco_subset.py`, the same letterbox, BGR 0..255
+input and YOLOX multiclass NMS at 0.45 as `profile_pipeline.py`, kept down
+to score 0.001 so the precision and recall curve is complete, and scored
+twice: at threshold 0 for average precision at IoU 0.5 (101-point
+interpolation, one-to-one same-class matching, one IoU, not the full COCO
+metric), and at the deployment threshold the case study runs at (0.3) for
+the precision and recall an operator sees. RTX 5090, 2026-10-29, the ONNX
+export at the SHA-256 in `exports.json`, from
+`accuracy/val2017_subset500/bench-5090_<provider>_fp32/accuracy_*.json`:
+
+| Provider, fp32 | Mean AP at IoU 0.5 (80 classes) | Person AP at IoU 0.5 | Recall at score 0.001 | Precision / recall at score 0.3 | Inference per image, median |
+|---|---|---|---|---|---|
+| CUDA | 0.6521 | 0.7964 | 0.846 | 0.703 / 0.617 | 5.91 ms |
+| TensorRT | 0.6521 | 0.7964 | 0.846 | 0.703 / 0.617 | 3.79 ms |
+
+- The TensorRT path runs fp32 as TF32 inside (PHASE1_FINDINGS.md, section
+  3). On this subset that changes 17 boxes out of 57,834 and the mean AP by
+  0.00004: the precision that the setting silently changed is not one the
+  detector's output depends on. That is a measured answer, for this model,
+  to the question the phase 1 findings left open.
+- The per-image inference time here is the whole `session.run` on a shared
+  GPU (an unrelated simulation process was resident), not the case study's
+  paced measurement; the latency numbers are in the sections above.
+- Still pending: accuracy on labelled rover frames (no labels exist yet),
+  and the same table for every optimized variant from phase 2 on
+  (docs/METHODOLOGY.md, rule 9), which this baseline is for. The earlier
+  attempt on Isaac-rendered frames (`reports/accuracy/2026-10-20-retained-simulation/`)
+  found no person above score 0.004 on any of 60 frames; with the detector
+  now measured at person AP 0.80 on photographs through the same pipeline,
+  that result reads as the stylised renders being outside what the detector
+  recognises, not as a pipeline fault. Labelled real frames remain the
+  missing piece.
 
 ## Runs
 
