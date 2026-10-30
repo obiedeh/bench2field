@@ -6,6 +6,8 @@ run file on named hardware, as the project rules require.
 
 ## Unreleased
 
+- Case study 02, Alpamayo 1 on the bench and the edge: measured decision latency, memory and power on the RTX 5090 (sdpa and flash-attn) and the Jetson AGX Thor (sdpa, board power), a torch.profiler stage split with plots, and an Orin NX feasibility note. Findings in the case study README and friction log, including that upstream's flash-attention default does not run under its own pins.
+- Branch `phase2` (the 2026-10-03 handoff state) archived as tag `archive/phase2-handoff-20261003`; its HANDOFF.md conflicts with master and its tests were superseded by v1.
 - Report theme: the EmbodiedEdge Labs evidence theme (dark default, light and print variants), with readable power-card tables and the case study 01 report regenerated with it.
 - `AGENTS.md`: the working rules for anyone changing the repository.
 - GitHub issue templates (bug report, share a result) and a manual trigger for the tests workflow.
