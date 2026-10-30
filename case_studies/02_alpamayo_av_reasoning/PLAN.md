@@ -61,9 +61,10 @@ the numbers (AGENTS.md rule 3). Changes to this plan are appended, dated, under
 - [x] this plan
 
 ### Phase 2: 5090 run
-- [ ] `clips.yaml` and the runner
-- [ ] `runs/decisions_bench-5090_sdpa.json`, `runs/decisions_bench-5090_flash.json`
-- [ ] three traces in `traces/`; README results table filled from the JSON only
+- [x] `clips.yaml` and the runner
+- [x] `runs/decisions_bench-5090_sdpa.json`
+- [x] `runs/decisions_bench-5090_flash.json` (flash on the VLM, sdpa on the expert; see Amendments)
+- [x] three traces in `traces/`; README results table filled from the JSON only
 
 ### Phase 3: profile
 - [ ] profiler and NVML timeline on one decision; plots under `report/`
@@ -83,4 +84,22 @@ quantization, CUDA graphs, batch sizes above one, Alpamayo 1.5 and 2.
 
 ## Amendments
 
-None yet.
+Dated, appended after the first run; the protocol above is not edited.
+
+- **2026-10-29, what "repeats" measure.** Seed 42 before every decision makes
+  the three repeats of a clip produce the same tokens, trace and waypoints on
+  a given board. The repeats therefore measure timing spread, not output
+  variance. Across boards the same seed does not reproduce the text (the Thor
+  and the 5090 wrote different token counts on the same clip). The protocol
+  stands as written; this is how to read it.
+- **2026-10-29, the flash variant.** The protocol said "flash-attn 2.8.3 as a
+  second variant on the 5090". Two facts changed what that means. First,
+  upstream's config declares `flash_attention_2` as its default, but the
+  config round-trip in transformers 4.57.1 drops that field to `None`, so
+  upstream's own demo runs `sdpa` on the VLM and on the diffusion expert
+  (checked by loading the model the way the demo does and reading the
+  attention implementation in effect). Second, forcing `flash_attention_2`
+  on both sub-models makes trajectory sampling fail inside flash-attn's
+  varlen forward. The flash variant is therefore defined as flash-attn on
+  the VLM (vision tower, prefill, decode) with `sdpa` kept on the diffusion
+  expert, and the JSON records both choices. The sdpa baseline is unchanged.

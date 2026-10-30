@@ -10,26 +10,48 @@ recent motion, writes a chain-of-causation reasoning trace, and samples a 6.4 s
 trajectory at 10 Hz. Every number here comes from a committed JSON record on a
 named board, as in case study 01.
 
-**Status: phase 1 done, nothing measured yet.** Results below say "pending" until
-the run that produces them is committed.
+**Status: phase 2 done, the 5090 is measured.** Results below come from the
+committed JSON only; a cell says "pending" until the run that produces it is committed.
 
 ## Boards
 
 | Board | Role | Target for | State |
 |---|---|---|---|
-| RTX 5090 (`bench-5090`) | bench | full-precision run, profile, plots | environment built and recorded |
+| RTX 5090 (`bench-5090`) | bench | full-precision run, profile, plots | measured, sdpa and flash-attn (phase 2); profile in phase 3 |
 | Jetson AGX Thor (`bench-thor`) | edge bench | same clips, with power | planned (phase 4); JetPack, not DriveOS |
 | Jetson Orin NX 8 GB (`field-orin`) | field | nothing | does not fit; documented in the friction log |
 
-## Results (pending)
+## Results
 
-| Metric | 5090 | Thor |
+Measured values only, from the committed JSON under `runs/`. The table is the
+output of `plot_results.py --table` (phase 3) and is regenerated, not edited,
+when a run is added. Protocol: eight clips, one warm-up decision excluded, three
+decisions per clip, upstream sampling defaults, seed 42 before each decision.
+Power on the 5090 is the GPU rail from NVML; power on the Thor is the whole
+board (`VIN` from tegrastats). The two power rows are therefore not like for
+like; the Thor figure includes CPU, memory and carrier board.
+
+| Metric | RTX 5090, flash-attn | RTX 5090, sdpa |
 |---|---|---|
-| Model load time | pending | pending |
-| Latency per decision, median and p95 | pending | pending |
-| Peak GPU memory | pending | pending |
-| Decisions per minute | pending | pending |
-| Board power during a decision | n/a | pending |
+| Model load time | 8.3 s | 15.7 s |
+| Latency per decision, median | 0.93 s | 0.89 s |
+| Latency per decision, p95 | 1.24 s | 1.16 s |
+| Time to first token, median | 0.37 s | 0.38 s |
+| Decode rate, median | 50.9 tok/s | 60.0 tok/s |
+| Reasoning tokens, median | 18 | 18 |
+| Decisions per minute | 64.3 | 67.8 |
+| GPU memory after load | 20.6 GiB | 20.6 GiB |
+| Peak GPU memory during a decision | 21.5 GiB | 21.5 GiB |
+| Power during a decision, median | 359 W | 377 W |
+| Energy per decision, median | 323 J | 316 J |
+| Decisions | 24 (8 clips x 3) | 24 (8 clips x 3) |
+
+The flash-attn column is flash-attn 2.8.3 on the VLM with sdpa kept on the
+diffusion expert (PLAN.md, Amendments). On this GPU, at batch size one and
+these sequence lengths, it is slower than sdpa in decode (50.9 against 60.0
+tokens per second) and equal in time to first token, so sdpa stays the
+baseline and is the variant the Thor is compared against. The Thor column is
+added in phase 4.
 
 ## Phases
 
@@ -49,7 +71,10 @@ FRICTION_LOG.md      what broke, how it was found, what fixed it, with times
 setup_env.sh         builds .venv on the 5090 host
 capture_env.py       writes runs/env_<board>.json
 requirements.txt     the pins, for reading; setup_env.sh installs them in the right order
-runs/                committed records only (environment, later latency and profiles)
+runs/                committed records only (environment, decisions, later profiles)
+traces/              three reasoning traces per board and variant, verbatim
+clips.yaml           the eight clip ids, chosen by rule before the first run
+run_decisions.py     the decision runner (one JSON per board and variant)
 .venv/, weights/, clips/, data/   ignored
 ```
 
