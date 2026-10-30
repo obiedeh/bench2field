@@ -206,3 +206,95 @@ The workstation host name, one LAN address and home-directory paths had survived
 | `ee00cd8eb59a` | `2e34686c8e86` | 2026-10-02 19:21 | Synthetic inputs follow each input's dtype |
 | `f81afb52bc3e` | `d94dc5d43da3` | 2026-10-02 08:02 | Add b2f sweep: alternating repeats of several variants |
 | `fee78275e8dc` | `8ad3c56fdd4d` | 2026-10-02 06:07 | Bench2Field v0.1: runner, report contract, field retention, gap attribution, load replay, verdicts |
+
+## Third rewrite, 2026-10-30
+
+The Orin NX host name and one truncated home path were replaced in every revision by `field-orin` and `<home>`. The table maps each commit ID as it was before this rewrite to its ID now, for commits whose ID changed; follow it after the second rewrite's table.
+
+| before | now | subject |
+|---|---|---|
+| `012d2419234f` | `43d2a5a7ddf8` | HANDOFF: all phase 1 baselines in, Thor stand-down procedure, Orin thermal note |
+| `0478372ae3ec` | `d7b513a70690` | Tests: self-contained means nothing fetched from the network; navigation links allowed |
+| `058f5793bfe2` | `f239c08b2ba8` | Report: EmbodiedEdge Labs evidence theme (dark default, light and print variants) |
+| `066ed0ec04f7` | `1c675a2d06ff` | Add CHANGELOG.md: releases 0.1, 1.0 and 1.0.1, and the unreleased changes on master |
+| `0790b9070ef6` | `a3c44a00a15e` | Reports carry a machine label; a test keeps private identifiers out of the tree |
+| `0a3c1aaf6bda` | `3900fbbaddfe` | Case study 01, phase 2: fp16 and int8 TensorRT variants with accuracy on the COCO subset (Thor) |
+| `0a9c83e75b46` | `6f960add064f` | Case study 01 phase 2 step 1: FP16 against FP32 on the Orin, sweep and back-to-back profiles |
+| `0bcf1d43b85d` | `ed684af56508` | v1.0.1: correct the Orin thermal claim (#3) |
+| `0fff1c7adec2` | `017c2b7d2c4b` | Report theme: keep power-card tables readable |
+| `13a042e92974` | `8ae3e62d33da` | Merge branch 'master' into phase2 |
+| `1ad6ab52d6eb` | `8885fac6a22f` | Correct the Orin thermal claim: a one-off fast first repeat, cause not established |
+| `1f263079207e` | `066fa889414d` | Import retained semantic labels and verified detector outputs |
+| `267cbfb82e47` | `8a028af7e2fd` | Case study 02: Orin NX note, why the field computer is not a target |
+| `27c0f7729a3b` | `33a3bfc45a41` | Record the provider's options in every report |
+| `280678841049` | `8e3131dd9a7b` | Version 1.0.1; report regenerated |
+| `2d36b0725056` | `21e14b9bd19d` | Publication: commit map for the rewritten history; HANDOFF updated |
+| `36495461b6fc` | `a0d51b5f8d9c` | Add b2f report: one self-contained HTML page from a case study's committed runs |
+| `37c411a007c1` | `742c56d2bdb5` | Report: the repeats panel no longer implies a thermal cause |
+| `37c47930e584` | `a37ec9f8d41d` | Case study 02: 5090 profiled, stage split, kernel table and the report plots |
+| `4177a24b457b` | `9031f5eb1ca3` | Case study 02: SETUP.md copy step writes SOURCE_COMMIT for the Thor's records |
+| `41a28668b5cb` | `4c45228313ed` | Case study 02: Alpamayo 1 scaffold, setup notes, friction log and 5090 environment record |
+| `4595ff062bf4` | `b9dfbd6e1ece` | Case study 04: Isaac ROS 4.5 object detection in a container, measured on the quickstart data |
+| `4beebd63addd` | `90cb9956d8a5` | Merge branch 'alpamayo-thor-run' |
+| `4f65fa8d4c07` | `436220290225` | Add AGENTS.md: working rules for contributors |
+| `534d775d44c5` | `731e0b435835` | profile_pipeline: --expect-commit, the same checkout guard as b2f sweep |
+| `53934051df90` | `09d17d7c8c7e` | Merge branch 'feature/accuracy-evidence-20261020' |
+| `569cdbb882a2` | `2bffc4959edd` | Case study 02: telemetry sampler chosen by board, source commit for copied trees |
+| `575c406bc8aa` | `eadd561a7b91` | Orin end-to-end pipeline profile on the rover's 480p frames; provenance notes |
+| `577795ee91ef` | `460542b9f9cd` | HANDOFF: v1.0 release state, what history still contains |
+| `579fea1e4f86` | `bb397c2a3062` | Report: shared lab type scale and accented case-study title |
+| `57e4adeb9c07` | `f5a366abda80` | Case study 02: profiler and plot scripts |
+| `58b283e52b96` | `df866c25c144` | Scrub hostnames, the LAN address and home paths from tracked files |
+| `5a1c19c7a705` | `9a88cf789bda` | Case study 02: Thor measured, same clips and protocol, board power, compared with the 5090 |
+| `5ad5ad3fc952` | `b200018c641d` | Add .mailmap so every commit by the owner shows the GitHub username obiedeh |
+| `5d922ce00059` | `3604d059175f` | Merge alpamayo-cuda-preprocess: case study 01 phase 2 precision ladder, case study 04 Isaac ROS quickstart, case study 05 plan |
+| `5e5df1a89fcd` | `b637b15d83c2` | Case study 01 phase 1: Orin NX idle baseline, four tiers, --no-spin |
+| `639374ffcef6` | `d65f962ac6db` | Case study 01: labelled accuracy of the fp32 baseline on a COCO val2017 subset, and the recall-0 diagnosis |
+| `647daf303b77` | `c6737a758972` | Case study 01 phase 2: script for the temporary CPU governor test on the Orin |
+| `67c8984ea2ca` | `acdd054f75a1` | Case study 02: decision runner, fixed clip list and the phase 2 friction log |
+| `6ab0fe40267c` | `65e1e3b34202` | Remove AI tool names from tracked files |
+| `6b3a8e2a5514` | `f106a94af4e4` | Case study 02: 5090 measured, sdpa and flash-attn, eight clips, three repeats |
+| `6b8c68161184` | `d00707c9be80` | Version 1.0.0 |
+| `6e920accee12` | `28f7f1803e88` | PHASE1_FINDINGS: the profiled rover frames show a blank wall; a busy scene makes the Orin frame slower |
+| `7149328675cb` | `dc3c99d9557f` | Merge hygiene/private-identifiers-20261030: machine labels in reports, private identifier test |
+| `71ac462970df` | `bd2c8ce33084` | Pipeline profiler records CPU governor and per-core frequency |
+| `7457acb4fe3d` | `8a11a017378c` | README: the finding first, the headline chart, what b2f measures, how to run one baseline, status |
+| `79e754a33302` | `b32a12dbc727` | HANDOFF: phase 2 state, governor test deferred, next session order |
+| `7cbc11a2cc6c` | `bba201d7f5a6` | profile_pipeline: carry YOLOX's NumPy NMS so the profile runs on boards without PyTorch |
+| `7f8183c1319b` | `d67cefe80dc9` | Hardware bring-up and case study 01 phase 1 (#1) |
+| `800172907c4c` | `acdfa3209b60` | Add provenance-bound saved detector accuracy evaluation |
+| `83fcfc57fe28` | `7ad7943f7a8b` | Case study 04: Isaac ROS 4.5 quickstart measured on the Jetson AGX Thor |
+| `8695d3d22c6e` | `f33ad8bde180` | Rebuild the case-study report |
+| `8a932facb8f6` | `a6e55b258c8d` | Case study 02: stage plot legend above the bars, PNG written next to each SVG |
+| `8ac3488f7ee1` | `5f96c8d5e95f` | Case study 02: Thor environment, setup script and record |
+| `8bdd0ab461b2` | `a6112be82835` | PHASE1_FINDINGS: no-spin baselines on all three machines, Orin section, 26 Hz headlines |
+| `8c83e5948c98` | `a65a1e759eab` | Merge branch 'alpamayo-5090-profile' into alpamayo-thor-run |
+| `8d79c9fbd135` | `d8e0de49681d` | Case study 01 phase 2: sweep config for FP16 against FP32 on the Orin (speed only) |
+| `8ddea5b7b9d4` | `da5aae7a8a9e` | Case study 03: DeepStream 7.1 on the rover's Orin NX with YOLOv8n in TensorRT fp16 |
+| `8e4835b0801a` | `0e7a7d3f54f5` | Case study 01: generated report and headline chart |
+| `8eb2ca835566` | `9156ec2e379b` | Merge branch 'alpamayo-5090-run' into alpamayo-thor-run |
+| `9aa28a108daa` | `43eb9fd6f0a7` | Case study 01 phase 1: Thor end-to-end pipeline profile on the rover's 480p frames |
+| `9c4281e89ba3` | `700ee50de902` | v1.0: report, README, scrub, clean-clone test (#2) |
+| `a5052270ab1d` | `5cdf441033b1` | Merge branch 'changelog' |
+| `ade0349620aa` | `8baf0caa1185` | Case study 05: plan for the Cosmos Predict 2.5 forecast cost study (protocol only, nothing measured) |
+| `aecd341c4537` | `a81ac839cba9` | Case study 01: regenerate the report from the scrubbed runs |
+| `af9077c27d3b` | `7400b38369a7` | Case study 02: Thor profile, per-clip trajectory error table, AV stack diagram, Thor tutorial, 1.1 release notes |
+| `afed1f32d7cb` | `1f2043634b38` | Merge branch 'alpamayo-orin-note' |
+| `b0a64ea30365` | `d17dfe3bfd44` | Case study 01, phase 2: precision ladder sweeps on the Thor and the Orin NX with the Orin accuracy |
+| `b0dba7bc7e12` | `899b371aef55` | Move the handoff note out of the tree; the README points at the changelog |
+| `b36dfb7acb15` | `2407cc6c50bf` | Merge branch 'alpamayo-5090-run' into alpamayo-5090-profile |
+| `b80c168fec56` | `6c52388fae2c` | Case study 01 phase 2: six alternated FP32/FP16 pipeline profiles on the Orin with CPU frequency |
+| `bb83262ec043` | `15b4bce3f1b3` | README: pin the ONNX Runtime and TensorRT pair, install YOLOX in two steps |
+| `befbbdf02efd` | `4798df4959b0` | Case study 02: PLAN.md with the protocol fixed before the first run |
+| `c027a3e7911c` | `98900d36f766` | PHASE1_FINDINGS: correct the Orin drop-rate and inference-rate sentences |
+| `c0f807532af0` | `bc048b36351c` | PHASE1_FINDINGS: the Orin headline is the model only; full frame on the Orin is 47.8 ms and misses |
+| `c4dcf4721841` | `18536177b1bd` | COMMIT_MAP: second rewrite (2026-10-30), host name, LAN address and home paths removed from every revision |
+| `c8b0494853d2` | `37df5806cdb0` | Case study 01 report: regenerated with the EmbodiedEdge Labs evidence theme |
+| `ca389888a375` | `a009170c7b3c` | Case study 01 phase 1: Thor FP32 baseline, four tiers, --no-spin, clean |
+| `d63c1172bcd6` | `6e4756d63b66` | CHANGELOG: case study 02 and the archived phase2 branch under Unreleased |
+| `e03b27fac734` | `c224df6abaa7` | Record retained simulation person accuracy failure |
+| `e38a97c53840` | `9e3400184c46` | Clean-clone test transcript: two passes on the 5090 host, second one clean |
+| `e3f3aeaf66ae` | `df5f770704da` | Add issue templates and a manual trigger for the tests workflow |
+| `e468f76071cd` | `f4071a2caf20` | README: link the report through GitHub Pages so it opens as a page |
+| `e6948d88758e` | `df68bdc9d026` | Case study 02, phase 3b: a fused CUDA preprocessing kernel, verified and timed on both boards |
+| `f4a053493c06` | `ed905ce6a667` | Case study 02, phase 3b second pass: separable kernel, C++ host side, standalone driver, parity gate |
