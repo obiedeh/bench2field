@@ -1,0 +1,151 @@
+{
+  "sweep": "phase2-precision-ladder-orin",
+  "config_file": "case_studies/01_perception_detector/sweeps/phase2_precision_orin.yaml",
+  "config": {
+    "name": "phase2-precision-ladder-orin",
+    "variants": [
+      {
+        "label": "trt_fp32",
+        "model": "models/yolox_s.onnx",
+        "provider": "tensorrt",
+        "precision": "fp32",
+        "technique": "baseline",
+        "name": "yolox-s",
+        "trt_cache_dir": ".trt_cache/fp32",
+        "calibration_table": null,
+        "trt_workspace_mb": 1024
+      },
+      {
+        "label": "trt_fp16",
+        "model": "models/yolox_s.onnx",
+        "provider": "tensorrt",
+        "precision": "fp16",
+        "technique": "fp16",
+        "name": "yolox-s",
+        "trt_cache_dir": ".trt_cache/fp16",
+        "calibration_table": null,
+        "trt_workspace_mb": 1024
+      },
+      {
+        "label": "trt_int8",
+        "model": "models/yolox_s.onnx",
+        "provider": "tensorrt",
+        "precision": "int8",
+        "technique": "int8-ptq-minmax",
+        "name": "yolox-s",
+        "trt_cache_dir": ".trt_cache/int8",
+        "calibration_table": "calibration.flatbuffers",
+        "trt_workspace_mb": 1024
+      }
+    ],
+    "repeats": 3,
+    "environment": "bench-idle",
+    "tiers_hz": [
+      10,
+      26,
+      30,
+      100
+    ],
+    "duration_s": 60,
+    "warmup_s": 5,
+    "deadline_ms": 33.3,
+    "drop_late": false,
+    "cooldown_c": null,
+    "replay": null,
+    "only": null,
+    "stopped": [],
+    "no_spin": true
+  },
+  "host": "field-orin",
+  "git": {
+    "commit": "4f48e48d5b3e02a0b1caaa9ad4a7f42238929d98",
+    "dirty": true,
+    "root": "<home>/b2f-quant-20261030"
+  },
+  "started_at": "2026-10-30T07:59:21.706330+00:00",
+  "finished_at": "2026-10-30T08:54:36.967668+00:00",
+  "complete": true,
+  "runs": [
+    {
+      "order": 1,
+      "label": "trt_fp32",
+      "repeat": 1,
+      "file": "trt_fp32_r1.json",
+      "started_at": "2026-10-30T07:59:21.706435+00:00",
+      "run_id": "eecd50ba6285",
+      "finished_at": "2026-10-30T08:06:55.475442+00:00"
+    },
+    {
+      "order": 2,
+      "label": "trt_fp16",
+      "repeat": 1,
+      "file": "trt_fp16_r1.json",
+      "started_at": "2026-10-30T08:06:55.475872+00:00",
+      "run_id": "e3bd775184a4",
+      "finished_at": "2026-10-30T08:19:31.636960+00:00"
+    },
+    {
+      "order": 3,
+      "label": "trt_int8",
+      "repeat": 1,
+      "file": "trt_int8_r1.json",
+      "started_at": "2026-10-30T08:19:31.637860+00:00",
+      "run_id": "6e50689f0f79",
+      "finished_at": "2026-10-30T08:27:48.768754+00:00"
+    },
+    {
+      "order": 4,
+      "label": "trt_fp32",
+      "repeat": 2,
+      "file": "trt_fp32_r2.json",
+      "started_at": "2026-10-30T08:27:48.769755+00:00",
+      "run_id": "e31d990b0d46",
+      "finished_at": "2026-10-30T08:32:26.599832+00:00"
+    },
+    {
+      "order": 5,
+      "label": "trt_fp16",
+      "repeat": 2,
+      "file": "trt_fp16_r2.json",
+      "started_at": "2026-10-30T08:32:26.600351+00:00",
+      "run_id": "f70d5a70c004",
+      "finished_at": "2026-10-30T08:36:49.829822+00:00"
+    },
+    {
+      "order": 6,
+      "label": "trt_int8",
+      "repeat": 2,
+      "file": "trt_int8_r2.json",
+      "started_at": "2026-10-30T08:36:49.830904+00:00",
+      "run_id": "d8d48ad3b8bc",
+      "finished_at": "2026-10-30T08:41:13.080731+00:00"
+    },
+    {
+      "order": 7,
+      "label": "trt_fp32",
+      "repeat": 3,
+      "file": "trt_fp32_r3.json",
+      "started_at": "2026-10-30T08:41:13.081575+00:00",
+      "run_id": "afcca39de787",
+      "finished_at": "2026-10-30T08:45:50.338547+00:00"
+    },
+    {
+      "order": 8,
+      "label": "trt_fp16",
+      "repeat": 3,
+      "file": "trt_fp16_r3.json",
+      "started_at": "2026-10-30T08:45:50.339161+00:00",
+      "run_id": "90fb7b25f4fc",
+      "finished_at": "2026-10-30T08:50:13.676055+00:00"
+    },
+    {
+      "order": 9,
+      "label": "trt_int8",
+      "repeat": 3,
+      "file": "trt_int8_r3.json",
+      "started_at": "2026-10-30T08:50:13.677425+00:00",
+      "run_id": "ae9d49c3291a",
+      "finished_at": "2026-10-30T08:54:36.967021+00:00"
+    }
+  ]
+}

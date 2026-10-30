@@ -1,0 +1,10 @@
+[WARN] [1793371955.916829954] [rcl]: ROS_LOCALHOST_ONLY is deprecated but still honored if it is enabled. Use ROS_AUTOMATIC_DISCOVERY_RANGE and ROS_STATIC_PEERS instead.
+[WARN] [1793371955.916875973] [rcl]: 'localhost_only' is enabled, 'automatic_discovery_range' and 'static_peers' will be ignored.
+/camera_info_rect
+/detections_output
+/events/read_split
+/image_rect
+/parameter_events
+/rosout
+/tensor_pub
+/yolov8_encoder/resize/image

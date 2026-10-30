@@ -42,3 +42,15 @@ def test_committed_runs_are_dataset_input_only():
     for p in (CASE / "runs").glob("decisions_*.json"):
         text = p.read_text()
         assert '"input": "dataset"' in text, f"{p.name} is not a dataset run; synthetic output belongs in runs/scratch/"
+
+
+def test_readme_trajectory_error_table_matches_committed_runs():
+    """The per-clip trajectory error table in the README is generated, not typed."""
+    pr = _plot_results()
+    runs = [r for r in pr.load_runs("decisions") if r["variant"] == "sdpa"]
+    if not runs:
+        pytest.skip("no committed decision records yet")
+    table = pr.ade_table(runs)
+    readme = (CASE / "README.md").read_text()
+    assert table in readme, "README trajectory error table differs from plot_results.py --ade-table; regenerate it"
+

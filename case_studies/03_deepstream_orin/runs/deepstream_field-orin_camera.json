@@ -1,0 +1,144 @@
+{
+  "schema": "bench2field.deepstream/1",
+  "label": "measured",
+  "board": "field-orin",
+  "source": "camera",
+  "model": "yolov8n, Ultralytics ONNX export, TensorRT fp16 engine built by trtexec",
+  "pipeline": "deepstream-app: source, nvstreammux 640x480, nvinfer (batch 1, interval 0), fakesink, no display",
+  "perf": {
+    "samples_total": 74,
+    "settle_s": 10,
+    "fps": {
+      "median": 25.1,
+      "p5": 24.99,
+      "p95": 25.12,
+      "min": 24.96,
+      "max": 25.14,
+      "n": 64
+    },
+    "fps_all": {
+      "median": 25.1,
+      "p5": 24.99,
+      "p95": 25.13,
+      "min": 24.96,
+      "max": 42.19,
+      "n": 74
+    }
+  },
+  "tegrastats": {
+    "vdd_in_mw": {
+      "median": 6597.0,
+      "p5": 6500.0,
+      "p95": 6601.0,
+      "min": 6500.0,
+      "max": 6694.0,
+      "n": 69
+    },
+    "vdd_cpu_gpu_cv_mw": {
+      "median": 1358.0,
+      "p5": 1358.0,
+      "p95": 1455.0,
+      "min": 1358.0,
+      "max": 1455.0,
+      "n": 69
+    },
+    "gr3d_pct": {
+      "median": 29.0,
+      "p5": 0.0,
+      "p95": 72.0,
+      "min": 0.0,
+      "max": 74.0,
+      "n": 69
+    },
+    "temps_c_max": {
+      "cpu": 58.937,
+      "soc0": 57.0,
+      "gpu": 59.875,
+      "tj": 59.875
+    }
+  },
+  "idle_tegrastats": {
+    "vdd_in_mw": {
+      "median": 5444.0,
+      "p5": 5444.0,
+      "p95": 5541.0,
+      "min": 5444.0,
+      "max": 5541.0,
+      "n": 29
+    },
+    "vdd_cpu_gpu_cv_mw": {
+      "median": 680.0,
+      "p5": 680.0,
+      "p95": 777.0,
+      "min": 680.0,
+      "max": 777.0,
+      "n": 29
+    },
+    "gr3d_pct": {
+      "median": 0.0,
+      "p5": 0.0,
+      "p95": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "n": 29
+    },
+    "temps_c_max": {
+      "cpu": 56.75,
+      "soc0": 54.531,
+      "gpu": 57.5,
+      "tj": 57.5
+    }
+  },
+  "engine_alone_trtexec": {
+    "latency_ms": {
+      "min": 3.83057,
+      "max": 4.02887,
+      "mean": 3.99285,
+      "median": 3.99326
+    },
+    "throughput_qps": 283.254
+  },
+  "versions": [
+    "# R36 (release), REVISION: 4.7, GCID: 42132812, BOARD: generic, EABI: aarch64, DATE: Thu Sep 18 22:54:44 UTC 2025",
+    "# KERNEL_VARIANT: oot",
+    "TARGET_USERSPACE_LIB_DIR=nvidia",
+    "TARGET_USERSPACE_LIB_DIR_PATH=usr/lib/aarch64-linux-gnu/nvidia",
+    "cuda-toolkit-12-6 12.6.11-1",
+    "cuda-toolkit-12-6-config-common 12.6.77-1",
+    "cuda-toolkit-12-config-common 12.9.79-1",
+    "deepstream-7.1 7.1.0-1",
+    "tensorrt 10.7.0.23-1+cuda12.6",
+    "NV Power Mode: MAXN_SUPER",
+    "0",
+    "NVPM ERROR: Error opening /sys/devices/system/cpu/cpu6/online: 2",
+    "NVPM ERROR: failed to read PARAM CPU_ONLINE: ARG CORE_6: PATH /sys/devices/system/cpu/cpu6/online",
+    "NVPM ERROR: Error opening /sys/devices/system/cpu/cpu7/online: 2",
+    "NVPM ERROR: failed to read PARAM CPU_ONLINE: ARG CORE_7: PATH /sys/devices/system/cpu/cpu7/online",
+    "NVPM ERROR: Error opening /sys/devices/system/cpu/cpu6/cpufreq/scaling_min_freq: 2",
+    "NVPM ERROR: failed to read PARAM CPU_A78_6: ARG MIN_FREQ: PATH /sys/devices/system/cpu/cpu6/cpufreq/scaling_min_freq",
+    "NVPM ERROR: Error opening /sys/devices/system/cpu/cpu6/cpufreq/scaling_max_freq: 2",
+    "NVPM ERROR: failed to read PARAM CPU_A78_6: ARG MAX_FREQ: PATH /sys/devices/system/cpu/cpu6/cpufreq/scaling_max_freq",
+    "NVPM ERROR: Error opening /sys/devices/system/cpu/cpu7/cpufreq/scaling_min_freq: 2",
+    "NVPM ERROR: failed to read PARAM CPU_A78_7: ARG MIN_FREQ: PATH /sys/devices/system/cpu/cpu7/cpufreq/scaling_min_freq",
+    "NVPM ERROR: Error opening /sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq: 2",
+    "NVPM ERROR: failed to read PARAM CPU_A78_7: ARG MAX_FREQ: PATH /sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq",
+    "/usr/local/lib/python3.10/dist-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.",
+    "  warnings.warn(\"Unable to import Axes3D. This may be due to multiple versions of \"",
+    "ultralytics 8.3.65 torch 2.5.0a0+872d972e41.nv24.08 onnx 1.17.0"
+  ],
+  "logs": {
+    "app": "app_camera.log",
+    "tegrastats": "tegrastats_camera.log"
+  },
+  "captured_at": "2026-10-29T22:50:22-0500",
+  "raw_logs_backup": "nvidia-gaps-20261029/orin/deepstream/tree/run on the lab backup volume; sanitized copies under logs/",
+  "engine_build": {
+    "tool": "trtexec",
+    "workspace": "768 MB",
+    "fp16": true,
+    "seconds": 434.2,
+    "engine_bytes": 8976988,
+    "onnx_sha256": "e88ac5f680c118cedca9dacb39e707cff0d4c542bf3596bee0e37c3cbeb91f3a",
+    "weights_sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36"
+  }
+}

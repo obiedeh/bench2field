@@ -1,0 +1,722 @@
+{
+  "protocol": {
+    "iou": 0.5,
+    "score_threshold": 0.3,
+    "max_detections_per_image": 100,
+    "interpolation_points": 101,
+    "tie_order": "input order",
+    "crowd_policy": "reject"
+  },
+  "images": 500,
+  "images_with_predictions": 491,
+  "tp": 1801,
+  "fp": 766,
+  "fn": 1117,
+  "precision": 0.7015971951694585,
+  "recall": 0.6172035640849897,
+  "mean_ap_at_declared_iou": 0.5724234777235481,
+  "per_class": [
+    {
+      "category_id": 1,
+      "positives": 838,
+      "tp": 608,
+      "fp": 126,
+      "fn": 230,
+      "ap": 0.7053465986302808
+    },
+    {
+      "category_id": 2,
+      "positives": 34,
+      "tp": 19,
+      "fp": 4,
+      "fn": 15,
+      "ap": 0.5364284327592418
+    },
+    {
+      "category_id": 3,
+      "positives": 146,
+      "tp": 98,
+      "fp": 37,
+      "fn": 48,
+      "ap": 0.6052353825132659
+    },
+    {
+      "category_id": 4,
+      "positives": 32,
+      "tp": 24,
+      "fp": 7,
+      "fn": 8,
+      "ap": 0.6965493443754305
+    },
+    {
+      "category_id": 5,
+      "positives": 10,
+      "tp": 9,
+      "fp": 1,
+      "fn": 1,
+      "ap": 0.900990099009901
+    },
+    {
+      "category_id": 6,
+      "positives": 22,
+      "tp": 19,
+      "fp": 5,
+      "fn": 3,
+      "ap": 0.8488161859664227
+    },
+    {
+      "category_id": 7,
+      "positives": 18,
+      "tp": 13,
+      "fp": 1,
+      "fn": 5,
+      "ap": 0.7149929278642152
+    },
+    {
+      "category_id": 8,
+      "positives": 28,
+      "tp": 12,
+      "fp": 17,
+      "fn": 16,
+      "ap": 0.26152972440101124
+    },
+    {
+      "category_id": 9,
+      "positives": 30,
+      "tp": 11,
+      "fp": 9,
+      "fn": 19,
+      "ap": 0.2587812352663837
+    },
+    {
+      "category_id": 10,
+      "positives": 28,
+      "tp": 13,
+      "fp": 14,
+      "fn": 15,
+      "ap": 0.34704137080374725
+    },
+    {
+      "category_id": 11,
+      "positives": 11,
+      "tp": 8,
+      "fp": 0,
+      "fn": 3,
+      "ap": 0.7227722772277227
+    },
+    {
+      "category_id": 13,
+      "positives": 4,
+      "tp": 4,
+      "fp": 2,
+      "fn": 0,
+      "ap": 1.0
+    },
+    {
+      "category_id": 14,
+      "positives": 14,
+      "tp": 8,
+      "fp": 2,
+      "fn": 6,
+      "ap": 0.5603960396039602
+    },
+    {
+      "category_id": 15,
+      "positives": 35,
+      "tp": 11,
+      "fp": 8,
+      "fn": 24,
+      "ap": 0.2394929718535763
+    },
+    {
+      "category_id": 16,
+      "positives": 22,
+      "tp": 13,
+      "fp": 3,
+      "fn": 9,
+      "ap": 0.594059405940594
+    },
+    {
+      "category_id": 17,
+      "positives": 18,
+      "tp": 18,
+      "fp": 2,
+      "fn": 0,
+      "ap": 0.9940594059405944
+    },
+    {
+      "category_id": 18,
+      "positives": 12,
+      "tp": 12,
+      "fp": 8,
+      "fn": 0,
+      "ap": 0.9419741974197423
+    },
+    {
+      "category_id": 19,
+      "positives": 30,
+      "tp": 24,
+      "fp": 2,
+      "fn": 6,
+      "ap": 0.7953574621676213
+    },
+    {
+      "category_id": 20,
+      "positives": 18,
+      "tp": 16,
+      "fp": 15,
+      "fn": 2,
+      "ap": 0.8290841584158412
+    },
+    {
+      "category_id": 21,
+      "positives": 21,
+      "tp": 10,
+      "fp": 3,
+      "fn": 11,
+      "ap": 0.4638233054074637
+    },
+    {
+      "category_id": 22,
+      "positives": 24,
+      "tp": 24,
+      "fp": 1,
+      "fn": 0,
+      "ap": 1.0
+    },
+    {
+      "category_id": 23,
+      "positives": 4,
+      "tp": 4,
+      "fp": 1,
+      "fn": 0,
+      "ap": 1.0
+    },
+    {
+      "category_id": 24,
+      "positives": 30,
+      "tp": 25,
+      "fp": 3,
+      "fn": 5,
+      "ap": 0.8285007072135784
+    },
+    {
+      "category_id": 25,
+      "positives": 17,
+      "tp": 12,
+      "fp": 1,
+      "fn": 5,
+      "ap": 0.7029702970297029
+    },
+    {
+      "category_id": 27,
+      "positives": 32,
+      "tp": 7,
+      "fp": 13,
+      "fn": 25,
+      "ap": 0.1488126256234646
+    },
+    {
+      "category_id": 28,
+      "positives": 18,
+      "tp": 8,
+      "fp": 4,
+      "fn": 10,
+      "ap": 0.4009900990099009
+    },
+    {
+      "category_id": 31,
+      "positives": 34,
+      "tp": 11,
+      "fp": 4,
+      "fn": 23,
+      "ap": 0.2869636963696371
+    },
+    {
+      "category_id": 32,
+      "positives": 32,
+      "tp": 20,
+      "fp": 6,
+      "fn": 12,
+      "ap": 0.6073997509641073
+    },
+    {
+      "category_id": 33,
+      "positives": 20,
+      "tp": 14,
+      "fp": 11,
+      "fn": 6,
+      "ap": 0.6845827439886848
+    },
+    {
+      "category_id": 34,
+      "positives": 14,
+      "tp": 13,
+      "fp": 1,
+      "fn": 1,
+      "ap": 0.9207920792079208
+    },
+    {
+      "category_id": 35,
+      "positives": 25,
+      "tp": 11,
+      "fp": 7,
+      "fn": 14,
+      "ap": 0.3513279899418515
+    },
+    {
+      "category_id": 36,
+      "positives": 4,
+      "tp": 3,
+      "fp": 3,
+      "fn": 1,
+      "ap": 0.7524752475247525
+    },
+    {
+      "category_id": 37,
+      "positives": 18,
+      "tp": 14,
+      "fp": 6,
+      "fn": 4,
+      "ap": 0.7321232123212312
+    },
+    {
+      "category_id": 38,
+      "positives": 12,
+      "tp": 8,
+      "fp": 2,
+      "fn": 4,
+      "ap": 0.6633663366336634
+    },
+    {
+      "category_id": 39,
+      "positives": 7,
+      "tp": 6,
+      "fp": 0,
+      "fn": 1,
+      "ap": 0.8514851485148515
+    },
+    {
+      "category_id": 40,
+      "positives": 9,
+      "tp": 7,
+      "fp": 1,
+      "fn": 2,
+      "ap": 0.7722772277227723
+    },
+    {
+      "category_id": 41,
+      "positives": 11,
+      "tp": 5,
+      "fp": 4,
+      "fn": 6,
+      "ap": 0.3487623762376239
+    },
+    {
+      "category_id": 42,
+      "positives": 28,
+      "tp": 18,
+      "fp": 7,
+      "fn": 10,
+      "ap": 0.5974753500194743
+    },
+    {
+      "category_id": 43,
+      "positives": 16,
+      "tp": 13,
+      "fp": 2,
+      "fn": 3,
+      "ap": 0.8118811881188119
+    },
+    {
+      "category_id": 44,
+      "positives": 88,
+      "tp": 40,
+      "fp": 27,
+      "fn": 48,
+      "ap": 0.38115430430339176
+    },
+    {
+      "category_id": 46,
+      "positives": 34,
+      "tp": 17,
+      "fp": 7,
+      "fn": 17,
+      "ap": 0.48106435643564355
+    },
+    {
+      "category_id": 47,
+      "positives": 83,
+      "tp": 45,
+      "fp": 35,
+      "fn": 38,
+      "ap": 0.4692729714991313
+    },
+    {
+      "category_id": 48,
+      "positives": 14,
+      "tp": 7,
+      "fp": 7,
+      "fn": 7,
+      "ap": 0.43654365436543613
+    },
+    {
+      "category_id": 49,
+      "positives": 32,
+      "tp": 11,
+      "fp": 5,
+      "fn": 21,
+      "ap": 0.2815995885302814
+    },
+    {
+      "category_id": 50,
+      "positives": 19,
+      "tp": 3,
+      "fp": 3,
+      "fn": 16,
+      "ap": 0.14603960396039603
+    },
+    {
+      "category_id": 51,
+      "positives": 52,
+      "tp": 33,
+      "fp": 29,
+      "fn": 19,
+      "ap": 0.545760088349756
+    },
+    {
+      "category_id": 52,
+      "positives": 27,
+      "tp": 11,
+      "fp": 8,
+      "fn": 16,
+      "ap": 0.383168316831683
+    },
+    {
+      "category_id": 53,
+      "positives": 19,
+      "tp": 5,
+      "fp": 8,
+      "fn": 14,
+      "ap": 0.17161716171617164
+    },
+    {
+      "category_id": 54,
+      "positives": 19,
+      "tp": 7,
+      "fp": 3,
+      "fn": 12,
+      "ap": 0.33608360836083606
+    },
+    {
+      "category_id": 55,
+      "positives": 28,
+      "tp": 24,
+      "fp": 14,
+      "fn": 4,
+      "ap": 0.6532170413257681
+    },
+    {
+      "category_id": 56,
+      "positives": 45,
+      "tp": 12,
+      "fp": 20,
+      "fn": 33,
+      "ap": 0.20792492783112893
+    },
+    {
+      "category_id": 57,
+      "positives": 26,
+      "tp": 13,
+      "fp": 22,
+      "fn": 13,
+      "ap": 0.3785733462146055
+    },
+    {
+      "category_id": 58,
+      "positives": 15,
+      "tp": 10,
+      "fp": 3,
+      "fn": 5,
+      "ap": 0.6633663366336634
+    },
+    {
+      "category_id": 59,
+      "positives": 20,
+      "tp": 18,
+      "fp": 6,
+      "fn": 2,
+      "ap": 0.8441236980840935
+    },
+    {
+      "category_id": 60,
+      "positives": 14,
+      "tp": 5,
+      "fp": 6,
+      "fn": 9,
+      "ap": 0.31658415841584164
+    },
+    {
+      "category_id": 61,
+      "positives": 10,
+      "tp": 6,
+      "fp": 6,
+      "fn": 4,
+      "ap": 0.5898161244695895
+    },
+    {
+      "category_id": 62,
+      "positives": 143,
+      "tp": 82,
+      "fp": 45,
+      "fn": 61,
+      "ap": 0.5089880153838692
+    },
+    {
+      "category_id": 63,
+      "positives": 27,
+      "tp": 18,
+      "fp": 9,
+      "fn": 9,
+      "ap": 0.5768455189172164
+    },
+    {
+      "category_id": 64,
+      "positives": 38,
+      "tp": 15,
+      "fp": 16,
+      "fn": 23,
+      "ap": 0.32882199510273613
+    },
+    {
+      "category_id": 65,
+      "positives": 18,
+      "tp": 14,
+      "fp": 5,
+      "fn": 4,
+      "ap": 0.7557617106248444
+    },
+    {
+      "category_id": 67,
+      "positives": 59,
+      "tp": 32,
+      "fp": 39,
+      "fn": 27,
+      "ap": 0.46222552367282366
+    },
+    {
+      "category_id": 70,
+      "positives": 21,
+      "tp": 18,
+      "fp": 4,
+      "fn": 3,
+      "ap": 0.8443344334433446
+    },
+    {
+      "category_id": 72,
+      "positives": 31,
+      "tp": 24,
+      "fp": 12,
+      "fn": 7,
+      "ap": 0.7537271219804209
+    },
+    {
+      "category_id": 73,
+      "positives": 32,
+      "tp": 24,
+      "fp": 12,
+      "fn": 8,
+      "ap": 0.7174430911544893
+    },
+    {
+      "category_id": 74,
+      "positives": 15,
+      "tp": 12,
+      "fp": 1,
+      "fn": 3,
+      "ap": 0.801980198019802
+    },
+    {
+      "category_id": 75,
+      "positives": 29,
+      "tp": 7,
+      "fp": 9,
+      "fn": 22,
+      "ap": 0.20132013201320142
+    },
+    {
+      "category_id": 76,
+      "positives": 21,
+      "tp": 11,
+      "fp": 7,
+      "fn": 10,
+      "ap": 0.4792744820700557
+    },
+    {
+      "category_id": 77,
+      "positives": 26,
+      "tp": 16,
+      "fp": 13,
+      "fn": 10,
+      "ap": 0.5514029663835951
+    },
+    {
+      "category_id": 78,
+      "positives": 3,
+      "tp": 2,
+      "fp": 2,
+      "fn": 1,
+      "ap": 0.5544554455445537
+    },
+    {
+      "category_id": 79,
+      "positives": 18,
+      "tp": 6,
+      "fp": 4,
+      "fn": 12,
+      "ap": 0.312871287128713
+    },
+    {
+      "category_id": 80,
+      "positives": 0,
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "ap": null
+    },
+    {
+      "category_id": 81,
+      "positives": 21,
+      "tp": 14,
+      "fp": 3,
+      "fn": 7,
+      "ap": 0.6633663366336634
+    },
+    {
+      "category_id": 82,
+      "positives": 13,
+      "tp": 10,
+      "fp": 5,
+      "fn": 3,
+      "ap": 0.7392739273927396
+    },
+    {
+      "category_id": 84,
+      "positives": 77,
+      "tp": 20,
+      "fp": 11,
+      "fn": 57,
+      "ap": 0.19961977434568656
+    },
+    {
+      "category_id": 85,
+      "positives": 21,
+      "tp": 16,
+      "fp": 3,
+      "fn": 5,
+      "ap": 0.7537816281628161
+    },
+    {
+      "category_id": 86,
+      "positives": 20,
+      "tp": 12,
+      "fp": 10,
+      "fn": 8,
+      "ap": 0.492426921263555
+    },
+    {
+      "category_id": 87,
+      "positives": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "ap": null
+    },
+    {
+      "category_id": 88,
+      "positives": 13,
+      "tp": 8,
+      "fp": 3,
+      "fn": 5,
+      "ap": 0.6138613861386139
+    },
+    {
+      "category_id": 89,
+      "positives": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "ap": null
+    },
+    {
+      "category_id": 90,
+      "positives": 1,
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "ap": 0.0
+    }
+  ],
+  "schema_version": "detection-accuracy-1",
+  "created_at": "2026-10-30T08:54:50.589375+00:00",
+  "device": "field-orin",
+  "machine": "aarch64",
+  "python": "3.10.12",
+  "evaluation_source_commit": "4f48e48d5b3e02a0b1caaa9ad4a7f42238929d98",
+  "evaluation_source_dirty": true,
+  "evaluator_sha256": "ccea964e2ef13ed4d68144361312bad8917759616527c5d22fd846d68d3d4b56",
+  "dataset_sha256": "6ec360f41b57ed65ce7f3422acc6f37023a7df74b9d0bdde27b4608f793f0b19",
+  "predictions_sha256": "c28603e3d0d94a30a5ee95641175aec3ce365caea29cad2e46bb878b8e340456",
+  "model_sha256": "00b70c44385bb5567e784b0c1efae213c4f2ec06efacfc8e3f52eca333356205",
+  "configuration": {
+    "model": "yolox_s.onnx",
+    "input_size": 640,
+    "letterbox_pad": 114,
+    "layout": "NCHW BGR 0..255",
+    "nms_threshold": 0.45,
+    "score_threshold_kept": 0.001,
+    "deployment_score_threshold": 0.3,
+    "class_map": "YOLOX index to COCO category id in id order"
+  },
+  "prediction_kind": "measured",
+  "inference_provenance": {
+    "recorded_at": "2026-10-30T02:49:01-05:00",
+    "device": "field-orin",
+    "source_sha256": "e2621d4d6ae0d1793b0ce3d24664092fdf6f57d5c792fd34760be2a4f6e37b69",
+    "source": "case_studies/01_perception_detector/eval_coco_subset.py",
+    "provider_requested": "tensorrt",
+    "provider": "TensorrtExecutionProvider",
+    "precision": "fp16",
+    "trt_cache_dir": "<home>/b2f-quant-20261030/.trt_cache",
+    "int8_calibration_table": null,
+    "int8_calibration_table_sha256": null,
+    "trt_max_workspace_mb": 1024,
+    "onnxruntime": "1.24.0",
+    "backend": {
+      "backend": "onnxruntime",
+      "onnxruntime": "1.24.0",
+      "tensorrt": "10.7.0",
+      "cudnn": "9.3.0",
+      "cuda_runtime": "12.6",
+      "provider_active": "TensorrtExecutionProvider",
+      "precision": "fp16",
+      "intra_op_threads": "default",
+      "inter_op_threads": "default",
+      "allow_spinning": true
+    },
+    "images": 500,
+    "wall_s": 22.8,
+    "inference_ms_median": 19.646,
+    "git": {
+      "commit": "4f48e48d5b3e02a0b1caaa9ad4a7f42238929d98",
+      "dirty": true
+    },
+    "data_dir": "<home>/data/coco"
+  },
+  "reference_review": {
+    "status": "unverified"
+  },
+  "scope": "fixed-IoU saved-output evaluation; no inference or speed promotion",
+  "full_coco_map": false,
+  "promotion_accepted": false
+}

@@ -38,6 +38,9 @@ class SweepVariant:
     precision: str = "fp32"
     technique: str = "baseline"
     name: str | None = None    # model name for the report; defaults to the file stem
+    trt_cache_dir: str | None = None       # TensorRT engine cache for this variant (one per precision)
+    calibration_table: str | None = None   # int8: calibration table file inside trt_cache_dir
+    trt_workspace_mb: int = 0              # TensorRT builder workspace limit, MiB
 
 
 @dataclass
@@ -110,6 +113,12 @@ def run_argv(cfg: SweepConfig, variant: SweepVariant, repeat: int, order: int, o
     ]
     if variant.name:
         argv += ["--name", variant.name]
+    if variant.trt_cache_dir:
+        argv += ["--trt-cache-dir", variant.trt_cache_dir]
+    if variant.calibration_table:
+        argv += ["--calibration-table", variant.calibration_table]
+    if variant.trt_workspace_mb:
+        argv += ["--trt-workspace-mb", str(variant.trt_workspace_mb)]
     if cfg.drop_late:
         argv.append("--drop-late")
     if cfg.no_spin:

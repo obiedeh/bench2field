@@ -257,9 +257,46 @@ def results_table(runs: list[dict[str, Any]]) -> str:
     return s
 
 
+def ade_table(runs: list[dict[str, Any]]) -> str:
+    """Markdown table of the per-clip trajectory error against the dataset's
+    recorded future, one column per committed sdpa run, from the
+    ``min_ade_m_sanity_only`` field of every decision.
+
+    The runner samples one trajectory per decision (``num_traj_samples`` 1 in
+    the protocol), so the value is the average displacement error of that one
+    sample over the 6.4 s horizon in metres; it is not the multi-sample minADE
+    of the model card. With seed 42 before every decision the three repeats of
+    a clip give the same trajectory on a board, so the table shows one value
+    per clip and board (the median of the repeats, which equals each of them)
+    and the mean over the eight clips.
+    """
+    cols = [r for r in sorted(runs, key=lambda r: r["board"]) if r["variant"] == "sdpa"]
+    if not cols:
+        return ""
+    clips: list[str] = []
+    for r in cols:
+        for d in r["decisions"]:
+            if d["clip_id"] not in clips:
+                clips.append(d["clip_id"])
+    head = "| Clip | " + " | ".join(f"{r['board']}, {r['variant']}" for r in cols) + " |\n|---|" + "---|" * len(cols) + "\n"
+    body = ""
+    means = []
+    for r in cols:
+        per_clip = {}
+        for c in clips:
+            vals = sorted(d["min_ade_m_sanity_only"] for d in r["decisions"] if d["clip_id"] == c)
+            per_clip[c] = vals[len(vals) // 2] if vals else float("nan")
+        means.append(per_clip)
+    for c in clips:
+        body += f"| `{c[:8]}` | " + " | ".join(f"{m[c]:.3f} m" for m in means) + " |\n"
+    body += "| Mean over clips | " + " | ".join(f"{sum(m.values()) / len(m):.3f} m" for m in means) + " |\n"
+    return head + body
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--table", action="store_true", help="print the Markdown results table only")
+    ap.add_argument("--ade-table", action="store_true", help="print the per-clip trajectory error table only")
     ap.add_argument("--runs", type=Path, default=None, help="alternative runs directory (for smoke output)")
     args = ap.parse_args(argv)
     global RUNS, REPORT
@@ -273,6 +310,9 @@ def main(argv: list[str] | None = None) -> int:
     if not runs:
         print("no decision runs found", file=sys.stderr)
         return 1
+    if args.ade_table:
+        print(ade_table(runs), end="")
+        return 0
     print(results_table(runs))
     if args.table:
         return 0

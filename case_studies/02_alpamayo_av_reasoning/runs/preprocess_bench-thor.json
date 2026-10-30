@@ -1,5 +1,5 @@
 {
-  "schema": "bench2field.alpamayo.preprocess/1",
+  "schema": "bench2field.alpamayo.preprocess/2",
   "label": "measured",
   "input": "dataset",
   "board": "bench-thor",
@@ -17,7 +17,12 @@
   ],
   "kernel": {
     "source": "kernels/preprocess.cu",
-    "build_s": 0.06,
+    "host_side": "kernels/preprocess_torch.cpp",
+    "variants": [
+      "fused",
+      "separable"
+    ],
+    "build_s": 0.04,
     "cuda_home": "/usr/local/cuda-13.0",
     "arch_list": "11.0",
     "nvcc_release": "13.0",
@@ -31,63 +36,166 @@
   },
   "errors": {
     "kernel_vs_torch_gpu": 0.007843196392059326,
+    "separable_vs_torch_gpu": 0.007843196392059326,
+    "separable_vs_fused": 0.0,
     "kernel_vs_processor_cpu": 0.031372666358947754,
+    "separable_vs_processor_cpu": 0.031372666358947754,
     "torch_gpu_vs_processor_cpu": 0.031372666358947754,
+    "fraction_kernel_vs_torch_gpu_one_step": 3.9220740291057155e-05,
+    "fraction_separable_vs_torch_gpu_one_step": 3.9220740291057155e-05,
     "fraction_kernel_vs_processor_above_1e-3": 0.09587322920560837,
-    "one_uint8_step_after_normalize": 0.00784313725490196
+    "one_uint8_step_after_normalize": 0.00784313725490196,
+    "gate_max_abs_error_vs_torch_gpu": 0.00784313725490196,
+    "gate_passed": true
   },
   "timings_per_16_frames": {
     "kernel": {
-      "median_s": 0.037267,
-      "p95_s": 0.03736,
-      "min_s": 0.037237,
-      "max_s": 0.037363,
+      "median_s": 0.037294,
+      "p95_s": 0.037424,
+      "min_s": 0.037234,
+      "max_s": 0.03743,
+      "n": 50
+    },
+    "kernel_separable": {
+      "median_s": 0.010739,
+      "p95_s": 0.010855,
+      "min_s": 0.0106,
+      "max_s": 0.010873,
       "n": 50
     },
     "kernel+upload": {
-      "median_s": 0.038451,
-      "p95_s": 0.038748,
-      "min_s": 0.038294,
-      "max_s": 0.038892,
+      "median_s": 0.038602,
+      "p95_s": 0.038905,
+      "min_s": 0.038306,
+      "max_s": 0.039128,
+      "n": 50
+    },
+    "kernel_separable+upload": {
+      "median_s": 0.01182,
+      "p95_s": 0.012204,
+      "min_s": 0.011612,
+      "max_s": 0.012233,
       "n": 50
     },
     "torch_gpu": {
-      "median_s": 0.015579,
-      "p95_s": 0.01568,
-      "min_s": 0.015436,
-      "max_s": 0.015682,
+      "median_s": 0.015628,
+      "p95_s": 0.015691,
+      "min_s": 0.014564,
+      "max_s": 0.015744,
       "n": 50
     },
     "processor_cpu": {
-      "median_s": 0.037164,
-      "p95_s": 0.053825,
-      "min_s": 0.030318,
-      "max_s": 0.053825,
+      "median_s": 0.03514,
+      "p95_s": 0.053762,
+      "min_s": 0.02991,
+      "max_s": 0.053762,
       "n": 10
     }
   },
+  "profiler_per_16_frames": {
+    "fused": {
+      "device_time_per_batch_us": 37233.3,
+      "kernel_launches_per_batch": 1.0,
+      "kernels": [
+        {
+          "name": "alpamayo_pre::(anonymous namespace)::preprocess_fused_kernel(unsigned char const*, int const*, float const*, int const*, float const*, float*)",
+          "calls_per_batch": 1.0,
+          "device_time_per_batch_us": 37233.3
+        }
+      ]
+    },
+    "separable": {
+      "device_time_per_batch_us": 10585.7,
+      "kernel_launches_per_batch": 2.0,
+      "kernels": [
+        {
+          "name": "alpamayo_pre::(anonymous namespace)::hpass_kernel(unsigned char const*, int const*, float const*, float*)",
+          "calls_per_batch": 1.0,
+          "device_time_per_batch_us": 9525.0
+        },
+        {
+          "name": "alpamayo_pre::(anonymous namespace)::vpass_kernel(float const*, int const*, float const*, float*)",
+          "calls_per_batch": 1.0,
+          "device_time_per_batch_us": 1060.7
+        }
+      ]
+    },
+    "torch_gpu": {
+      "device_time_per_batch_us": 15650.2,
+      "kernel_launches_per_batch": 11.0,
+      "kernels": [
+        {
+          "name": "void at::native::(anonymous namespace)::upsample_gen2d_aa_out_frame<float, float, at::native::upsample_antialias::BicubicFilterFunctor>(float, float, torch::headeronly::detail::GenericPackedTensorAccessor<torch::headeronly::detail::TensorAccessor<c10::ArrayRef<long>, float const, 3ul, torch::headeronly::DefaultPtrTraits, long>, at::detail::IndexBoundsCheck<4ul, long>, float const, 4ul, torch::headeronly::DefaultPtrTraits, long>, torch::headeronly::detail::GenericPackedTensorAccessor<torch::headeronly::detail::TensorAccessor<c10::ArrayRef<long>, float, 3ul, torch::headeronly::DefaultPtrTraits, long>, at::detail::IndexBoundsCheck<4ul, long>, float, 4ul, torch::headeronly::DefaultPtrTraits, long>, at::native::upsample_antialias::BicubicFilterFunctor const&)",
+          "calls_per_batch": 1.0,
+          "device_time_per_batch_us": 7685.7
+        },
+        {
+          "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+          "calls_per_batch": 2.0,
+          "device_time_per_batch_us": 4088.0
+        },
+        {
+          "name": "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}>(at::TensorIteratorBase&, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1} const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}>(at::TensorIteratorBase&, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1} const&)::{lambda(int)#1})",
+          "calls_per_batch": 2.0,
+          "device_time_per_batch_us": 1668.8
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctorOnSelf_add<float>, std::array<char*, 2ul> >(int, at::native::CUDAFunctorOnSelf_add<float>, std::array<char*, 2ul>)",
+          "calls_per_batch": 1.0,
+          "device_time_per_batch_us": 391.1
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BUnaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> >, std::array<char*, 2ul> >(int, at::native::BUnaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> >, std::array<char*, 2ul>)",
+          "calls_per_batch": 1.0,
+          "device_time_per_batch_us": 385.9
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::AUnaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> >, std::array<char*, 2ul> >(int, at::native::AUnaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> >, std::array<char*, 2ul>)",
+          "calls_per_batch": 1.0,
+          "device_time_per_batch_us": 383.2
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::round_kernel_cuda(at::TensorIteratorBase&)::{lambda()#1}::operator()() const::{lambda()#2}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::round_kernel_cuda(at::TensorIteratorBase&)::{lambda()#1}::operator()() const::{lambda()#2}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "calls_per_batch": 1.0,
+          "device_time_per_batch_us": 381.8
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::(anonymous namespace)::launch_clamp_scalar(at::TensorIteratorBase&, c10::Scalar, c10::Scalar, at::native::detail::ClampLimits)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::(anonymous namespace)::launch_clamp_scalar(at::TensorIteratorBase&, c10::Scalar, c10::Scalar, at::native::detail::ClampLimits)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "calls_per_batch": 1.0,
+          "device_time_per_batch_us": 370.4
+        },
+        {
+          "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#1}::operator()() const::{lambda(unsigned char)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#1}::operator()() const::{lambda(unsigned char)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+          "calls_per_batch": 1.0,
+          "device_time_per_batch_us": 295.3
+        }
+      ]
+    }
+  },
+  "gpu_utilization_pct_before_run": 12,
   "protocol": {
     "reps": 50,
     "warmup": 5,
     "gpu_timing": "cuda events, synchronised",
-    "cpu_timing": "perf_counter"
+    "cpu_timing": "perf_counter",
+    "profiler": "torch.profiler CUDA activity, 10 launches after 3 warm-ups, device time per kernel name divided by 10"
   },
   "provenance": {
     "bench2field": {
-      "commit": "1f7fb99524a2a6e798a99bebf0cffccba6996ab0",
+      "commit": "d7073fb3ac1a20d470622b33541641409c908e78",
       "dirty": null,
       "root": "copied tree, see SOURCE_COMMIT"
     },
     "background": {
       "stopped_for_this_run": [],
       "containers_running": [],
-      "load_avg_1m": 0.43310546875,
+      "load_avg_1m": 0.63720703125,
       "host_top_cpu_pct": [
-        2.9,
-        1.4,
-        1.1,
-        0.5,
-        0.4
+        100.0,
+        17.5,
+        2.4,
+        0.8,
+        0.5
       ],
       "other_gpu_processes": [
         {
@@ -106,5 +214,5 @@
       "captured_at": "2026-10-29T21:15:35+00:00"
     }
   },
-  "captured_at": "2026-10-29T21:14:44-0500"
+  "captured_at": "2026-10-29T22:43:47-0500"
 }

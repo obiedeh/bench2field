@@ -1,0 +1,718 @@
+{
+  "protocol": {
+    "iou": 0.5,
+    "score_threshold": 0.0,
+    "max_detections_per_image": 100,
+    "interpolation_points": 101,
+    "tie_order": "input order",
+    "crowd_policy": "reject"
+  },
+  "images": 500,
+  "images_with_predictions": 500,
+  "tp": 2469,
+  "fp": 31874,
+  "fn": 449,
+  "precision": 0.07189237981539179,
+  "recall": 0.8461274845784784,
+  "mean_ap_at_declared_iou": 0.6521030679046607,
+  "per_class": [
+    {
+      "category_id": 1,
+      "positives": 838,
+      "tp": 735,
+      "fp": 3376,
+      "fn": 103,
+      "ap": 0.7964119050493891
+    },
+    {
+      "category_id": 2,
+      "positives": 34,
+      "tp": 30,
+      "fp": 439,
+      "fn": 4,
+      "ap": 0.6546428559277938
+    },
+    {
+      "category_id": 3,
+      "positives": 146,
+      "tp": 123,
+      "fp": 1377,
+      "fn": 23,
+      "ap": 0.6826434297543233
+    },
+    {
+      "category_id": 4,
+      "positives": 32,
+      "tp": 30,
+      "fp": 251,
+      "fn": 2,
+      "ap": 0.7694364399559188
+    },
+    {
+      "category_id": 5,
+      "positives": 10,
+      "tp": 9,
+      "fp": 162,
+      "fn": 1,
+      "ap": 0.900990099009901
+    },
+    {
+      "category_id": 6,
+      "positives": 22,
+      "tp": 20,
+      "fp": 249,
+      "fn": 2,
+      "ap": 0.8752188262304492
+    },
+    {
+      "category_id": 7,
+      "positives": 18,
+      "tp": 16,
+      "fp": 212,
+      "fn": 2,
+      "ap": 0.8229106781645906
+    },
+    {
+      "category_id": 8,
+      "positives": 28,
+      "tp": 24,
+      "fp": 642,
+      "fn": 4,
+      "ap": 0.3659195942529844
+    },
+    {
+      "category_id": 9,
+      "positives": 30,
+      "tp": 21,
+      "fp": 507,
+      "fn": 9,
+      "ap": 0.34615126283054665
+    },
+    {
+      "category_id": 10,
+      "positives": 28,
+      "tp": 19,
+      "fp": 421,
+      "fn": 9,
+      "ap": 0.4193246204265048
+    },
+    {
+      "category_id": 11,
+      "positives": 11,
+      "tp": 10,
+      "fp": 89,
+      "fn": 1,
+      "ap": 0.801614291863969
+    },
+    {
+      "category_id": 13,
+      "positives": 4,
+      "tp": 4,
+      "fp": 104,
+      "fn": 0,
+      "ap": 1.0
+    },
+    {
+      "category_id": 14,
+      "positives": 14,
+      "tp": 11,
+      "fp": 101,
+      "fn": 3,
+      "ap": 0.6622909615037023
+    },
+    {
+      "category_id": 15,
+      "positives": 35,
+      "tp": 25,
+      "fp": 1144,
+      "fn": 10,
+      "ap": 0.3444283659260454
+    },
+    {
+      "category_id": 16,
+      "positives": 22,
+      "tp": 18,
+      "fp": 544,
+      "fn": 4,
+      "ap": 0.6578562743492394
+    },
+    {
+      "category_id": 17,
+      "positives": 18,
+      "tp": 18,
+      "fp": 143,
+      "fn": 0,
+      "ap": 0.9940594059405942
+    },
+    {
+      "category_id": 18,
+      "positives": 12,
+      "tp": 12,
+      "fp": 283,
+      "fn": 0,
+      "ap": 0.941974197419742
+    },
+    {
+      "category_id": 19,
+      "positives": 30,
+      "tp": 27,
+      "fp": 204,
+      "fn": 3,
+      "ap": 0.8551360532458235
+    },
+    {
+      "category_id": 20,
+      "positives": 18,
+      "tp": 17,
+      "fp": 303,
+      "fn": 1,
+      "ap": 0.8448638613861386
+    },
+    {
+      "category_id": 21,
+      "positives": 21,
+      "tp": 20,
+      "fp": 212,
+      "fn": 1,
+      "ap": 0.6734099980453014
+    },
+    {
+      "category_id": 22,
+      "positives": 24,
+      "tp": 24,
+      "fp": 148,
+      "fn": 0,
+      "ap": 1.0
+    },
+    {
+      "category_id": 23,
+      "positives": 4,
+      "tp": 4,
+      "fp": 57,
+      "fn": 0,
+      "ap": 1.0
+    },
+    {
+      "category_id": 24,
+      "positives": 30,
+      "tp": 29,
+      "fp": 113,
+      "fn": 1,
+      "ap": 0.9293006149996519
+    },
+    {
+      "category_id": 25,
+      "positives": 17,
+      "tp": 12,
+      "fp": 85,
+      "fn": 5,
+      "ap": 0.7029702970297029
+    },
+    {
+      "category_id": 27,
+      "positives": 32,
+      "tp": 20,
+      "fp": 755,
+      "fn": 12,
+      "ap": 0.23440164445837994
+    },
+    {
+      "category_id": 28,
+      "positives": 18,
+      "tp": 13,
+      "fp": 282,
+      "fn": 5,
+      "ap": 0.5469097006662528
+    },
+    {
+      "category_id": 31,
+      "positives": 34,
+      "tp": 24,
+      "fp": 1024,
+      "fn": 10,
+      "ap": 0.33769301666506096
+    },
+    {
+      "category_id": 32,
+      "positives": 32,
+      "tp": 23,
+      "fp": 267,
+      "fn": 9,
+      "ap": 0.6560314042931803
+    },
+    {
+      "category_id": 33,
+      "positives": 20,
+      "tp": 18,
+      "fp": 469,
+      "fn": 2,
+      "ap": 0.772842948929447
+    },
+    {
+      "category_id": 34,
+      "positives": 14,
+      "tp": 14,
+      "fp": 109,
+      "fn": 0,
+      "ap": 0.9947194719471948
+    },
+    {
+      "category_id": 35,
+      "positives": 25,
+      "tp": 21,
+      "fp": 366,
+      "fn": 4,
+      "ap": 0.4508491987160474
+    },
+    {
+      "category_id": 36,
+      "positives": 4,
+      "tp": 4,
+      "fp": 213,
+      "fn": 0,
+      "ap": 0.7807637906647809
+    },
+    {
+      "category_id": 37,
+      "positives": 18,
+      "tp": 17,
+      "fp": 224,
+      "fn": 1,
+      "ap": 0.7952688125955452
+    },
+    {
+      "category_id": 38,
+      "positives": 12,
+      "tp": 11,
+      "fp": 188,
+      "fn": 1,
+      "ap": 0.7878544376176747
+    },
+    {
+      "category_id": 39,
+      "positives": 7,
+      "tp": 7,
+      "fp": 134,
+      "fn": 0,
+      "ap": 1.0
+    },
+    {
+      "category_id": 40,
+      "positives": 9,
+      "tp": 8,
+      "fp": 164,
+      "fn": 1,
+      "ap": 0.7986798679867987
+    },
+    {
+      "category_id": 41,
+      "positives": 11,
+      "tp": 6,
+      "fp": 216,
+      "fn": 5,
+      "ap": 0.356086396310864
+    },
+    {
+      "category_id": 42,
+      "positives": 28,
+      "tp": 26,
+      "fp": 363,
+      "fn": 2,
+      "ap": 0.7734807683022284
+    },
+    {
+      "category_id": 43,
+      "positives": 16,
+      "tp": 15,
+      "fp": 137,
+      "fn": 1,
+      "ap": 0.8789250353606789
+    },
+    {
+      "category_id": 44,
+      "positives": 88,
+      "tp": 60,
+      "fp": 983,
+      "fn": 28,
+      "ap": 0.4581823091168039
+    },
+    {
+      "category_id": 46,
+      "positives": 34,
+      "tp": 23,
+      "fp": 186,
+      "fn": 11,
+      "ap": 0.5651035518687724
+    },
+    {
+      "category_id": 47,
+      "positives": 83,
+      "tp": 64,
+      "fp": 880,
+      "fn": 19,
+      "ap": 0.5459183533415456
+    },
+    {
+      "category_id": 48,
+      "positives": 14,
+      "tp": 11,
+      "fp": 235,
+      "fn": 3,
+      "ap": 0.4893475774423822
+    },
+    {
+      "category_id": 49,
+      "positives": 32,
+      "tp": 26,
+      "fp": 418,
+      "fn": 6,
+      "ap": 0.401324739243987
+    },
+    {
+      "category_id": 50,
+      "positives": 19,
+      "tp": 10,
+      "fp": 357,
+      "fn": 9,
+      "ap": 0.20428602220348951
+    },
+    {
+      "category_id": 51,
+      "positives": 52,
+      "tp": 45,
+      "fp": 739,
+      "fn": 7,
+      "ap": 0.6043213572608644
+    },
+    {
+      "category_id": 52,
+      "positives": 27,
+      "tp": 21,
+      "fp": 366,
+      "fn": 6,
+      "ap": 0.4677742268103884
+    },
+    {
+      "category_id": 53,
+      "positives": 19,
+      "tp": 14,
+      "fp": 331,
+      "fn": 5,
+      "ap": 0.24305904627085356
+    },
+    {
+      "category_id": 54,
+      "positives": 19,
+      "tp": 17,
+      "fp": 210,
+      "fn": 2,
+      "ap": 0.5434493337665859
+    },
+    {
+      "category_id": 55,
+      "positives": 28,
+      "tp": 26,
+      "fp": 241,
+      "fn": 2,
+      "ap": 0.6925084884044781
+    },
+    {
+      "category_id": 56,
+      "positives": 45,
+      "tp": 39,
+      "fp": 645,
+      "fn": 6,
+      "ap": 0.3525176338655028
+    },
+    {
+      "category_id": 57,
+      "positives": 26,
+      "tp": 24,
+      "fp": 439,
+      "fn": 2,
+      "ap": 0.46808722959496163
+    },
+    {
+      "category_id": 58,
+      "positives": 15,
+      "tp": 15,
+      "fp": 173,
+      "fn": 0,
+      "ap": 0.8416811605972627
+    },
+    {
+      "category_id": 59,
+      "positives": 20,
+      "tp": 19,
+      "fp": 174,
+      "fn": 1,
+      "ap": 0.819658768573164
+    },
+    {
+      "category_id": 60,
+      "positives": 14,
+      "tp": 11,
+      "fp": 202,
+      "fn": 3,
+      "ap": 0.38351018970044565
+    },
+    {
+      "category_id": 61,
+      "positives": 10,
+      "tp": 9,
+      "fp": 245,
+      "fn": 1,
+      "ap": 0.6875313754467423
+    },
+    {
+      "category_id": 62,
+      "positives": 143,
+      "tp": 127,
+      "fp": 1808,
+      "fn": 16,
+      "ap": 0.6198171528198357
+    },
+    {
+      "category_id": 63,
+      "positives": 27,
+      "tp": 25,
+      "fp": 424,
+      "fn": 2,
+      "ap": 0.6862001691377154
+    },
+    {
+      "category_id": 64,
+      "positives": 38,
+      "tp": 23,
+      "fp": 563,
+      "fn": 15,
+      "ap": 0.36939881874560354
+    },
+    {
+      "category_id": 65,
+      "positives": 18,
+      "tp": 17,
+      "fp": 241,
+      "fn": 1,
+      "ap": 0.8556635927049439
+    },
+    {
+      "category_id": 67,
+      "positives": 59,
+      "tp": 54,
+      "fp": 806,
+      "fn": 5,
+      "ap": 0.5461051437147165
+    },
+    {
+      "category_id": 70,
+      "positives": 21,
+      "tp": 20,
+      "fp": 167,
+      "fn": 1,
+      "ap": 0.8948394839483949
+    },
+    {
+      "category_id": 72,
+      "positives": 31,
+      "tp": 31,
+      "fp": 275,
+      "fn": 0,
+      "ap": 0.8376184204105417
+    },
+    {
+      "category_id": 73,
+      "positives": 32,
+      "tp": 31,
+      "fp": 250,
+      "fn": 1,
+      "ap": 0.8266234751371605
+    },
+    {
+      "category_id": 74,
+      "positives": 15,
+      "tp": 15,
+      "fp": 137,
+      "fn": 0,
+      "ap": 0.9081370809403316
+    },
+    {
+      "category_id": 75,
+      "positives": 29,
+      "tp": 21,
+      "fp": 431,
+      "fn": 8,
+      "ap": 0.35903918399238705
+    },
+    {
+      "category_id": 76,
+      "positives": 21,
+      "tp": 18,
+      "fp": 177,
+      "fn": 3,
+      "ap": 0.5845658903317611
+    },
+    {
+      "category_id": 77,
+      "positives": 26,
+      "tp": 24,
+      "fp": 497,
+      "fn": 2,
+      "ap": 0.6498173664388021
+    },
+    {
+      "category_id": 78,
+      "positives": 3,
+      "tp": 3,
+      "fp": 99,
+      "fn": 0,
+      "ap": 0.6806930693069307
+    },
+    {
+      "category_id": 79,
+      "positives": 18,
+      "tp": 12,
+      "fp": 221,
+      "fn": 6,
+      "ap": 0.4050257203804926
+    },
+    {
+      "category_id": 80,
+      "positives": 0,
+      "tp": 0,
+      "fp": 54,
+      "fn": 0,
+      "ap": null
+    },
+    {
+      "category_id": 81,
+      "positives": 21,
+      "tp": 16,
+      "fp": 300,
+      "fn": 5,
+      "ap": 0.6977013490822767
+    },
+    {
+      "category_id": 82,
+      "positives": 13,
+      "tp": 10,
+      "fp": 181,
+      "fn": 3,
+      "ap": 0.7392739273927393
+    },
+    {
+      "category_id": 84,
+      "positives": 77,
+      "tp": 53,
+      "fp": 1122,
+      "fn": 24,
+      "ap": 0.2937517180720345
+    },
+    {
+      "category_id": 85,
+      "positives": 21,
+      "tp": 19,
+      "fp": 373,
+      "fn": 2,
+      "ap": 0.7840226367097648
+    },
+    {
+      "category_id": 86,
+      "positives": 20,
+      "tp": 19,
+      "fp": 350,
+      "fn": 1,
+      "ap": 0.6296106396353921
+    },
+    {
+      "category_id": 87,
+      "positives": 0,
+      "tp": 0,
+      "fp": 114,
+      "fn": 0,
+      "ap": null
+    },
+    {
+      "category_id": 88,
+      "positives": 13,
+      "tp": 11,
+      "fp": 197,
+      "fn": 2,
+      "ap": 0.7927864214992928
+    },
+    {
+      "category_id": 89,
+      "positives": 0,
+      "tp": 0,
+      "fp": 60,
+      "fn": 0,
+      "ap": null
+    },
+    {
+      "category_id": 90,
+      "positives": 1,
+      "tp": 1,
+      "fp": 126,
+      "fn": 0,
+      "ap": 0.07692307692307693
+    }
+  ],
+  "schema_version": "detection-accuracy-1",
+  "created_at": "2026-10-30T03:21:26.517851+00:00",
+  "device": "bench-5090",
+  "machine": "x86_64",
+  "python": "3.12.3",
+  "evaluation_source_commit": "d7073fb3ac1a20d470622b33541641409c908e78",
+  "evaluation_source_dirty": true,
+  "evaluator_sha256": "ccea964e2ef13ed4d68144361312bad8917759616527c5d22fd846d68d3d4b56",
+  "dataset_sha256": "6ec360f41b57ed65ce7f3422acc6f37023a7df74b9d0bdde27b4608f793f0b19",
+  "predictions_sha256": "f647bcf98b8f34a6a4684791e2efc88eab7e87d7a5970ee92c28a7380c519a2c",
+  "model_sha256": "00b70c44385bb5567e784b0c1efae213c4f2ec06efacfc8e3f52eca333356205",
+  "configuration": {
+    "model": "yolox_s.onnx",
+    "input_size": 640,
+    "letterbox_pad": 114,
+    "layout": "NCHW BGR 0..255",
+    "nms_threshold": 0.45,
+    "score_threshold_kept": 0.001,
+    "deployment_score_threshold": 0.3,
+    "class_map": "YOLOX index to COCO category id in id order"
+  },
+  "prediction_kind": "measured",
+  "inference_provenance": {
+    "recorded_at": "2026-10-29T22:21:25-0500",
+    "device": "bench-5090",
+    "source_sha256": "30c40dac023d24517a00637d5ac61d3c5b4621595343fe34d8b96f20b3f4e34a",
+    "source": "case_studies/01_perception_detector/eval_coco_subset.py",
+    "provider_requested": "cuda",
+    "provider": "CUDAExecutionProvider",
+    "precision": "fp32",
+    "onnxruntime": "1.30.0",
+    "backend": {
+      "backend": "onnxruntime",
+      "onnxruntime": "1.30.0",
+      "tensorrt": null,
+      "cudnn": "9.19.0",
+      "cuda_runtime": "13.0",
+      "provider_active": "CUDAExecutionProvider",
+      "precision": "fp32",
+      "intra_op_threads": "default",
+      "inter_op_threads": "default",
+      "allow_spinning": true
+    },
+    "images": 500,
+    "wall_s": 5.9,
+    "inference_ms_median": 5.908,
+    "git": {
+      "commit": "d7073fb3ac1a20d470622b33541641409c908e78",
+      "dirty": true
+    },
+    "data_dir": "/mnt/backup/nvidia-gaps-20261029/coco"
+  },
+  "reference_review": {
+    "status": "unverified"
+  },
+  "scope": "fixed-IoU saved-output evaluation; no inference or speed promotion",
+  "full_coco_map": false,
+  "promotion_accepted": false
+}

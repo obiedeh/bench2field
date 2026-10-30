@@ -1,0 +1,33 @@
+Setting min object dimensions as 16x16 instead of 1x1 to support VIC compute mode.
+0:00:00.151233341 [35m38284[00m 0xaaaad41ba800 [33;01mWARN   [00m [00m             nvinfer gstnvinfer.cpp:681:gst_nvinfer_logger:<primary_gie>[00m NvDsInferContext[UID 1]: Warning from NvDsInferContextImpl::deserializeEngineAndBackend() <nvdsinfer_context_impl.cpp:2080> [UID = 1]: deserialize engine from file :<work>/run/yolov8n_b1_gpu0_fp16.engine failed
+0:00:00.151285119 [35m38284[00m 0xaaaad41ba800 [33;01mWARN   [00m [00m             nvinfer gstnvinfer.cpp:681:gst_nvinfer_logger:<primary_gie>[00m NvDsInferContext[UID 1]: Warning from NvDsInferContextImpl::generateBackendContext() <nvdsinfer_context_impl.cpp:2185> [UID = 1]: deserialize backend context from engine from file :<work>/run/yolov8n_b1_gpu0_fp16.engine failed, try rebuild
+0:00:00.151297567 [35m38284[00m 0xaaaad41ba800 [36mINFO   [00m [00m             nvinfer gstnvinfer.cpp:684:gst_nvinfer_logger:<primary_gie>[00m NvDsInferContext[UID 1]: Info from NvDsInferContextImpl::buildModel() <nvdsinfer_context_impl.cpp:2106> [UID = 1]: Trying to create engine from model files
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+ERROR: [TRT]: [resizingAllocator.cpp::allocate::78] Error Code 1: Cuda Runtime (out of memory)
+ERROR: [TRT]: [globWriter.cpp::HybridGlobWriter::487] Error Code 2: OutOfMemory (Requested size was 1024 bytes.)
+timeout: the monitored command dumped core

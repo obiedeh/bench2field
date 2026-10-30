@@ -10,15 +10,15 @@ recent motion, writes a chain-of-causation reasoning trace, and samples a 6.4 s
 trajectory at 10 Hz. Every number here comes from a committed JSON record on a
 named board, as in case study 01.
 
-**Status: phases 2 to 4 and 3b done.** The 5090 is measured and profiled, the Thor is measured, and the custom preprocessing kernel is verified and timed on both. Results below come from the
+**Status: phases 2 to 4 and 3b done.** Both boards are measured and profiled, the two preprocessing kernels are verified and timed on both boards and the separable one beats PyTorch's own ops, and the standalone C++ driver matches the extension bit for bit. Results below come from the
 committed JSON only; a cell says "pending" until the run that produces it is committed.
 
 ## Boards
 
 | Board | Role | Target for | State |
 |---|---|---|---|
-| RTX 5090 (`bench-5090`) | bench | full-precision run, profile, plots | measured, sdpa and flash-attn (phase 2); profiled (phase 3) |
-| Jetson AGX Thor (`bench-thor`) | edge bench | same clips, with power | measured, sdpa, board power (phase 4); JetPack, not DriveOS |
+| RTX 5090 (`bench-5090`) | bench | full-precision run, profile, plots | measured, sdpa and flash-attn (phase 2); profiled (phase 3); kernels (phase 3b) |
+| Jetson AGX Thor (`bench-thor`) | edge bench | same clips, with power | measured, sdpa, board power (phase 4); profiled (phase 3 on the edge); kernels (phase 3b); JetPack, not DriveOS |
 | Jetson Orin NX 8 GB (`field-orin`) | field | nothing | does not fit; measured facts in [ORIN_NX.md](ORIN_NX.md) |
 
 ## Results
@@ -91,63 +91,198 @@ unprofiled run, so the split below is read as shares, not as the latency.
   `power_per_decision`, and `profile_timeline` (NVML power and utilisation
   around the profiled decision). SVG with a PNG next to each.
 
+## Where the time goes on the Thor (phase 3 on the edge, sdpa)
+
+The same profiler run on the Thor, same clip, one warm-up, from
+`runs/profile_bench-thor_sdpa.json` (tree copied at commit `d7073fb`). The
+profiled decision took 4.94 s against 4.38 s median
+unprofiled, so again the split is read as shares.
+
+| Stage | RTX 5090, device ms | Jetson AGX Thor, device ms | Thor as a share of the 5090 |
+|---|---|---|---|
+| Decision | 1009 | 4940 | 20 % |
+| Rollout (prefill and decode) | 784 | 4080 | 19 % |
+| Vision tower, inside the rollout | 117 | 756 | 15 % |
+| Trajectory sampling | 223 | 854 | 26 % |
+| Decode, per token (22 tokens) | 19 | 105 | 18 % |
+
+- **Same shape, one fifth the speed, as the unprofiled runs said.** Every
+  stage retains 15 to 21 percent; the vision tower retains the least, the
+  trajectory head the most.
+- **Different kernels.** The 5090's table is sm80 cutlass GEMMs and an
+  sm80 memory-efficient attention kernel (torch 2.8.0+cu128 has no Blackwell
+  kernels). The Thor's table is native `nvjet_sm110` bf16 GEMMs from torch
+  2.11.0+cu130: the three largest, `nvjet_sm110_tst_128x8_64x12_2x1_v_bz_TNT`,
+  `nvjet_sm110_tst_512x8_64x3_2x1_v_bz_splitK_TNT` and `nvjet_sm110_tst_256x256_64x4_2x1_2cta_v_bz_TNT`, take 39 percent of
+  device time, and the decode is again a streamed weight read at batch one
+  (`gemv2T` and the 128-row `nvjet` variants). The boards run the same
+  model, not the same code.
+- **Operators.** `aten::linear` 27 percent and `aten::matmul`
+  22 percent of operator device time on the Thor; attention itself
+  (`aten::scaled_dot_product_attention`) 3.0 percent.
+
 ## A custom CUDA kernel for the camera preprocessing (phase 3b)
 
-`kernels/preprocess.cu` does the processor's three passes over each frame
-(antialiased bicubic resize 1080x1920 to 320x576, rescale and normalize, the
-16x16 patch layout with 2x2 merge and the temporal duplicate) in one pass:
-each thread computes one output value and writes it to its final place in
-the `[16 x 720, 1536]` patch tensor. `KERNEL_WALKTHROUGH.md` explains it in
-plain language; the kernel header explains the thread layout, the memory
-pattern and the index mapping line by line. Built with the case study venvs
-only (SETUP.md), measured by `bench_preprocess.py`, records in
-`runs/preprocess_<board>.json`. Measured values only.
+Alpamayo's processor does three passes over each camera frame before the
+vision tower sees it: an antialiased bicubic resize from 1080x1920 to
+320x576, a rescale and normalize, and the 16x16 patch layout with 2x2 merge
+and the temporal duplicate. `kernels/preprocess.cu` does that on the GPU
+twice over, on purpose: a **fused** kernel, one pass, one thread per output
+value, written to be read first; and a **separable** pair, a horizontal
+pass into a float buffer and a vertical pass that rounds, normalizes and
+scatters, written after the fused one was measured and found slow. The host
+side is C++: `kernels/preprocess_torch.cpp` is the PyTorch binding (input
+checks, allocation, the current stream, the launch check), and
+`kernels/standalone/` is a driver that builds and runs the same kernels with
+CMake and the CUDA toolkit alone, no PyTorch, and is compared with the
+extension bit for bit. `KERNEL_WALKTHROUGH.md` explains all of it in plain
+language. Built with the case study venvs only (SETUP.md), measured by
+`bench_preprocess.py`, records in `runs/preprocess_<board>.json`. Measured
+values only.
 
-**Correctness.** Against the real processor run on the GPU the kernel differs
-by at most one uint8 step (0.0078 after normalization) on 0.004 percent of
-the 17.7 million values, which is float summation order at rounding ties.
-Against the same processor run on the CPU, where Alpamayo runs it today,
-the kernel differs by up to 0.039, five grey levels, on 9.6 percent of
-values, and so does the processor's own GPU path: the CPU uint8 resize uses
-fixed-point weights and is not bit-identical to the float path. The model
-therefore sees slightly different pixels depending on where preprocessing
-runs. The kernel matches the float path.
+**Correctness.** `bench_preprocess.py` refuses to write a record unless both
+variants agree with the processor's recipe run as PyTorch ops on the GPU
+within one uint8 step after normalization (0.0078), and a test holds every
+committed record to that gate. Both variants meet it on both boards; the two
+variants agree with each other exactly (`separable_vs_fused` 0.0 in both
+records). Against the PyTorch GPU path, one value in about 23,000 rounds to
+the neighbouring grey level (`fraction_separable_vs_torch_gpu_one_step`
+4.3e-5 on the 5090, 3.9e-5 on the Thor), which is float summation order at rounding ties.
+Against the processor run on the CPU, where Alpamayo runs it today, the
+kernels differ by up to five grey levels on 9.6 percent of values, and so
+does the processor's own GPU path: the CPU uint8 resize uses fixed-point
+weights and is not bit-identical to the float path. The model therefore sees
+slightly different pixels depending on where preprocessing runs; the kernels
+match the float path. The standalone driver's output equals the extension's
+on both boards, and its C++ resampling tables equal the Python ones exactly.
 
-**Time per 16-frame batch, one decision's input.**
+**Time per 16-frame batch, one decision's input.** Wall time from CUDA
+events; the three "under the profiler" rows are device time summed over the
+kernels each path launches, from `torch.profiler`.
 
 | Path, 16 frames | bench-5090 | bench-thor |
 |---|---|---|
-| kernel | 3.29 ms median, 3.75 ms p95 | 37.27 ms median, 37.36 ms p95 |
-| kernel+upload | 7.70 ms median, 8.43 ms p95 | 38.45 ms median, 38.75 ms p95 |
-| torch_gpu | 1.24 ms median, 1.25 ms p95 | 15.58 ms median, 15.68 ms p95 |
-| processor_cpu | 365.78 ms median, 397.20 ms p95 | 37.16 ms median, 53.82 ms p95 |
-| Max abs error, kernel vs processor on the CPU | 0.039216 | 0.031373 |
-| Max abs error, kernel vs torch GPU | 0.007843 | 0.007843 |
+| kernel | 3.29 ms median, 3.39 ms p95 | 37.29 ms median, 37.42 ms p95 |
+| kernel_separable | 0.65 ms median, 0.65 ms p95 | 10.74 ms median, 10.86 ms p95 |
+| kernel+upload | 7.71 ms median, 7.93 ms p95 | 38.60 ms median, 38.91 ms p95 |
+| kernel_separable+upload | 5.08 ms median, 5.52 ms p95 | 11.82 ms median, 12.20 ms p95 |
+| torch_gpu | 1.23 ms median, 1.24 ms p95 | 15.63 ms median, 15.69 ms p95 |
+| processor_cpu | 318.70 ms median, 384.86 ms p95 | 35.14 ms median, 53.76 ms p95 |
+| Kernel time under the profiler, fused | 2.628 ms in 1 launches | 37.233 ms in 1 launches |
+| Kernel time under the profiler, separable | 0.856 ms in 2 launches | 10.586 ms in 2 launches |
+| Kernel time under the profiler, torch_gpu | 1.911 ms in 11 launches | 15.650 ms in 11 launches |
+| Max abs error, fused vs torch GPU | 0.007843 | 0.007843 |
+| Max abs error, separable vs torch GPU | 0.007843 | 0.007843 |
+| Max abs error, fused vs processor on the CPU | 0.039216 | 0.031373 |
 
-The processor on the GPU (`image_processor(..., device="cuda")`) was timed
-once on the 5090 outside the record: 1.51 ms median over 20 runs.
+`kernel` is the fused kernel and `kernel_separable` the pair, frames already
+on the GPU; `+upload` adds the host to device copy of the 100 MB of uint8
+frames from pinned memory, which the CPU processor path does not need;
+`torch_gpu` is the same recipe in PyTorch ops on the GPU; `processor_cpu` is
+the Hugging Face processor on the CPU as Alpamayo calls it. The 5090 was
+shared with an unrelated simulation process during these runs (about 4.2 GB
+resident, NVML utilisation 87 percent just before the run, recorded in the
+record); the kernel and the PyTorch path were timed back to back under the
+same sharing, so their ratio stands, and an idle-GPU run is the thing to
+add. The Thor was idle.
 
-**Reading the numbers honestly.**
+**Reading the numbers.**
 
-- PyTorch wins on the GPU, on both boards: its own ops do the same work in
-  1.24 ms against the kernel's 3.29 ms on the 5090 and 15.6 ms against
-  37.3 ms on the Thor. The reason is in the kernel's design: the fused
-  two-dimensional resample does 14 x 14 taps per output value, about 1.7
-  billion byte gathers and multiply-adds per batch (calculated from the
-  shapes), where a separable resize does about a third of that and streams
-  rows. The fused form was chosen for readability and verified first; the
-  separable version is the obvious next step and is not claimed here.
-- The kernel still removes the preprocessing from the critical path where it
-  matters. Alpamayo calls the processor on the CPU: 366 ms per decision on
-  the 5090 host (24 cores, torchvision 0.23) and 37 ms on the Thor (14 cores,
-  torchvision 0.26). Against the measured decision latencies of 0.89 s and
-  4.38 s that is 41 percent of a 5090 decision and 0.8 percent of a Thor
-  decision spent before the model starts. Any GPU path, PyTorch's or this
-  kernel's, cuts that to a few milliseconds plus the upload
-  (7.7 ms including the 100 MB host to device copy on the 5090; 38.5 ms on the
-  Thor, whose memory is shared).
-- The two CPU figures are not a like for like comparison of the two CPUs: the
-  torchvision versions differ. They are recorded as measured.
+- The fused kernel loses to PyTorch on both boards (3.29 against 1.23 ms on
+  the 5090, 37.3 against 15.6 ms on the Thor) and the profiler says why: it
+  is one kernel that gathers a 14 x 14 window of single bytes per output
+  value, 196 loads where a separable resize needs 28, and on these GPUs the
+  byte gathers are the cost, not the arithmetic.
+- The separable pair beats PyTorch on both boards: 0.65 against 1.23 ms on
+  the 5090 (1.9x), 10.7 against 15.6 ms on the Thor (1.5x). Under the
+  profiler it is two launches, 0.86 ms of device time on the 5090, against
+  PyTorch's eleven launches and 1.91 ms (`BicubicFilterFunctor` for the
+  resize, then the elementwise rescale, normalize and copy kernels). The
+  pair spends almost all of its time in the horizontal pass (0.75 of
+  0.86 ms; 9.5 of 10.6 ms on the Thor), which still gathers single bytes at a
+  stride of 3.3 input pixels between neighbouring threads. Vectorised byte
+  loads or a shared-memory row tile are the next step and are not claimed.
+- Where it matters: Alpamayo calls the processor on the CPU, 319 ms per
+  decision on the 5090 host (24 cores, torchvision 0.23) and 35 ms on the
+  Thor (14 cores, torchvision 0.26), against decision latencies of 0.89 s
+  and 4.38 s. Any GPU path, PyTorch's or the separable pair, cuts that to a
+  few milliseconds plus the upload (5.1 ms including the copy on the 5090;
+  11.8 ms on the Thor, whose memory is shared with the CPU). The two CPU
+  figures are not a like for like comparison of the two CPUs: the torchvision
+  versions differ. They are recorded as measured.
+- The standalone driver times the same kernels without PyTorch in the loop:
+  0.65 ms and 3.04 ms on the 5090, 10.37 ms and 37.24 ms on the Thor
+  (separable and fused, 50 runs), printed by the driver and not committed as
+  records; they agree with the extension's timings, so the PyTorch binding
+  adds nothing measurable.
+
+## Trajectory error against the dataset's own future (sanity figure, not accuracy)
+
+The runner records, for every decision, the average displacement error of the
+sampled 6.4 s trajectory against the future the dataset recorded for that
+clip (`min_ade_m_sanity_only` in the decision records), the way upstream's
+own demo prints it. The protocol samples one trajectory per decision, so this
+is the error of that one sample, not the multi-sample minADE of the model
+card, and eight clips are not an evaluation set. It is here so the numbers
+the boards produce can be seen to be driving-shaped, and because an
+interviewer should be able to ask for it. From `plot_results.py --ade-table`,
+enforced by `tests/test_alpamayo_results_table.py`:
+
+| Clip | bench-5090, sdpa | bench-thor, sdpa |
+|---|---|---|
+| `030c760c` | 2.567 m | 1.452 m |
+| `0347d9f9` | 1.664 m | 3.397 m |
+| `06b483cf` | 1.869 m | 1.716 m |
+| `09ad74a2` | 1.625 m | 2.949 m |
+| `0a1ef808` | 2.099 m | 0.979 m |
+| `0ea6fd88` | 0.357 m | 2.603 m |
+| `174407b0` | 2.522 m | 1.011 m |
+| `195f1fc6` | 2.514 m | 4.423 m |
+| Mean over clips | 1.902 m | 2.316 m |
+
+The two boards sample different trajectories for the same clip and seed
+(different kernels, different rounding, a different sample; the friction log
+records the same effect on the reasoning text), so the per-clip values are
+not expected to match and their difference says nothing about either board.
+The 2.567 m on the first clip equals what upstream's demo prints on this
+host for the same clip.
+
+## Where Alpamayo sits in an AV stack
+
+What this case study measured is the model stage of an end-to-end reasoning
+driver, on its own, with recorded sensor data and no vehicle. The diagram
+places it; the lab measured only the box in the middle.
+
+```mermaid
+flowchart LR
+    subgraph sensing["Sensing (not in this study)"]
+        cams["4 cameras, 0.4 s window"]
+        ego["Ego motion history"]
+    end
+    subgraph model["Alpamayo 1 (measured here)"]
+        pre["Camera preprocessing<br/>resize, normalize, patches<br/>(phase 3b kernels)"]
+        vlm["Vision tower and<br/>language rollout<br/>(chain-of-causation trace)"]
+        traj["Diffusion trajectory head<br/>6.4 s at 10 Hz"]
+    end
+    subgraph downstream["Downstream (not in this study)"]
+        ctrl["Trajectory controller"]
+        safe["Safety layer: limits, fallback,<br/>a classical stack as the monitor"]
+        veh["Vehicle"]
+    end
+    cams --> pre --> vlm --> traj --> ctrl --> safe --> veh
+    ego --> vlm
+    traj -.->|"sanity figure only"| ade["Error against the<br/>recorded future"]
+```
+
+Alpamayo 1 replaces the hand-built perception, prediction and planning
+chain of a modular stack with one model that reads the cameras and writes a
+trajectory plus the reasoning behind it. It does not replace the controller
+that tracks the trajectory or the safety layer that bounds it, and the
+numbers here (latency, memory, power, decisions per minute) are the budget
+such a layer would have to live inside: 13.7 decisions per minute on a
+Jetson AGX Thor at 64 W is one decision every 4.4 s, which is a planning
+cadence, not a control cadence. The study makes no claim about driving
+performance.
 
 ## 5090 against Thor (phase 4)
 
@@ -203,7 +338,7 @@ and `runs/decisions_bench-thor_sdpa.json`:
 1. Review and environment: the venv, the pins, the friction log, this scaffold. Done.
 2. 5090 run on a handful of PhysicalAI-AV clips: load time, latency per decision, peak memory, throughput, sample reasoning traces. Done.
 3. Profile: where the time goes between the vision encoder, the language rollout and the diffusion trajectory head, with plots. Done.
-3b. Custom CUDA preprocessing kernel, verified and timed against PyTorch on both boards. Done; PyTorch's GPU ops are faster, the CPU path Alpamayo uses is far slower than either.
+3b. Custom CUDA preprocessing kernels, verified and timed against PyTorch on both boards, with a C++ host side and a standalone driver. Done; the fused kernel is slower than PyTorch's GPU ops and the separable pair is faster, and the CPU path Alpamayo uses is far slower than any of them.
 4. Thor, same clips, power from tegrastats, compared with the 5090. Done.
 5. Orin NX: why a quantized run is not feasible on this module. Done: [ORIN_NX.md](ORIN_NX.md).
 
@@ -218,11 +353,12 @@ ORIN_NX.md           why the field computer is not a target, with measured facts
 setup_env.sh         builds .venv on the 5090 host
 capture_env.py       writes runs/env_<board>.json
 requirements.txt     the pins, for reading; setup_env.sh installs them in the right order
-runs/                committed records only (environment, decisions, profile, preprocess)
-kernels/             the CUDA preprocessing kernel (preprocess.cu)
-preprocess_ext.py    builds the kernel, the resampling tables, the PyTorch and processor references
-bench_preprocess.py  verifies the kernel and times it against PyTorch
-KERNEL_WALKTHROUGH.md the kernel in plain language
+runs/                committed records only (environment, decisions, profiles on both boards, preprocess)
+kernels/             preprocess.cu (fused and separable kernels, launch functions), preprocess.h,
+                     preprocess_torch.cpp (the PyTorch binding in C++), standalone/ (CMake driver, C++ tables, compare script)
+preprocess_ext.py    builds the extension, the resampling tables, the PyTorch and processor references
+bench_preprocess.py  verifies both kernels against PyTorch and the processor, times them, profiles them
+KERNEL_WALKTHROUGH.md the kernels and the host side in plain language
 report/              plots written by plot_results.py (SVG and PNG)
 profile_decision.py  torch.profiler on one decision, stage labels, kernel and op tables
 plot_results.py      the plots and the README results table, from runs/ only

@@ -1,0 +1,38 @@
+# The phase 2 precision ladder for the 8 GB Orin NX: identical to
+# phase2_precision.yaml except every variant caps the TensorRT builder
+# workspace at 1024 MiB, because the board's desktop and services hold about
+# half its memory and an uncapped build runs out (case study 03 hit the same
+# limit). The cap is recorded in each report.
+name: phase2-precision-ladder-orin
+no_spin: true
+environment: bench-idle
+repeats: 3
+tiers_hz: [10, 26, 30, 100]
+duration_s: 60
+warmup_s: 5
+deadline_ms: 33.3
+variants:
+  - label: trt_fp32
+    model: models/yolox_s.onnx
+    name: yolox-s
+    provider: tensorrt
+    precision: fp32
+    trt_cache_dir: .trt_cache/fp32
+    trt_workspace_mb: 1024
+  - label: trt_fp16
+    model: models/yolox_s.onnx
+    name: yolox-s
+    provider: tensorrt
+    precision: fp16
+    technique: fp16
+    trt_cache_dir: .trt_cache/fp16
+    trt_workspace_mb: 1024
+  - label: trt_int8
+    model: models/yolox_s.onnx
+    name: yolox-s
+    provider: tensorrt
+    precision: int8
+    technique: int8-ptq-minmax
+    trt_cache_dir: .trt_cache/int8
+    trt_workspace_mb: 1024
+    calibration_table: calibration.flatbuffers

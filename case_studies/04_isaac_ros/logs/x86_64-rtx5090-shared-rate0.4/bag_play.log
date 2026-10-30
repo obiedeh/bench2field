@@ -1,0 +1,9 @@
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1793347344.235578297] [rosbag2_storage]: Opened database '/assets/isaac_ros_yolov8/quickstart.bag/quickstart.bag_0.db3' for READ_ONLY.
+[INFO] [1793347344.237359872] [rosbag2_player]: Set rate to 0.4
+[INFO] [1793347344.240869382] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1793347344.240891039] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1793347344.240894607] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1793347344.240897731] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1793347344.240900667] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1793347344.242015398] [rosbag2_player]: Playback until timestamp: -1
+[INFO] [1793347413.406811383] [rosbag2_player]: Stopping playback.

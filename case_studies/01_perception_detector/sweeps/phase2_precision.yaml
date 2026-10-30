@@ -1,0 +1,46 @@
+# Phase 2, precision ladder: YOLOX-s through the TensorRT provider in fp32,
+# fp16 and int8 (post-training quantization with the min-max calibration
+# table under accuracy/int8_calibration/), same tiers and protocol as the
+# phase 1 baseline so the three are comparable, three repeats alternating.
+# Accuracy for the same three variants is in accuracy/val2017_subset500/
+# (eval_coco_subset.py); this sweep is the speed half of the pair.
+#
+# Each variant keeps its own TensorRT engine cache: the provider's cache does
+# not key on fp16 or int8, so sharing one directory would silently reuse the
+# wrong engine. The int8 variant needs the calibration table copied into its
+# cache directory first:
+#   mkdir -p .trt_cache/int8 && cp case_studies/01_perception_detector/accuracy/int8_calibration/calibration.flatbuffers .trt_cache/int8/
+#   Thor:  .venv/bin/b2f sweep case_studies/01_perception_detector/sweeps/phase2_precision.yaml --out-dir case_studies/01_perception_detector/runs/bench_thor_precision
+#   Orin:  .venv/bin/b2f sweep case_studies/01_perception_detector/sweeps/phase2_precision.yaml --out-dir case_studies/01_perception_detector/runs/bench_orin_precision
+# On the 8 GB Orin NX add trt_workspace_mb: 1024 to each variant (the bench
+# records it) so the builder does not take the memory the desktop holds.
+name: phase2-precision-ladder
+no_spin: true
+environment: bench-idle
+repeats: 3
+tiers_hz: [10, 26, 30, 100]
+duration_s: 60
+warmup_s: 5
+deadline_ms: 33.3
+variants:
+  - label: trt_fp32
+    model: models/yolox_s.onnx
+    name: yolox-s
+    provider: tensorrt
+    precision: fp32
+    trt_cache_dir: .trt_cache/fp32
+  - label: trt_fp16
+    model: models/yolox_s.onnx
+    name: yolox-s
+    provider: tensorrt
+    precision: fp16
+    technique: fp16
+    trt_cache_dir: .trt_cache/fp16
+  - label: trt_int8
+    model: models/yolox_s.onnx
+    name: yolox-s
+    provider: tensorrt
+    precision: int8
+    technique: int8-ptq-minmax
+    trt_cache_dir: .trt_cache/int8
+    calibration_table: calibration.flatbuffers

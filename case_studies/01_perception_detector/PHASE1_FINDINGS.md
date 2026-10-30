@@ -158,7 +158,7 @@ These frames show a blank wall: zero detections in all 300, small JPEGs (38 KB).
 
 ## 4. Not done in phase 1
 
-- Accuracy (COCO subset and labelled rover frames) starts in phase 2 with the first optimized variant, per the methodology.
+- Accuracy (COCO subset and labelled rover frames) starts in phase 2 with the first optimized variant, per the methodology. Update 2026-10-29: the fp32 baseline on a 500-image COCO val2017 subset is measured (README, Accuracy): mean AP 0.652 at IoU 0.5, person AP 0.796, identical to four decimals between the CUDA and the TensorRT (TF32) providers. Labelled rover frames are still missing.
 - The Orin NX was baselined idle (section 1); the runs with the rover's stack up, the replay profile and attribution are phase 5.
 - Thermal state was not controlled (no `--cooldown-c`). On the 5090 (45–50 °C) and the Thor (38–44 °C) it made no visible difference across the sweeps. On the Orin the first 26 Hz repeat was faster than the other two (23.1 against 26.9 ms) and also cooler (59.7 against 63.5 °C); v1.0 called that a 16% thermal swing, which the evidence does not support. A later sweep on the same board (phase 2, `runs/phase2_orin_fp16/` on branch `phase2`) measured the same FP32 variant at 26.84–26.90 ms in all three repeats with the junction at 58.0–60.3 °C, including a repeat cooler than the fast one here. The cause of the fast repeat is not established.
 - Provenance: reports record the git commit they ran from since `0ac4fbf`. The `bench_5090_nospin` and `field_orin` sweeps predate that; their manifests carry the commit (`ac95271`) recorded afterwards from the session log, marked as such. The Orin profile ran at `86d0490`, likewise noted in its JSON.

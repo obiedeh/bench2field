@@ -1,7 +1,9 @@
-"""Build, run and check the fused CUDA preprocessing kernel for Alpamayo 1.
+"""Build, run and check the CUDA preprocessing kernels for Alpamayo 1.
 
-This module is the Python side of ``kernels/preprocess.cu``. It does four
-things, each small enough to read in one sitting:
+This module is the Python side of ``kernels/preprocess.cu`` (the device code:
+a fused kernel and a separable pair) and ``kernels/preprocess_torch.cpp``
+(the C++ host side: input checks, allocation, stream, launch, error check).
+It does four things, each small enough to read in one sitting:
 
 ``bicubic_aa_table``
     Builds the per-axis resampling tables the kernel consumes. They are the
@@ -20,8 +22,9 @@ things, each small enough to read in one sitting:
     toolkit; SETUP.md has the exact recipe per board.
 
 ``preprocess``
-    Runs the kernel on a ``[N, 3, 1080, 1920]`` uint8 CUDA tensor and returns
-    the processor's ``pixel_values`` layout, ``[N * 720, 1536]`` float32.
+    Runs one of the kernels (``variant`` "fused" or "separable") on a
+    ``[N, 3, 1080, 1920]`` uint8 CUDA tensor and returns the processor's
+    ``pixel_values`` layout, ``[N * 720, 1536]`` float32.
 
 ``reference_torch`` and ``reference_processor``
     Two independent references for the same tensor. ``reference_torch`` is
@@ -49,7 +52,9 @@ from typing import Any
 import torch
 
 HERE = Path(__file__).resolve().parent
-KERNEL_SRC = HERE / "kernels" / "preprocess.cu"
+KERNEL_DIR = HERE / "kernels"
+KERNEL_SOURCES = [KERNEL_DIR / "preprocess.cu", KERNEL_DIR / "preprocess_torch.cpp"]
+VARIANTS = ("fused", "separable")
 BUILD_DIR = HERE / "runs" / "scratch" / "kernel_build"   # ignored by git
 
 IN_H, IN_W = 1080, 1920
@@ -138,19 +143,27 @@ def load_kernel(verbose: bool = False) -> Any:
     BUILD_DIR.mkdir(parents=True, exist_ok=True)
     _ext = cpp.load(
         name="alpamayo_preprocess",
-        sources=[str(KERNEL_SRC)],
+        sources=[str(p) for p in KERNEL_SOURCES],
         build_directory=str(BUILD_DIR),
+        extra_include_paths=[str(KERNEL_DIR)],
         extra_cuda_cflags=["-O3"],
         verbose=verbose,
     )
     return _ext
 
 
-def preprocess(frames: torch.Tensor, tabs: dict[str, torch.Tensor] | None = None) -> torch.Tensor:
-    """Kernel path: uint8 [N, 3, 1080, 1920] on the GPU to float32 [N * 720, 1536]."""
+def preprocess(frames: torch.Tensor, tabs: dict[str, torch.Tensor] | None = None, variant: str = "separable") -> torch.Tensor:
+    """Kernel path: uint8 [N, 3, 1080, 1920] on the GPU to float32 [N * 720, 1536].
+
+    ``variant`` picks the fused kernel (one pass, readable, slower) or the
+    separable pair (two passes, the measured default). Both produce the same
+    values up to float summation order.
+    """
+    if variant not in VARIANTS:
+        raise ValueError(f"variant must be one of {VARIANTS}, got {variant!r}")
     ext = load_kernel()
     tabs = tabs or tables(frames.device)
-    return ext.preprocess(frames.contiguous(), tabs["y_start"], tabs["y_weight"], tabs["x_start"], tabs["x_weight"])
+    return ext.preprocess(frames.contiguous(), tabs["y_start"], tabs["y_weight"], tabs["x_start"], tabs["x_weight"], variant)
 
 
 def reference_layout(images: torch.Tensor) -> torch.Tensor:
