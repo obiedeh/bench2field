@@ -4,10 +4,10 @@
 world model cost on the RTX 5090, in wall time, peak GPU memory and frames
 produced, and does it fit the Jetson AGX Thor at all?
 
-Status: **planned, not started.** Nothing here is measured. The workstation
-GPU is held by a long simulation campaign at the time of writing and the
-model's own card asks for more memory than the 5090 has, so the first run
-will tell whether a forecast fits at all before anything else is asked.
+Status: **protocol frozen; results page filled from external measured
+records on 2026-10-30** ([README.md](README.md)). The protocol's own runs
+(three repeats with power and an NVML trace) have not been executed; the
+README says which rows are recorded and which are not.
 
 ## Protocol (fixed before the first run)
 

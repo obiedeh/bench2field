@@ -31,6 +31,7 @@ One report schema across all three, so results compare directly.
 
 - [Case study 01 findings](case_studies/01_perception_detector/PHASE1_FINDINGS.md): what phase 1 measured and what it means.
 - [The report](https://obiedeh.github.io/bench2field/case_studies/01_perception_detector/report/index.html): every chart, from the committed runs. GitHub shows an HTML file in a repository as source, so the link goes to the same file served as a page; the file itself is `case_studies/01_perception_detector/report/index.html` and works offline.
+- [Case study 05](case_studies/05_cosmos_predict/README.md): Cosmos Predict 2.5, the cost of one video forecast on the 5090 (773.9 s, 30.9 GiB peak), and what admission on the Thor's unified memory revealed.
 - [Methodology](docs/METHODOLOGY.md): the rules every result follows.
 - [Changelog](CHANGELOG.md): what changed in each release and what is still unreleased.
 

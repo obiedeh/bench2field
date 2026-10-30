@@ -1,0 +1,33 @@
+{
+  "schema": "bench2field-external-sources-v1",
+  "note": "Case study 05 is filled from records committed in a private repository. Each entry names the repository, the record path, the commit that holds it and the SHA-256 of the file as read on 2026-10-30. The public case study carries board labels and numbers only.",
+  "records": [
+    {
+      "id": "rtx5090-native-integration-2026-10-20",
+      "repository": "private repository, available on request",
+      "path": "reports/forecast/2026-10-20-native-study-integration/summary.json",
+      "commit": "4046e3c",
+      "sha256": "775eb537e13ff50f11565251901fd7975c3ce568a50b054ffb8a1767d7b180ed",
+      "board": "rtx-5090-workstation",
+      "what": "one Cosmos-Predict2.5-2B generation through the native harness, with timing, process memory and output geometry"
+    },
+    {
+      "id": "rtx5090-confirmed-native-pilot-2026-10-21",
+      "repository": "private repository, available on request",
+      "path": "reports/forecast/2026-10-21-confirmed-native-pilot/summary.json",
+      "commit": "0a9d1be",
+      "sha256": "78beaa77c4c000e4ef3122b8ca0d853bcf8b91fee66392b0be78d1306267b05d",
+      "board": "rtx-5090-workstation",
+      "what": "the historical generation wall time and peak memory the confirmed pilot reused (no new GPU call)"
+    },
+    {
+      "id": "thor-native-pilot-2026-10-30",
+      "repository": "private repository, available on request",
+      "path": "reports/forecast/2026-10-30-thor-native-pilot-admitted/summary.json",
+      "commit": "4ef8d9c",
+      "sha256": "c8528e75ece6b9595c9b206bfb29a3651d48ac2d021ece1d9fc466fa169c1eae",
+      "board": "jetson-agx-thor",
+      "what": "admission observations before and after a page-cache drop, and the native run outcome"
+    }
+  ]
+}
