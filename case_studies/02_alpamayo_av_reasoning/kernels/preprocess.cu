@@ -1,4 +1,5 @@
-// Alpamayo camera preprocessing as one CUDA kernel.
+// Alpamayo camera preprocessing as CUDA kernels: a fused version and a
+// separable version of the same work.
 //
 // What the model's processor does to each camera frame before the vision tower
 // sees it (Qwen2VLImageProcessorFast, as configured by NVlabs/alpamayo):
@@ -12,38 +13,55 @@
 //      duplicate the frame along a temporal axis of length 2, and lay every
 //      patch out as one row of 3 x 2 x 16 x 16 = 1536 floats.
 //
-// Steps 1 to 3 are three or four passes over memory in PyTorch. This kernel does
-// all of them in a single pass: each thread produces one output pixel of one
-// channel and writes it straight into its final place in the patch tensor,
-// twice (once per temporal slot). Nothing intermediate is stored.
+// Steps 1 to 3 are three or four passes over memory in PyTorch. Two kernels
+// here do the same work, and they are kept side by side on purpose:
 //
-// Resampling is written as two small weight tables, one per axis, computed on
-// the host exactly the way torch computes them for antialiased bicubic
-// downscaling (see preprocess_ext.py, bicubic_aa_table). A thread reads the
-// taps for its output row and column, and the resample is a plain double sum
-// over at most MAX_TAPS x MAX_TAPS input pixels. Separable filtering would do
-// fewer multiplies; the fused form was chosen because it is the easiest to
-// read and verify, and the arithmetic is not the bottleneck on either GPU
-// (the input is 100 MB of uint8 that has to be read once either way).
+//   preprocess_fused_kernel   one pass. Each thread produces one output pixel
+//                             of one channel from a 14 x 14 window of input
+//                             bytes and writes it straight into the patch
+//                             tensor, twice (once per temporal slot). It is the
+//                             version to read first: one kernel, one idea.
+//                             Measured, it loses to PyTorch's own ops on both
+//                             boards, because every thread gathers 196 bytes.
+//
+//   hpass_kernel, vpass_kernel
+//                             two passes. The first resamples every input row
+//                             horizontally (1080 rows x 576 columns per plane,
+//                             14 taps each) into a float32 buffer. The second
+//                             resamples that buffer vertically (14 taps),
+//                             rounds, normalizes and scatters into the patch
+//                             tensor. 28 taps per output value instead of 196,
+//                             coalesced reads in both passes, one extra buffer
+//                             of 1080 x 576 floats per plane in between.
+//
+// Resampling in both versions is written as two small weight tables, one per
+// axis, computed on the host exactly the way torch computes them for
+// antialiased bicubic downscaling (preprocess_ext.py, bicubic_aa_table; the
+// same code in C++ in standalone/tables.cpp). A thread reads the taps for its
+// output row or column and the resample is a plain sum. Taps whose weight is
+// zero are padding; their input index is clamped to the plane so no read ever
+// leaves the buffer, and they add nothing.
 //
 // Thread and block layout
-//   block   = (32, 8) threads: 32 along the output x axis, 8 along y.
-//   grid    = (ceil(576/32), ceil(320/8), images * 3): one z slice per
-//             (image, channel) pair, so blockIdx.z picks the input plane.
-//   A warp therefore covers 32 horizontally adjacent output pixels of one row
-//   of one channel. Their input windows overlap (each output pixel spans about
-//   3.4 input pixels per axis, the window is about 14 wide), so the uint8 loads
-//   of one warp hit the same cache lines and L1 serves most of them; the loads
-//   go through __ldg to use the read-only path.
+//   fused   block (32, 8); grid (ceil(576/32), ceil(320/8), images * 3): one z
+//           slice per (image, channel) pair, so blockIdx.z picks the input
+//           plane. A warp covers 32 horizontally adjacent output pixels of one
+//           row of one channel; their 14-wide input windows overlap (stride 3.4
+//           input pixels), so a warp's byte loads hit the same cache lines and
+//           go through __ldg, the read-only path.
+//   hpass   block (32, 8); grid (ceil(576/32), ceil(1080/8), images * 3): one
+//           thread per (input row, output column). A warp reads about 140
+//           contiguous bytes of one input row and writes 32 contiguous floats.
+//   vpass   block (32, 8); grid (ceil(576/32), ceil(320/8), images * 3): one
+//           thread per output pixel. A warp reads 32 contiguous floats from
+//           each of 14 rows of the buffer (fully coalesced) and writes the
+//           patch tensor like the fused kernel does.
 //
-// Memory access pattern
-//   Reads:  input plane [1080][1920] uint8, row-major; a thread reads a
-//           ~14 x 14 window; warps read ~14 rows of ~140 contiguous bytes.
-//   Writes: output row = patch index, column = position inside the patch.
-//           32 adjacent x pixels map to two 16-float runs in two different
-//           patch rows, so a warp writes 2 x 64-byte contiguous segments per
-//           temporal slot. That is partial coalescing; the output is small
-//           (71 MB float32 for 16 images) and the kernel is read-bound.
+// Output writes (both versions): row = patch index, column = position inside
+// the patch. 32 adjacent x pixels map to two 16-float runs in two different
+// patch rows, so a warp writes 2 x 64-byte contiguous segments per temporal
+// slot. That is partial coalescing; the output is 71 MB of float32 for 16
+// images and this is the price of writing straight into patch order.
 //
 // Index mapping (the only part that needs care; it mirrors the processor's
 // view/permute/reshape, see preprocess_ext.py, reference_layout):
@@ -54,26 +72,43 @@
 //   column     = ((c * 2 + t) * 16 + py) * 16 + px
 //
 // Everything is specialised to this case study's fixed geometry on purpose: the
-// constants are the model's and the kernel asserts them at launch. A general
-// kernel would hide the mapping behind arithmetic the reader would have to
-// undo again.
+// constants are the model's and the host side asserts them before launching.
+// A general kernel would hide the mapping behind arithmetic the reader would
+// have to undo again.
+//
+// This file holds device code and the two launch functions only. The PyTorch
+// binding is preprocess_torch.cpp; the standalone driver is standalone/main.cpp.
 
-#include <torch/extension.h>
-#include <cuda_runtime.h>
-#include <ATen/cuda/CUDAContext.h>
+#include "preprocess.h"
+
+namespace alpamayo_pre {
 
 namespace {
 
-constexpr int IN_H = 1080, IN_W = 1920;     // camera frame
-constexpr int OUT_H = 320, OUT_W = 576;     // smart_resize of 1080x1920 at MIN/MAX_PIXELS
-constexpr int PATCH = 16, MERGE = 2, TEMPORAL = 2, CHANNELS = 3;
-constexpr int GRID_H = OUT_H / PATCH;       // 20
-constexpr int GRID_W = OUT_W / PATCH;       // 36
-constexpr int PATCHES_PER_IMAGE = GRID_H * GRID_W;                       // 720
-constexpr int ROW_LEN = CHANNELS * TEMPORAL * PATCH * PATCH;             // 1536
-constexpr int MAX_TAPS = 16;                // bicubic support 2 * scale 3.375 = 6.75 each side: 14 taps
+// Round the resampled value the way torchvision does for uint8 input (float
+// resize, round half to even, clamp) and apply the processor's rescale and
+// normalize: (q / 255 - 0.5) / 0.5 = q / 127.5 - 1.
+__device__ __forceinline__ float quantize_normalize(float acc) {
+    const float q = fminf(fmaxf(rintf(acc), 0.f), 255.f);
+    return q * (1.f / 127.5f) - 1.f;
+}
 
-__global__ void preprocess_kernel(
+// Write one normalized value to its two places (temporal slots) in the patch
+// tensor. See the index mapping in the header.
+__device__ __forceinline__ void scatter(float* __restrict__ out, int img, int c, int y, int x, float v) {
+    const int bh = y / (PATCH * MERGE), mh = (y % (PATCH * MERGE)) / PATCH, py = y % PATCH;
+    const int bw = x / (PATCH * MERGE), mw = (x % (PATCH * MERGE)) / PATCH, px = x % PATCH;
+    const std::size_t patch_row = static_cast<std::size_t>(img) * PATCHES_PER_IMAGE
+                                + ((static_cast<std::size_t>(bh) * (GRID_W / MERGE) + bw) * MERGE + mh) * MERGE + mw;
+    float* dst = out + patch_row * ROW_LEN;
+    #pragma unroll
+    for (int t = 0; t < TEMPORAL; ++t) {
+        dst[((c * TEMPORAL + t) * PATCH + py) * PATCH + px] = v;
+    }
+}
+
+// Fused: one thread per output value, the full 2-D window gathered as bytes.
+__global__ void preprocess_fused_kernel(
     const uint8_t* __restrict__ frames,      // [N][3][1080][1920]
     const int*     __restrict__ y_start,     // [320]  first input row of each output row's window
     const float*   __restrict__ y_weight,    // [320][MAX_TAPS], zero padded
@@ -87,73 +122,96 @@ __global__ void preprocess_kernel(
     const int img = blockIdx.z / CHANNELS;
     const int c   = blockIdx.z % CHANNELS;
 
-    const uint8_t* plane = frames + ((size_t)img * CHANNELS + c) * IN_H * IN_W;
+    const uint8_t* plane = frames + (static_cast<std::size_t>(img) * CHANNELS + c) * IN_H * IN_W;
     const int ys = y_start[y];
     const int xs = x_start[x];
     const float* wy = y_weight + y * MAX_TAPS;
     const float* wx = x_weight + x * MAX_TAPS;
 
-    // Antialiased bicubic resample: sum over the window with separable weights.
-    // Rows whose weight is zero (padding) are skipped, so the loop does the
-    // same work as torch's variable-length window.
     float acc = 0.f;
     #pragma unroll 1
     for (int j = 0; j < MAX_TAPS; ++j) {
         const float wyj = wy[j];
-        if (wyj == 0.f) continue;
-        const uint8_t* row = plane + (size_t)(ys + j) * IN_W + xs;
+        if (wyj == 0.f) continue;                                   // padding rows: skip the whole row
+        const uint8_t* row = plane + static_cast<std::size_t>(min(ys + j, IN_H - 1)) * IN_W;
         float racc = 0.f;
         #pragma unroll
         for (int i = 0; i < MAX_TAPS; ++i) {
-            racc += wx[i] * (float)__ldg(row + i);   // zero weights read a valid in-window byte and add nothing
+            racc += wx[i] * static_cast<float>(__ldg(row + min(xs + i, IN_W - 1)));   // padding taps add 0
         }
         acc += wyj * racc;
     }
+    scatter(out, img, c, y, x, quantize_normalize(acc));
+}
 
-    // torchvision resizes uint8 input in float and rounds back to uint8; the
-    // processor then rescales and normalizes. Reproduce both so the comparison
-    // against the real processor is exact up to summation order.
-    const float q = fminf(fmaxf(rintf(acc), 0.f), 255.f);
-    const float v = q * (1.f / 127.5f) - 1.f;
-
-    // Scatter into the patch layout (see header), once per temporal slot.
-    const int bh = y / (PATCH * MERGE), mh = (y % (PATCH * MERGE)) / PATCH, py = y % PATCH;
-    const int bw = x / (PATCH * MERGE), mw = (x % (PATCH * MERGE)) / PATCH, px = x % PATCH;
-    const size_t patch_row = (size_t)img * PATCHES_PER_IMAGE
-                           + (((size_t)bh * (GRID_W / MERGE) + bw) * MERGE + mh) * MERGE + mw;
-    float* dst = out + patch_row * ROW_LEN;
+// Separable, pass 1: every input row resampled horizontally into float32.
+__global__ void hpass_kernel(
+    const uint8_t* __restrict__ frames,      // [N][3][1080][1920]
+    const int*     __restrict__ x_start,     // [576]
+    const float*   __restrict__ x_weight,    // [576][MAX_TAPS]
+    float*         __restrict__ tmp)         // [N * 3][1080][576]
+{
+    const int x  = blockIdx.x * blockDim.x + threadIdx.x;  // output column
+    const int iy = blockIdx.y * blockDim.y + threadIdx.y;  // input row
+    if (x >= OUT_W || iy >= IN_H) return;
+    const std::size_t plane = blockIdx.z;                   // img * 3 + c
+    const uint8_t* row = frames + plane * IN_H * IN_W + static_cast<std::size_t>(iy) * IN_W;
+    const int xs = x_start[x];
+    const float* wx = x_weight + x * MAX_TAPS;
+    float acc = 0.f;
     #pragma unroll
-    for (int t = 0; t < TEMPORAL; ++t) {
-        dst[((c * TEMPORAL + t) * PATCH + py) * PATCH + px] = v;
+    for (int i = 0; i < MAX_TAPS; ++i) {
+        acc += wx[i] * static_cast<float>(__ldg(row + min(xs + i, IN_W - 1)));
     }
+    tmp[(plane * IN_H + iy) * OUT_W + x] = acc;
+}
+
+// Separable, pass 2: the buffer resampled vertically, then rounded,
+// normalized and scattered. Reads of `tmp` are contiguous across a warp.
+__global__ void vpass_kernel(
+    const float* __restrict__ tmp,           // [N * 3][1080][576]
+    const int*   __restrict__ y_start,       // [320]
+    const float* __restrict__ y_weight,      // [320][MAX_TAPS]
+    float*       __restrict__ out)           // [N * 720][1536]
+{
+    const int x = blockIdx.x * blockDim.x + threadIdx.x;   // output column
+    const int y = blockIdx.y * blockDim.y + threadIdx.y;   // output row
+    if (x >= OUT_W || y >= OUT_H) return;
+    const int img = blockIdx.z / CHANNELS;
+    const int c   = blockIdx.z % CHANNELS;
+    const float* plane = tmp + static_cast<std::size_t>(blockIdx.z) * IN_H * OUT_W;
+    const int ys = y_start[y];
+    const float* wy = y_weight + y * MAX_TAPS;
+    float acc = 0.f;
+    #pragma unroll
+    for (int j = 0; j < MAX_TAPS; ++j) {
+        acc += wy[j] * __ldg(plane + static_cast<std::size_t>(min(ys + j, IN_H - 1)) * OUT_W + x);
+    }
+    scatter(out, img, c, y, x, quantize_normalize(acc));
 }
 
 }  // namespace
 
-// frames: uint8 CUDA tensor [N, 3, 1080, 1920], contiguous.
-// Returns float32 [N * 720, 1536], the processor's pixel_values for these frames.
-torch::Tensor preprocess(torch::Tensor frames,
-                         torch::Tensor y_start, torch::Tensor y_weight,
-                         torch::Tensor x_start, torch::Tensor x_weight)
+void launch_preprocess_fused(const uint8_t* frames,
+                             const int* y_start, const float* y_weight,
+                             const int* x_start, const float* x_weight,
+                             float* out, int n, cudaStream_t stream)
 {
-    TORCH_CHECK(frames.is_cuda() && frames.dtype() == torch::kUInt8 && frames.is_contiguous(), "frames: contiguous uint8 CUDA tensor");
-    TORCH_CHECK(frames.dim() == 4 && frames.size(1) == CHANNELS && frames.size(2) == IN_H && frames.size(3) == IN_W,
-                "frames must be [N, 3, 1080, 1920]; this kernel is specialised to the camera geometry");
-    TORCH_CHECK(y_weight.size(0) == OUT_H && y_weight.size(1) == MAX_TAPS && x_weight.size(0) == OUT_W && x_weight.size(1) == MAX_TAPS,
-                "weight tables must be [320, 16] and [576, 16]");
-    const int n = (int)frames.size(0);
-    auto out = torch::empty({(int64_t)n * PATCHES_PER_IMAGE, ROW_LEN}, frames.options().dtype(torch::kFloat32));
     const dim3 block(32, 8);
     const dim3 grid((OUT_W + block.x - 1) / block.x, (OUT_H + block.y - 1) / block.y, n * CHANNELS);
-    preprocess_kernel<<<grid, block, 0, at::cuda::getCurrentCUDAStream()>>>(
-        frames.data_ptr<uint8_t>(),
-        y_start.data_ptr<int>(), y_weight.data_ptr<float>(),
-        x_start.data_ptr<int>(), x_weight.data_ptr<float>(),
-        out.data_ptr<float>());
-    C10_CUDA_KERNEL_LAUNCH_CHECK();
-    return out;
+    preprocess_fused_kernel<<<grid, block, 0, stream>>>(frames, y_start, y_weight, x_start, x_weight, out);
 }
 
-PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
-    m.def("preprocess", &preprocess, "Alpamayo camera preprocessing: resize, normalize and patch layout in one pass");
+void launch_preprocess_separable(const uint8_t* frames,
+                                 const int* y_start, const float* y_weight,
+                                 const int* x_start, const float* x_weight,
+                                 float* tmp, float* out, int n, cudaStream_t stream)
+{
+    const dim3 block(32, 8);
+    const dim3 grid_h((OUT_W + block.x - 1) / block.x, (IN_H + block.y - 1) / block.y, n * CHANNELS);
+    hpass_kernel<<<grid_h, block, 0, stream>>>(frames, x_start, x_weight, tmp);
+    const dim3 grid_v((OUT_W + block.x - 1) / block.x, (OUT_H + block.y - 1) / block.y, n * CHANNELS);
+    vpass_kernel<<<grid_v, block, 0, stream>>>(tmp, y_start, y_weight, out);
 }
+
+}  // namespace alpamayo_pre

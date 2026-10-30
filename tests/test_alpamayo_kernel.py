@@ -1,35 +1,37 @@
-"""CPU-only checks for case study 02's preprocessing kernel support code.
+"""Tests for the case study 02 preprocessing kernels that need no GPU.
 
-The kernel itself needs a GPU and a compiler; these tests pin down the two
-things it depends on that can be checked anywhere: the antialiased bicubic
-weight tables must reproduce torchvision's resize, and the patch index
-mapping the kernel hard-codes must equal the processor's view/permute/
-reshape. If either drifts, the GPU comparison in bench_preprocess.py would
-fail in a way that is hard to place; here it fails with a name.
+Three things are checked on the CPU: the resampling tables preprocess_ext
+builds (normalized, in range, within MAX_TAPS, and matching torchvision's
+antialiased bicubic resize on a small image), the patch index mapping the
+kernel scatters into (against the processor's own view, permute and reshape,
+pixel by pixel), and the committed measurement records (dataset input,
+measured label, both kernel variants within one uint8 step of the PyTorch GPU
+reference, every timing present). One opt-in test builds and runs both
+kernel variants on the GPU when ALPAMAYO_KERNEL_GPU_TEST=1 and a CUDA device
+and toolkit are present; it is the same gate the benchmark applies.
 """
 
 from __future__ import annotations
 
-import importlib.util
+import json
+import os
 import sys
 from pathlib import Path
 
 import pytest
 
 torch = pytest.importorskip("torch")
+
 CASE = Path(__file__).resolve().parents[1] / "case_studies" / "02_alpamayo_av_reasoning"
+sys.path.insert(0, str(CASE))
 
+import preprocess_ext as pe  # noqa: E402
 
-def _ext():
-    spec = importlib.util.spec_from_file_location("preprocess_ext", CASE / "preprocess_ext.py")
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = mod
-    spec.loader.exec_module(mod)
-    return mod
+ONE_STEP = 2.0 / 255.0
+RECORDS = sorted(CASE.glob("runs/preprocess_*.json"))
 
 
 def test_tables_are_normalized_in_range_and_within_max_taps():
-    pe = _ext()
     for in_size, out_size in ((pe.IN_H, pe.OUT_H), (pe.IN_W, pe.OUT_W)):
         starts, weights = pe.bicubic_aa_table(in_size, out_size)
         taps = (weights != 0).sum(1)
@@ -38,50 +40,42 @@ def test_tables_are_normalized_in_range_and_within_max_taps():
         assert int(starts.min()) >= 0 and int((starts + taps).max()) <= in_size
 
 
-def _dense(starts: torch.Tensor, weights: torch.Tensor, in_size: int) -> torch.Tensor:
-    """Expand a (start, weights) table into a dense [out, in] resampling matrix."""
-    m = torch.zeros(weights.shape[0], in_size)
-    for i in range(weights.shape[0]):
-        s0 = int(starts[i])
-        n = int((weights[i] != 0).sum())
-        m[i, s0:s0 + n] = weights[i, :n]
-    return m
-
-
-def _resample_with_tables(pe, img: torch.Tensor) -> torch.Tensor:
-    """Apply the kernel's tables on the CPU: rows then columns, the same weighted sums the kernel does."""
-    wy = _dense(*pe.bicubic_aa_table(img.shape[-2], pe.OUT_H), img.shape[-2])
-    wx = _dense(*pe.bicubic_aa_table(img.shape[-1], pe.OUT_W), img.shape[-1])
-    x = img.float()
-    return wy @ x @ wx.T
+def _resample_with_tables(img: torch.Tensor, in_h: int, in_w: int, out_h: int, out_w: int) -> torch.Tensor:
+    ys, yw = pe.bicubic_aa_table(in_h, out_h)
+    xs, xw = pe.bicubic_aa_table(in_w, out_w)
+    out = torch.zeros(out_h, out_w)
+    for y in range(out_h):
+        for x in range(out_w):
+            acc = 0.0
+            for j in range(pe.MAX_TAPS):
+                if yw[y, j] == 0:
+                    continue
+                row = img[min(int(ys[y]) + j, in_h - 1)]
+                for i in range(pe.MAX_TAPS):
+                    acc += float(yw[y, j]) * float(xw[x, i]) * float(row[min(int(xs[x]) + i, in_w - 1)])
+            out[y, x] = acc
+    return out
 
 
 def test_tables_reproduce_torchvision_antialiased_bicubic():
-    """Resample a float image with the tables and with torchvision; they must
-    agree to float precision. (On uint8 input torchvision's CPU path uses
-    fixed-point weights and lands one grey level away on about a tenth of the
-    pixels; the GPU path, which the kernel is compared against, casts to float.
-    Testing on float isolates the tables from that implementation detail.)"""
-    pytest.importorskip("torchvision")
-    from torchvision.transforms.v2 import functional as F
-
-    pe = _ext()
+    """A 54x96 image downscaled 3.375x (the case study's scale) by the tables
+    equals torchvision's antialiased bicubic resize to within float rounding."""
+    F = pytest.importorskip("torchvision.transforms.v2.functional")
     g = torch.Generator().manual_seed(0)
-    img = torch.randint(0, 256, (1, 3, pe.IN_H, pe.IN_W), generator=g, dtype=torch.uint8).float()
-    ref = F.resize(img, [pe.OUT_H, pe.OUT_W], interpolation=F.InterpolationMode.BICUBIC, antialias=True)
-    mine = _resample_with_tables(pe, img)
-    # Same weights, different float32 summation order: torch accumulates per tap, this test
-    # uses two matrix products. Observed maximum 0.0032 on the 0 to 255 scale; the bound is a
-    # hundredth of a grey level, far below the rounding step the kernel is judged against.
+    img = torch.rand(1, 1, 54, 96, generator=g) * 255.0
+    ref = F.resize(img, [16, 28], interpolation=F.InterpolationMode.BICUBIC, antialias=True)[0, 0]
+    # 54/16 = 3.375 = 1080/320, 96/28 = 3.43 ~ 1920/576 = 3.33: same tap counts as the kernel's geometry.
+    mine = _resample_with_tables(img[0, 0], 54, 96, 16, 28)
     assert float((mine - ref).abs().max()) < 1e-2
 
 
 def test_patch_index_mapping_equals_processor_layout():
-    pe = _ext()
-    img = torch.arange(3 * pe.OUT_H * pe.OUT_W, dtype=torch.float32).view(1, 3, pe.OUT_H, pe.OUT_W)
+    """The kernel's closed-form patch row and column for a pixel match the
+    processor's view/permute/reshape, checked on a labelled image."""
+    img = torch.arange(3 * pe.OUT_H * pe.OUT_W, dtype=torch.float32).reshape(1, 3, pe.OUT_H, pe.OUT_W)
     lay = pe.reference_layout(img)
     assert tuple(lay.shape) == (pe.PATCHES_PER_IMAGE, pe.ROW_LEN)
-    for y, x, c in ((0, 0, 0), (37, 100, 2), (319, 575, 1), (16, 32, 0)):
+    for (c, y, x) in ((0, 0, 0), (1, 17, 33), (2, 319, 575), (0, 160, 288), (2, 31, 32)):
         bh, mh, py = y // 32, (y % 32) // 16, y % 16
         bw, mw, px = x // 32, (x % 32) // 16, x % 16
         row = ((bh * (pe.GRID_W // pe.MERGE) + bw) * pe.MERGE + mh) * pe.MERGE + mw
@@ -91,6 +85,36 @@ def test_patch_index_mapping_equals_processor_layout():
 
 
 def test_committed_preprocess_records_are_measured_dataset_runs():
-    for p in (CASE / "runs").glob("preprocess_*.json"):
+    assert RECORDS, "no committed preprocess records"
+    for p in RECORDS:
         text = p.read_text()
         assert '"input": "dataset"' in text and '"label": "measured"' in text, p.name
+
+
+@pytest.mark.parametrize("record", RECORDS, ids=[p.name for p in RECORDS])
+def test_committed_record_passes_the_parity_gate(record: Path):
+    """Both kernel variants agree with the PyTorch GPU reference within one
+    uint8 step after normalization, and every timing path is present."""
+    rec = json.loads(record.read_text())
+    err = rec["errors"]
+    assert err["kernel_vs_torch_gpu"] <= ONE_STEP + 1e-6, record.name
+    assert err["separable_vs_torch_gpu"] <= ONE_STEP + 1e-6, record.name
+    assert err["gate_passed"] is True, record.name
+    assert set(rec["kernel"]["variants"]) == set(pe.VARIANTS)
+    for key in ("kernel", "kernel_separable", "kernel+upload", "kernel_separable+upload", "torch_gpu", "processor_cpu"):
+        assert key in rec["timings_per_16_frames"], f"{record.name}: {key} timing missing"
+    for key in ("fused", "separable", "torch_gpu"):
+        assert rec["profiler_per_16_frames"][key]["device_time_per_batch_us"] > 0, f"{record.name}: {key} profile missing"
+
+
+@pytest.mark.skipif(os.environ.get("ALPAMAYO_KERNEL_GPU_TEST") != "1" or not torch.cuda.is_available(),
+                    reason="set ALPAMAYO_KERNEL_GPU_TEST=1 on a machine with a CUDA device and toolkit")
+def test_kernels_match_torch_gpu_within_one_uint8_step():
+    """Builds the extension and runs both variants on random frames."""
+    g = torch.Generator().manual_seed(0)
+    frames = torch.randint(0, 256, (2, 3, pe.IN_H, pe.IN_W), generator=g, dtype=torch.uint8).cuda()
+    ref = pe.reference_torch(frames)
+    outs = {v: pe.preprocess(frames, variant=v) for v in pe.VARIANTS}
+    for v, out in outs.items():
+        assert pe.max_abs_error(out, ref) <= ONE_STEP + 1e-6, v
+    assert pe.max_abs_error(outs["fused"], outs["separable"]) == 0.0

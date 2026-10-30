@@ -123,6 +123,36 @@ runfile installer (about 4 GB, no root needed with a custom path), was not
 taken because the opt-in is smaller and the check covers it. Build time
 about 25 s.
 
+## Building the standalone C++ driver (phase 3b, no PyTorch)
+
+`kernels/standalone/` builds the same kernels with CMake and the CUDA
+toolkit alone: `main.cpp` reads raw frames, builds the resampling tables in
+C++ (`tables.cpp`, the same arithmetic as `preprocess_ext.bicubic_aa_table`),
+runs a variant, times it with CUDA events and writes the output.
+`compare_standalone.py` then checks that output and those tables against the
+extension. The compiler is named explicitly because the distribution `nvcc`
+on PATH is an older toolkit than the one that built the extension.
+
+```bash
+# frames for the driver: bench_preprocess.py --dump-frames writes them (16 x 3 x 1080 x 1920 bytes)
+# 5090 host
+cmake -S kernels/standalone -B runs/scratch/standalone_build -DCMAKE_CUDA_ARCHITECTURES=120 \
+      -DCMAKE_CUDA_COMPILER=/usr/local/cuda-13.2/bin/nvcc
+# Thor
+cmake -S kernels/standalone -B runs/scratch/standalone_build -DCMAKE_CUDA_ARCHITECTURES=110 \
+      -DCMAKE_CUDA_COMPILER=/usr/local/cuda-13.0/bin/nvcc
+# both
+cmake --build runs/scratch/standalone_build
+runs/scratch/standalone_build/preprocess_standalone runs/scratch/frames_clip0.u8 16 separable \
+      runs/scratch/standalone_separable.f32 50 5 runs/scratch/standalone_tables
+<venv python> kernels/standalone/compare_standalone.py runs/scratch/frames_clip0.u8 16 separable \
+      runs/scratch/standalone_separable.f32 runs/scratch/standalone_tables
+```
+
+The driver prints one JSON line with the timings; the comparison exits
+non-zero unless the output matches the extension exactly and the C++ tables
+match the Python tables exactly. Build time a few seconds on either board.
+
 ## Orin NX (`field-orin`)
 
 Not run. The board is an 8 GB Orin NX on JetPack 6 with Python 3.10; see the

@@ -119,3 +119,28 @@ Dated, appended after the first run; the protocol above is not edited.
   if the Thor could not build it without system changes it would run on the
   5090 alone and the friction log would say why. Nothing above this line
   changes; the measured phase 2 to 4 results stand as recorded.
+- **2026-10-29, phase 3b second pass.** The fused kernel was verified and
+  timed first and lost to PyTorch's GPU ops on both boards. Phase 3b is
+  extended, not reopened: a separable two-kernel variant of the same
+  preprocessing (same tables, same rounding, same layout, bit-identical
+  output) is added beside the fused one, the host side is split into C++
+  (`kernels/preprocess_torch.cpp`, with the input checks, allocation, stream
+  and launch check) and device code (`kernels/preprocess.cu`), and a
+  standalone C++ driver (`kernels/standalone/`, CMake, CUDA toolkit only)
+  runs the same kernels without PyTorch and is compared with the extension
+  bit for bit. The benchmark now records both variants, refuses to write a
+  record unless both agree with the PyTorch GPU path within one uint8 step,
+  and adds the kernel time under `torch.profiler`. The phase 2 to 4 results
+  stand; the first-pass kernel numbers are superseded by the records that
+  carry both variants.
+- **2026-10-29, phase 3 on the Thor.** The protocol profiled one decision
+  on the 5090 only. The same profiler run on the Thor is added
+  (`runs/profile_bench-thor_sdpa.json`) so the stage split and the kernel
+  table can be compared across boards. Read as shares, not as latency.
+- **2026-10-29, trajectory error table.** The runner records the
+  single-sample average displacement error of each decision against the
+  dataset's own future (`min_ade_m_sanity_only`). A table of it per clip
+  and board is added to the README (`plot_results.py --ade-table`, enforced
+  by a test), named for what it is: one sample per decision, not the
+  multi-sample minADE of the model card, and not an accuracy claim.
+
