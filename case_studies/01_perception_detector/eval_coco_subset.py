@@ -47,6 +47,7 @@ import subprocess
 import sys
 import time
 import urllib.request
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -113,7 +114,8 @@ def fetch(data_dir: Path, n: int, subset: str) -> Path:
     return truth_path
 
 
-def predict(data_dir: Path, subset: str, model: Path, board: str, provider: str, precision: str, conf: float, out_path: Path) -> None:
+def predict(data_dir: Path, subset: str, model: Path, board: str, provider: str, precision: str, conf: float, out_path: Path,
+            trt_cache_dir: str = ".trt_cache", calibration_table: str | None = None, trt_workspace_mb: int = 0) -> None:
     import cv2
     import onnxruntime as ort
 
@@ -123,7 +125,13 @@ def predict(data_dir: Path, subset: str, model: Path, board: str, provider: str,
     truth_path = data_dir / subset / "truth.json"
     truth = json.loads(truth_path.read_text())
     cat_ids = [c["id"] for c in truth["categories"]]            # YOLOX class index -> COCO category id
-    be = OnnxRuntimeBackend(str(model), OrtOptions(provider=provider, precision=precision))
+    extra: dict[str, Any] = {}
+    if trt_workspace_mb:
+        extra["trt_max_workspace_size"] = trt_workspace_mb * (1 << 20)
+    if precision == "int8" and provider in ("tensorrt", "TensorrtExecutionProvider") and not calibration_table:
+        raise SystemExit("int8 on TensorRT needs --calibration-table (file name inside --trt-cache-dir, from calibrate_int8.py)")
+    be = OnnxRuntimeBackend(str(model), OrtOptions(provider=provider, precision=precision, trt_cache_dir=trt_cache_dir,
+                                                 int8_calibration_table=calibration_table, extra_provider_options=extra))
     in_name = be.input_specs()[0][0]
     rows: list[dict[str, Any]] = []
     started = time.time()
@@ -167,9 +175,12 @@ def predict(data_dir: Path, subset: str, model: Path, board: str, provider: str,
         "configuration": {"model": model.name, "input_size": pp.INPUT_SIZE, "letterbox_pad": pp.PAD, "layout": "NCHW BGR 0..255",
                           "nms_threshold": pp.NMS_THRESHOLD, "score_threshold_kept": conf,
                           "deployment_score_threshold": pp.CONF_THRESHOLD, "class_map": "YOLOX index to COCO category id in id order"},
-        "inference": {"recorded_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "device": board,
+        "inference": {"recorded_at": datetime.now().astimezone().isoformat(timespec="seconds"), "device": board,
                       "source_sha256": sha256(Path(__file__).resolve()), "source": "case_studies/01_perception_detector/eval_coco_subset.py",
                       "provider_requested": provider, "provider": be.provider(), "precision": precision,
+                      "trt_cache_dir": trt_cache_dir, "int8_calibration_table": calibration_table,
+                      "int8_calibration_table_sha256": sha256(Path(trt_cache_dir) / calibration_table) if calibration_table and (Path(trt_cache_dir) / calibration_table).exists() else None,
+                      "trt_max_workspace_mb": trt_workspace_mb or None,
                       "onnxruntime": ort.__version__, "backend": be.describe(),
                       "images": len(truth["images"]), "wall_s": round(time.time() - started, 1),
                       "inference_ms_median": round(1000 * float(np.median(t_infer)), 3) if t_infer else None,
@@ -209,12 +220,16 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--precision", default="fp32")
     ap.add_argument("--conf", type=float, default=0.001)
     ap.add_argument("--out-dir", type=Path, default=None, help="default accuracy/<subset>/<board>_<provider>_<precision>/")
+    ap.add_argument("--trt-cache-dir", default=".trt_cache", help="TensorRT engine cache; the int8 calibration table must be inside it")
+    ap.add_argument("--calibration-table", default=None, help="file name of the ORT calibration table inside --trt-cache-dir (calibrate_int8.py writes calibration.flatbuffers)")
+    ap.add_argument("--trt-workspace-mb", type=int, default=0, help="TensorRT builder workspace limit in MiB (0 = provider default); bounded on the 8 GB Orin NX")
     args = ap.parse_args(argv)
     out_dir = args.out_dir or HERE / "accuracy" / args.subset / f"{args.board}_{args.provider}_{args.precision}"
     if args.fetch:
         fetch(args.data_dir, args.fetch, args.subset)
     if args.predict:
-        predict(args.data_dir, args.subset, args.model, args.board, args.provider, args.precision, args.conf, out_dir / "predictions.json")
+        predict(args.data_dir, args.subset, args.model, args.board, args.provider, args.precision, args.conf, out_dir / "predictions.json",
+                trt_cache_dir=args.trt_cache_dir, calibration_table=args.calibration_table, trt_workspace_mb=args.trt_workspace_mb)
     if args.score:
         score(args.data_dir, args.subset, out_dir / "predictions.json", args.board, out_dir)
     return 0

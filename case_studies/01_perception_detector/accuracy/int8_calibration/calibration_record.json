@@ -1,0 +1,24 @@
+{
+ "model": "yolox_s.onnx",
+ "model_sha256": "00b70c44385bb5567e784b0c1efae213c4f2ec06efacfc8e3f52eca333356205",
+ "input_name": "images",
+ "images": 100,
+ "calib_manifest_sha256": "1d4fc54b56f2fcf76fa44736b73f1e15c8a178a2840c007cbfb71d0954ce42d8",
+ "method": "minmax",
+ "provider": "CUDAExecutionProvider",
+ "onnxruntime": "1.30.0",
+ "tensors_calibrated": 293,
+ "wall_s": 48.0,
+ "outputs": {
+  "calibration.cache": "c1db2d3f331ae46a9212cbc7ee1d0cea1ccc9b84ee822ec1ca64f409d77f452d",
+  "calibration.flatbuffers": "958faa95fad2ba623a67f51f5daa1ead0c919f152934dd04b577c1d8551efdb1",
+  "calibration.json": "6698ece8d7b6b0bca8aef05cae8a64ef8ef60b81d8fef5fa36c3434eb492b8cd"
+ },
+ "recorded_at": "2026-10-30T02:45:00-0500",
+ "git": {
+  "commit": "4f48e48d5b3e02a0b1caaa9ad4a7f42238929d98",
+  "dirty": true
+ },
+ "source": "case_studies/01_perception_detector/calibrate_int8.py",
+ "source_sha256": "1588458844e68ee25c9e9277a31a7d2e22c06ae8a549941ada538583132b74b9"
+}

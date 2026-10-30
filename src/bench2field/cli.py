@@ -30,9 +30,15 @@ def _cmd_run(a: argparse.Namespace) -> int:
     from .runner import RunConfig, run
     from .telemetry import NullSampler, auto_sampler
 
+    extra_prov: dict = {}
+    if a.trt_workspace_mb:
+        extra_prov["trt_max_workspace_size"] = a.trt_workspace_mb * (1 << 20)
+    if a.precision == "int8" and a.provider in ("tensorrt", "TensorrtExecutionProvider") and not a.calibration_table:
+        raise SystemExit("int8 on TensorRT needs --calibration-table (a file inside --trt-cache-dir)")
     opts = OrtOptions(provider=a.provider, precision=a.precision,
                       intra_op_threads=a.intra_threads, inter_op_threads=a.inter_threads,
-                      allow_spinning=not a.no_spin)
+                      allow_spinning=not a.no_spin, trt_cache_dir=a.trt_cache_dir,
+                      int8_calibration_table=a.calibration_table, extra_provider_options=extra_prov)
     be = OnnxRuntimeBackend(a.model, opts)
     feeds = be.synthetic_input(batch=a.batch)
     sampler = NullSampler() if a.no_telemetry else auto_sampler()
@@ -185,6 +191,10 @@ def build_parser() -> argparse.ArgumentParser:
     r.add_argument("--intra-threads", type=int, default=0)
     r.add_argument("--inter-threads", type=int, default=0)
     r.add_argument("--no-spin", action="store_true")
+    r.add_argument("--trt-cache-dir", default=".trt_cache",
+                   help="TensorRT engine cache directory; use one per precision, the cache does not key on fp16/int8")
+    r.add_argument("--calibration-table", help="int8: ORT calibration table file name inside --trt-cache-dir")
+    r.add_argument("--trt-workspace-mb", type=int, default=0, help="TensorRT builder workspace limit in MiB (0 = default)")
     r.add_argument("--cooldown-c", type=float)
     r.add_argument("--environment", default=ENV_BENCH_IDLE, help="bench-idle or field")
     r.add_argument("--replay", help="load profile JSON to replay during the run")

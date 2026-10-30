@@ -23,8 +23,8 @@ Ordered for the AMD application: 1, 3 and 4 first, then the rest.
 - [ ] Write down where the time goes. Expect preprocessing and host-device copies to matter as much as inference.
 
 ### Phase 2: optimization ladder (accuracy reported at every step)
-- [ ] FP16 TensorRT
-- [ ] INT8 PTQ with calibration on rover frames
+- [x] FP16 TensorRT (accuracy on the COCO subset on the Thor and the Orin NX; speed through `sweeps/phase2_precision*.yaml`)
+- [x] INT8 PTQ, calibrated on 100 COCO images disjoint from the accuracy subset (`calibrate_int8.py`, min-max); calibration on rover frames waits for the frames to be labelled
 - [ ] 2:4 structured sparsity, fine-tune, TensorRT sparse engine
 - [ ] Distillation: large to small, trained on the 5090
 
