@@ -8,6 +8,7 @@ average, and whatever the operator says they stopped beforehand.
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import subprocess
 from typing import Any
@@ -34,6 +35,15 @@ def _docker_containers() -> list[dict[str, str]] | None:
     return rows
 
 
+_HOME_PATH = re.compile(r"/home/[A-Za-z0-9_.-]+")
+
+
+def scrub_private(text: str) -> str:
+    """Remove what a committed record must not carry from a command line: any
+    home directory becomes <home>. Labels, not names, identify machines."""
+    return _HOME_PATH.sub("<home>", text)
+
+
 def _top_processes(n: int = TOP_N) -> list[dict[str, Any]]:
     """The n busiest processes by CPU, excluding this one."""
     try:
@@ -50,7 +60,7 @@ def _top_processes(n: int = TOP_N) -> list[dict[str, Any]]:
         pid, pcpu, pmem, cmd = parts
         if int(pid) == me:
             continue
-        rows.append({"pid": int(pid), "cpu_pct": float(pcpu), "mem_pct": float(pmem), "cmd": cmd[:120]})
+        rows.append({"pid": int(pid), "cpu_pct": float(pcpu), "mem_pct": float(pmem), "cmd": scrub_private(cmd)[:120]})
         if len(rows) == n:
             break
     return rows

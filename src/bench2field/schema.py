@@ -8,8 +8,8 @@ so the schema is the contract: add fields, never rename or repurpose them.
 from __future__ import annotations
 
 import json
+import os
 import platform
-import socket
 import uuid
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
@@ -147,10 +147,23 @@ class RunReport:
         return cls.from_dict(json.loads(Path(path).read_text(encoding="utf-8")))
 
 
+HOST_LABEL_ENV = "B2F_HOST_LABEL"
+HOST_LABEL_DEFAULT = "unlabelled-host"
+
+
+def host_label() -> str:
+    """The machine label written into reports. Never the host name: reports are
+    committed, and a machine's name is not part of the evidence. Set
+    B2F_HOST_LABEL (for example bench-thor, field-orin, rtx-5090-workstation);
+    without it the label is "unlabelled-host"."""
+    return os.environ.get(HOST_LABEL_ENV, "").strip() or HOST_LABEL_DEFAULT
+
+
 def describe_platform() -> dict[str, Any]:
-    """Best-effort host description; telemetry samplers add device detail."""
+    """Best-effort platform description; telemetry samplers add device detail.
+    The "host" field carries the label from host_label(), not the host name."""
     info: dict[str, Any] = {
-        "host": socket.gethostname(),
+        "host": host_label(),
         "machine": platform.machine(),
         "system": platform.system(),
         "kernel": platform.release(),
