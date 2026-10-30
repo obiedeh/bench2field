@@ -68,6 +68,12 @@ import yaml
 HERE = Path(__file__).resolve().parent
 BOARDS = ("bench-5090", "bench-thor")
 VARIANTS = {"sdpa": "sdpa", "flash": "flash_attention_2"}
+# The diffusion expert keeps sdpa in every variant. With flash_attention_2 on the
+# expert, trajectory sampling fails in flash-attn's varlen forward
+# ("cu_seqlens_q must have shape (batch_size + 1)") on transformers 4.57.1;
+# upstream's own demo never hits this because its config round-trip drops the
+# attn_implementation to None and runs sdpa everywhere. See FRICTION_LOG.md.
+EXPERT_ATTN = {"sdpa": "sdpa", "flash": "sdpa"}
 MODEL_ID = "nvidia/Alpamayo-R1-10B"
 SAMPLING = dict(top_p=0.98, temperature=0.6, num_traj_samples=1, max_generation_length=256)
 SEED = 42
@@ -252,7 +258,7 @@ def power_summary(samples: list[dict[str, float]]) -> dict[str, Any] | None:
 
 
 # --------------------------------------------------------------------------- the run
-def load_model(attn: str) -> tuple[Any, Any, dict[str, Any]]:
+def load_model(attn: str, attn_expert: str | None = None) -> tuple[Any, Any, dict[str, Any]]:
     from alpamayo_r1 import helper
     from alpamayo_r1.config import AlpamayoR1Config
     from alpamayo_r1.models.alpamayo_r1 import AlpamayoR1
@@ -263,6 +269,8 @@ def load_model(attn: str) -> tuple[Any, Any, dict[str, Any]]:
     config = AlpamayoR1Config.from_pretrained(MODEL_ID)
     config.attn_implementation = attn
     model = AlpamayoR1.from_pretrained(MODEL_ID, config=config, dtype=torch.bfloat16)
+    if attn_expert and attn_expert != attn:
+        model.expert.set_attn_implementation(attn_expert)
     t_cpu = time.perf_counter()
     model = model.to("cuda")
     torch.cuda.synchronize()
@@ -274,6 +282,7 @@ def load_model(attn: str) -> tuple[Any, Any, dict[str, Any]]:
         "load_from_pretrained_s": round(t_cpu - t0, 2),
         "load_to_device_s": round(t1 - t_cpu, 2),
         "attn_implementation_requested": attn,
+        "attn_implementation_requested_expert": attn_expert or attn,
         "attn_implementation_vlm": getattr(model.vlm.config, "_attn_implementation", None),
         "attn_implementation_expert": getattr(model.expert.config, "_attn_implementation", None),
         "parameters_total": sum(p.numel() for p in model.parameters()),
@@ -350,6 +359,31 @@ def summarize(decisions: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+
+def other_gpu_processes() -> list[dict[str, Any]]:
+    """Other processes holding memory on GPU 0 (executable basename and MiB); [] when NVML cannot say."""
+    try:
+        import os
+
+        import pynvml
+
+        pynvml.nvmlInit()
+        h = pynvml.nvmlDeviceGetHandleByIndex(0)
+        procs = list(pynvml.nvmlDeviceGetComputeRunningProcesses(h)) + list(pynvml.nvmlDeviceGetGraphicsRunningProcesses(h))
+    except Exception:
+        return []
+    out = []
+    for pr in procs:
+        if pr.pid == os.getpid():
+            continue
+        try:
+            exe = Path(os.readlink(f"/proc/{pr.pid}/exe")).name
+        except OSError:
+            exe = "unknown"
+        mib = pr.usedGpuMemory // (1024 * 1024) if isinstance(pr.usedGpuMemory, int) else None
+        out.append({"exe": exe, "used_mib": mib})
+    return out
+
 def provenance(env_path: Path) -> dict[str, Any]:
     out: dict[str, Any] = {}
     try:
@@ -362,10 +396,13 @@ def provenance(env_path: Path) -> dict[str, Any]:
             if marker.exists():
                 out["bench2field"] = {"commit": marker.read_text().strip(), "dirty": None, "root": "copied tree, see SOURCE_COMMIT"}
         snap = background.snapshot()
-        snap["top_processes"] = [
-            {**{k: v for k, v in p.items() if k != "cmd"}, "exe": Path(str(p.get("cmd", "")).split()[0]).name if str(p.get("cmd", "")).split() else ""}
-            for p in snap.get("top_processes") or []
-        ]
+        # Host process names are not evidence for a GPU benchmark and can name
+        # tools that have no place in the record. Keep the host's load figures
+        # and list only the other processes that hold GPU memory, by executable
+        # name, so a shared GPU is visible without a process inventory.
+        top = snap.pop("top_processes", None) or []
+        snap["host_top_cpu_pct"] = [p.get("cpu_pct") for p in top]
+        snap["other_gpu_processes"] = other_gpu_processes()
         out["background"] = snap
     except Exception as exc:
         out["error"] = f"{type(exc).__name__}: {exc}"
@@ -410,7 +447,7 @@ def main(argv: list[str] | None = None) -> int:
     h = nvml_handle()
     started = datetime.now(timezone.utc).isoformat(timespec="seconds")
     print(f"[run] loading {MODEL_ID} with attn={VARIANTS[args.variant]}", flush=True)
-    model, processor, load = load_model(VARIANTS[args.variant])
+    model, processor, load = load_model(VARIANTS[args.variant], EXPERT_ATTN[args.variant])
     print(f"[run] loaded in {load['load_total_s']} s, vlm attn={load['attn_implementation_vlm']}, "
           f"after load {load['memory_after_load']}", flush=True)
     hooks = Hooks(model)
