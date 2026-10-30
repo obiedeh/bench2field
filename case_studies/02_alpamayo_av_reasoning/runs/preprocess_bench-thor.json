@@ -1,0 +1,110 @@
+{
+  "schema": "bench2field.alpamayo.preprocess/1",
+  "label": "measured",
+  "input": "dataset",
+  "board": "bench-thor",
+  "clip_id": "030c760c-ae38-49aa-9ad8-f5650a545d26",
+  "t0_us": 5100000,
+  "frames": [
+    16,
+    3,
+    1080,
+    1920
+  ],
+  "output": [
+    11520,
+    1536
+  ],
+  "kernel": {
+    "source": "kernels/preprocess.cu",
+    "build_s": 0.06,
+    "cuda_home": "/usr/local/cuda-13.0",
+    "arch_list": "11.0",
+    "nvcc_release": "13.0",
+    "torch": "2.11.0+cu130",
+    "torch_cuda": "13.0",
+    "device": "NVIDIA Thor",
+    "compute_capability": [
+      11,
+      0
+    ]
+  },
+  "errors": {
+    "kernel_vs_torch_gpu": 0.007843196392059326,
+    "kernel_vs_processor_cpu": 0.031372666358947754,
+    "torch_gpu_vs_processor_cpu": 0.031372666358947754,
+    "fraction_kernel_vs_processor_above_1e-3": 0.09587322920560837,
+    "one_uint8_step_after_normalize": 0.00784313725490196
+  },
+  "timings_per_16_frames": {
+    "kernel": {
+      "median_s": 0.037267,
+      "p95_s": 0.03736,
+      "min_s": 0.037237,
+      "max_s": 0.037363,
+      "n": 50
+    },
+    "kernel+upload": {
+      "median_s": 0.038451,
+      "p95_s": 0.038748,
+      "min_s": 0.038294,
+      "max_s": 0.038892,
+      "n": 50
+    },
+    "torch_gpu": {
+      "median_s": 0.015579,
+      "p95_s": 0.01568,
+      "min_s": 0.015436,
+      "max_s": 0.015682,
+      "n": 50
+    },
+    "processor_cpu": {
+      "median_s": 0.037164,
+      "p95_s": 0.053825,
+      "min_s": 0.030318,
+      "max_s": 0.053825,
+      "n": 10
+    }
+  },
+  "protocol": {
+    "reps": 50,
+    "warmup": 5,
+    "gpu_timing": "cuda events, synchronised",
+    "cpu_timing": "perf_counter"
+  },
+  "provenance": {
+    "bench2field": {
+      "commit": "1f7fb99524a2a6e798a99bebf0cffccba6996ab0",
+      "dirty": null,
+      "root": "copied tree, see SOURCE_COMMIT"
+    },
+    "background": {
+      "stopped_for_this_run": [],
+      "containers_running": [],
+      "load_avg_1m": 0.43310546875,
+      "host_top_cpu_pct": [
+        2.9,
+        1.4,
+        1.1,
+        0.5,
+        0.4
+      ],
+      "other_gpu_processes": [
+        {
+          "exe": "unknown",
+          "used_mib": 84
+        },
+        {
+          "exe": "unknown",
+          "used_mib": 19
+        }
+      ]
+    },
+    "alpamayo_r1_commit": "11a0e01c13a5622377c45ee37d653351453ec43b",
+    "env_record": {
+      "path": "runs/env_bench-thor.json",
+      "captured_at": "2026-10-29T21:15:35+00:00"
+    }
+  },
+  "captured_at": "2026-10-29T21:14:44-0500"
+}

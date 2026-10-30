@@ -10,7 +10,7 @@ recent motion, writes a chain-of-causation reasoning trace, and samples a 6.4 s
 trajectory at 10 Hz. Every number here comes from a committed JSON record on a
 named board, as in case study 01.
 
-**Status: phases 2 to 4 done, the 5090 is measured and profiled, the Thor is measured.** Results below come from the
+**Status: phases 2 to 4 and 3b done.** The 5090 is measured and profiled, the Thor is measured, and the custom preprocessing kernel is verified and timed on both. Results below come from the
 committed JSON only; a cell says "pending" until the run that produces it is committed.
 
 ## Boards
@@ -91,6 +91,64 @@ unprofiled run, so the split below is read as shares, not as the latency.
   `power_per_decision`, and `profile_timeline` (NVML power and utilisation
   around the profiled decision). SVG with a PNG next to each.
 
+## A custom CUDA kernel for the camera preprocessing (phase 3b)
+
+`kernels/preprocess.cu` does the processor's three passes over each frame
+(antialiased bicubic resize 1080x1920 to 320x576, rescale and normalize, the
+16x16 patch layout with 2x2 merge and the temporal duplicate) in one pass:
+each thread computes one output value and writes it to its final place in
+the `[16 x 720, 1536]` patch tensor. `KERNEL_WALKTHROUGH.md` explains it in
+plain language; the kernel header explains the thread layout, the memory
+pattern and the index mapping line by line. Built with the case study venvs
+only (SETUP.md), measured by `bench_preprocess.py`, records in
+`runs/preprocess_<board>.json`. Measured values only.
+
+**Correctness.** Against the real processor run on the GPU the kernel differs
+by at most one uint8 step (0.0078 after normalization) on 0.004 percent of
+the 17.7 million values, which is float summation order at rounding ties.
+Against the same processor run on the CPU, where Alpamayo runs it today,
+the kernel differs by up to 0.039, five grey levels, on 9.6 percent of
+values, and so does the processor's own GPU path: the CPU uint8 resize uses
+fixed-point weights and is not bit-identical to the float path. The model
+therefore sees slightly different pixels depending on where preprocessing
+runs. The kernel matches the float path.
+
+**Time per 16-frame batch, one decision's input.**
+
+| Path, 16 frames | bench-5090 | bench-thor |
+|---|---|---|
+| kernel | 3.29 ms median, 3.75 ms p95 | 37.27 ms median, 37.36 ms p95 |
+| kernel+upload | 7.70 ms median, 8.43 ms p95 | 38.45 ms median, 38.75 ms p95 |
+| torch_gpu | 1.24 ms median, 1.25 ms p95 | 15.58 ms median, 15.68 ms p95 |
+| processor_cpu | 365.78 ms median, 397.20 ms p95 | 37.16 ms median, 53.82 ms p95 |
+| Max abs error, kernel vs processor on the CPU | 0.039216 | 0.031373 |
+| Max abs error, kernel vs torch GPU | 0.007843 | 0.007843 |
+
+The processor on the GPU (`image_processor(..., device="cuda")`) was timed
+once on the 5090 outside the record: 1.51 ms median over 20 runs.
+
+**Reading the numbers honestly.**
+
+- PyTorch wins on the GPU, on both boards: its own ops do the same work in
+  1.24 ms against the kernel's 3.29 ms on the 5090 and 15.6 ms against
+  37.3 ms on the Thor. The reason is in the kernel's design: the fused
+  two-dimensional resample does 14 x 14 taps per output value, about 1.7
+  billion byte gathers and multiply-adds per batch (calculated from the
+  shapes), where a separable resize does about a third of that and streams
+  rows. The fused form was chosen for readability and verified first; the
+  separable version is the obvious next step and is not claimed here.
+- The kernel still removes the preprocessing from the critical path where it
+  matters. Alpamayo calls the processor on the CPU: 366 ms per decision on
+  the 5090 host (24 cores, torchvision 0.23) and 37 ms on the Thor (14 cores,
+  torchvision 0.26). Against the measured decision latencies of 0.89 s and
+  4.38 s that is 41 percent of a 5090 decision and 0.8 percent of a Thor
+  decision spent before the model starts. Any GPU path, PyTorch's or this
+  kernel's, cuts that to a few milliseconds plus the upload
+  (7.7 ms including the 100 MB host to device copy on the 5090; 38.5 ms on the
+  Thor, whose memory is shared).
+- The two CPU figures are not a like for like comparison of the two CPUs: the
+  torchvision versions differ. They are recorded as measured.
+
 ## 5090 against Thor (phase 4)
 
 Same model snapshot, same inference code, same eight clips, same protocol,
@@ -145,6 +203,7 @@ and `runs/decisions_bench-thor_sdpa.json`:
 1. Review and environment: the venv, the pins, the friction log, this scaffold. Done.
 2. 5090 run on a handful of PhysicalAI-AV clips: load time, latency per decision, peak memory, throughput, sample reasoning traces. Done.
 3. Profile: where the time goes between the vision encoder, the language rollout and the diffusion trajectory head, with plots. Done.
+3b. Custom CUDA preprocessing kernel, verified and timed against PyTorch on both boards. Done; PyTorch's GPU ops are faster, the CPU path Alpamayo uses is far slower than either.
 4. Thor, same clips, power from tegrastats, compared with the 5090. Done.
 5. Orin NX: why a quantized run is not feasible on this module. Done: [ORIN_NX.md](ORIN_NX.md).
 
@@ -159,7 +218,11 @@ ORIN_NX.md           why the field computer is not a target, with measured facts
 setup_env.sh         builds .venv on the 5090 host
 capture_env.py       writes runs/env_<board>.json
 requirements.txt     the pins, for reading; setup_env.sh installs them in the right order
-runs/                committed records only (environment, decisions, profile)
+runs/                committed records only (environment, decisions, profile, preprocess)
+kernels/             the CUDA preprocessing kernel (preprocess.cu)
+preprocess_ext.py    builds the kernel, the resampling tables, the PyTorch and processor references
+bench_preprocess.py  verifies the kernel and times it against PyTorch
+KERNEL_WALKTHROUGH.md the kernel in plain language
 report/              plots written by plot_results.py (SVG and PNG)
 profile_decision.py  torch.profiler on one decision, stage labels, kernel and op tables
 plot_results.py      the plots and the README results table, from runs/ only

@@ -81,6 +81,48 @@ What differs from the 5090, and why:
 
 Setup took 329 s, 263 s of it the torch download.
 
+## Building the preprocessing kernel (phase 3b)
+
+The kernel in `kernels/preprocess.cu` is compiled on first use by
+`preprocess_ext.load_kernel()` with `torch.utils.cpp_extension.load`, into
+`runs/scratch/kernel_build/` (ignored by git). No system package changes on
+either board; `ninja` is installed into each venv.
+
+Thor: the JetPack toolkit matches the torch build (both CUDA 13), so
+
+```bash
+uv pip install --python ~/.venv/alpamayo/bin/python ninja
+cd ~/alpamayo-work/bench2field/case_studies/02_alpamayo_av_reasoning
+PATH=$HOME/.venv/alpamayo/bin:$PATH CUDA_HOME=/usr/local/cuda-13.0 TORCH_CUDA_ARCH_LIST=11.0 \
+  ~/.venv/alpamayo/bin/python bench_preprocess.py --board bench-thor
+```
+
+`ninja` must be on `PATH` as an executable; importing the Python package is
+not enough for torch's check. Build time about 40 s.
+
+5090 host: torch 2.8.0+cu128 wants a CUDA 12.x nvcc and the host only has
+13.2. The pip package named `nvidia-cuda-nvcc-cu12` (12.8.93) was tried first
+and contains only `ptxas` and `nvPTXCompiler.h`, no compiler front end, on
+PyPI and on NVIDIA's own index alike. The recorded path is therefore the
+13.2 compiler with torch's major-version check relaxed, as an explicit
+opt-in:
+
+```bash
+uv pip install --python .venv/bin/python ninja
+ALPAMAYO_RELAX_CUDA_VERSION_CHECK=1 CUDA_HOME=/usr/local/cuda-13.2 TORCH_CUDA_ARCH_LIST=12.0 \
+  env -u PYTHONPATH .venv/bin/python bench_preprocess.py --board bench-5090
+```
+
+What that means: the extension is compiled for sm_120 by nvcc 13.2 and links
+`libcudart.so.13`, which then lives in the same process as torch's
+`libcudart.so.12`. Both runtimes use the same driver context and stream
+handle; the benchmark checks the kernel's output against the processor
+element by element, so a broken interaction would show as a wrong answer, not
+a silent one. The clean alternative, a user-local CUDA 12.8 toolkit from the
+runfile installer (about 4 GB, no root needed with a custom path), was not
+taken because the opt-in is smaller and the check covers it. Build time
+about 25 s.
+
 ## Orin NX (`field-orin`)
 
 Not run. The board is an 8 GB Orin NX on JetPack 6 with Python 3.10; see the

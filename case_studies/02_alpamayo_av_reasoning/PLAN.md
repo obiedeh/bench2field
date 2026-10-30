@@ -69,6 +69,12 @@ the numbers (AGENTS.md rule 3). Changes to this plan are appended, dated, under
 ### Phase 3: profile
 - [x] profiler and NVML timeline on one decision; plots under `report/`
 
+### Phase 3b: custom CUDA preprocessing kernel (added 2026-10-29, see Amendments)
+- [x] `kernels/preprocess.cu` and `preprocess_ext.py`: resize, normalize and patch layout in one pass, short and documented line by line
+- [x] verified against the PyTorch reference and the real processor, maximum absolute error reported
+- [x] `runs/preprocess_bench-5090.json` and `runs/preprocess_bench-thor.json`: median and p95 per 16-frame batch, kernel against PyTorch, reported whichever wins
+- [x] `KERNEL_WALKTHROUGH.md` in plain language
+
 ### Phase 4: Thor
 - [x] same clips, same protocol, sdpa, Jetson torch wheel named; `runs/decisions_bench-thor_sdpa.json`
 - [x] comparison table and retention
@@ -103,3 +109,13 @@ Dated, appended after the first run; the protocol above is not edited.
   varlen forward. The flash variant is therefore defined as flash-attn on
   the VLM (vision tower, prefill, decode) with `sdpa` kept on the diffusion
   expert, and the JSON records both choices. The sdpa baseline is unchanged.
+- **2026-10-29, phase 3b added.** The owner added a custom CUDA
+  preprocessing kernel to the definition of done after phase 3: the camera
+  preprocessing (resize, normalize, layout for 4 cameras x 4 frames to
+  320x576) as a PyTorch C++ extension, verified against the standard
+  preprocessing with the maximum absolute error reported, benchmarked
+  against PyTorch on both boards with measured values only, documented so
+  every line can be walked through. Builds use the case study venvs only;
+  if the Thor could not build it without system changes it would run on the
+  5090 alone and the friction log would say why. Nothing above this line
+  changes; the measured phase 2 to 4 results stand as recorded.

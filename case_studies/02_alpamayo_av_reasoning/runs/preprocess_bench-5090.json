@@ -1,0 +1,130 @@
+{
+  "schema": "bench2field.alpamayo.preprocess/1",
+  "label": "measured",
+  "input": "dataset",
+  "board": "bench-5090",
+  "clip_id": "030c760c-ae38-49aa-9ad8-f5650a545d26",
+  "t0_us": 5100000,
+  "frames": [
+    16,
+    3,
+    1080,
+    1920
+  ],
+  "output": [
+    11520,
+    1536
+  ],
+  "kernel": {
+    "source": "kernels/preprocess.cu",
+    "build_s": 0.28,
+    "cuda_home": "/usr/local/cuda-13.2",
+    "arch_list": "12.0",
+    "nvcc_release": "13.2",
+    "torch": "2.8.0+cu128",
+    "torch_cuda": "12.8",
+    "device": "NVIDIA GeForce RTX 5090",
+    "compute_capability": [
+      12,
+      0
+    ]
+  },
+  "errors": {
+    "kernel_vs_torch_gpu": 0.007843196392059326,
+    "kernel_vs_processor_cpu": 0.039215803146362305,
+    "torch_gpu_vs_processor_cpu": 0.039215803146362305,
+    "fraction_kernel_vs_processor_above_1e-3": 0.09591493755578995,
+    "one_uint8_step_after_normalize": 0.00784313725490196
+  },
+  "timings_per_16_frames": {
+    "kernel": {
+      "median_s": 0.003288,
+      "p95_s": 0.003745,
+      "min_s": 0.002095,
+      "max_s": 0.003857,
+      "n": 50
+    },
+    "kernel+upload": {
+      "median_s": 0.007701,
+      "p95_s": 0.008429,
+      "min_s": 0.006123,
+      "max_s": 0.008566,
+      "n": 50
+    },
+    "torch_gpu": {
+      "median_s": 0.001237,
+      "p95_s": 0.001248,
+      "min_s": 0.00121,
+      "max_s": 0.00125,
+      "n": 50
+    },
+    "processor_cpu": {
+      "median_s": 0.365778,
+      "p95_s": 0.397202,
+      "min_s": 0.145304,
+      "max_s": 0.397202,
+      "n": 10
+    }
+  },
+  "protocol": {
+    "reps": 50,
+    "warmup": 5,
+    "gpu_timing": "cuda events, synchronised",
+    "cpu_timing": "perf_counter"
+  },
+  "provenance": {
+    "bench2field": {
+      "commit": "c03d6cf3cc7bac6b881a264fccfc50941e10e947",
+      "dirty": true,
+      "root": "<home>/github/bench2field"
+    },
+    "background": {
+      "stopped_for_this_run": [],
+      "containers_running": [],
+      "load_avg_1m": 9.79541015625,
+      "host_top_cpu_pct": [
+        268.0,
+        25.1,
+        7.9,
+        5.8,
+        4.8
+      ],
+      "other_gpu_processes": [
+        {
+          "exe": "python3",
+          "used_mib": 4179
+        },
+        {
+          "exe": "Xorg",
+          "used_mib": 220
+        },
+        {
+          "exe": "gnome-shell",
+          "used_mib": 56
+        },
+        {
+          "exe": "localsend_app",
+          "used_mib": 21
+        },
+        {
+          "exe": "xdg-desktop-portal-gnome",
+          "used_mib": 9
+        },
+        {
+          "exe": "chrome",
+          "used_mib": 71
+        },
+        {
+          "exe": "python3",
+          "used_mib": 4179
+        }
+      ]
+    },
+    "alpamayo_r1_commit": "11a0e01c13a5622377c45ee37d653351453ec43b",
+    "env_record": {
+      "path": "runs/env_bench-5090.json",
+      "captured_at": "2026-10-29T20:46:47+00:00"
+    }
+  },
+  "captured_at": "2026-10-29T21:15:07-0500"
+}
