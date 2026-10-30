@@ -42,10 +42,6 @@ import sys
 from pathlib import Path
 from typing import Any
 
-import matplotlib
-
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 RUNS = HERE / "runs"
@@ -62,6 +58,17 @@ SERIES = {  # fixed slot per (board, variant); never cycled
 }
 STAGES = [("ttft", "#2a78d6", "first token (vision + prefill)"), ("decode", "#1baf7a", "decode"),
           ("trajectory", "#eb6834", "trajectory sampling"), ("glue", "#b5b4ae", "glue")]
+
+
+def pyplot() -> Any:
+    """Import pyplot on first use with the Agg backend, so the table and the
+    loaders work without matplotlib installed (the repository tests use them)."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    return plt
 
 
 def load_runs(prefix: str) -> list[dict[str, Any]]:
@@ -88,7 +95,7 @@ def style(ax: Any, ylabel: str = "", xlabel: str = "") -> None:
 
 
 def fig(w: float = 7.2, h: float = 3.6, n: int = 1, sharex: bool = False) -> tuple[Any, Any]:
-    f, axes = plt.subplots(n, 1, figsize=(w, h), facecolor=SURFACE, sharex=sharex)
+    f, axes = pyplot().subplots(n, 1, figsize=(w, h), facecolor=SURFACE, sharex=sharex)
     return f, axes
 
 
@@ -97,7 +104,7 @@ def save(f: Any, name: str) -> None:
     f.tight_layout()
     f.savefig(REPORT / name, facecolor=SURFACE)
     f.savefig((REPORT / name).with_suffix(".png"), facecolor=SURFACE, dpi=160)  # the README embeds the SVG; the PNG is for viewers without SVG
-    plt.close(f)
+    pyplot().close(f)
     print(f"wrote report/{name} (+ .png)", file=sys.stderr)
 
 
@@ -215,11 +222,11 @@ def plot_power(runs: list[dict[str, Any]]) -> None:
         color, name = SERIES[(r["board"], r["variant"])]
         ax.bar(i, statistics.median(vals), width=0.55, color=color, linewidth=0, zorder=2)
         ax.scatter([i] * len(vals), vals, s=14, color=SURFACE, edgecolor=INK, linewidth=0.8, zorder=3)
-        ax.text(i, statistics.median(vals), f"{statistics.median(vals):.0f} W", ha="center", va="bottom", fontsize=8, color=INK)
+        ax.text(i + 0.32, statistics.median(vals), f"{statistics.median(vals):.0f} W", ha="left", va="center", fontsize=8, color=INK)
     ax.set_xticks(range(len(rows)))
     ax.set_xticklabels([SERIES[(r["board"], r["variant"])][1] for r, _ in rows], fontsize=9)
-    style(ax, "mean watts during a decision")
-    ax.set_title("Power per decision: median bar, every decision as a dot (5090: GPU rail via NVML; Thor: VIN via tegrastats)", color=INK, fontsize=9, loc="left")
+    style(ax, "mean watts during a decision", "5090: GPU rail via NVML. Thor: whole board, VIN via tegrastats. Not like for like.")
+    ax.set_title("Power during a decision: median bar, every decision as a dot", color=INK, fontsize=10, loc="left")
     save(f, "power_per_decision.svg")
 
 

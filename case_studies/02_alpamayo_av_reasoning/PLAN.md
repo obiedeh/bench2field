@@ -67,7 +67,7 @@ the numbers (AGENTS.md rule 3). Changes to this plan are appended, dated, under
 - [x] three traces in `traces/`; README results table filled from the JSON only
 
 ### Phase 3: profile
-- [ ] profiler and NVML timeline on one decision; plots under `report/`
+- [x] profiler and NVML timeline on one decision; plots under `report/`
 
 ### Phase 4: Thor
 - [ ] same clips, same protocol, sdpa, Jetson torch wheel named; `runs/decisions_bench-thor_sdpa.json`

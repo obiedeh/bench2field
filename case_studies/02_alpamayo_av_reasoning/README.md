@@ -10,14 +10,14 @@ recent motion, writes a chain-of-causation reasoning trace, and samples a 6.4 s
 trajectory at 10 Hz. Every number here comes from a committed JSON record on a
 named board, as in case study 01.
 
-**Status: phase 2 done, the 5090 is measured.** Results below come from the
+**Status: phases 2 and 3 done, the 5090 is measured and profiled.** Results below come from the
 committed JSON only; a cell says "pending" until the run that produces it is committed.
 
 ## Boards
 
 | Board | Role | Target for | State |
 |---|---|---|---|
-| RTX 5090 (`bench-5090`) | bench | full-precision run, profile, plots | measured, sdpa and flash-attn (phase 2); profile in phase 3 |
+| RTX 5090 (`bench-5090`) | bench | full-precision run, profile, plots | measured, sdpa and flash-attn (phase 2); profiled (phase 3) |
 | Jetson AGX Thor (`bench-thor`) | edge bench | same clips, with power | planned (phase 4); JetPack, not DriveOS |
 | Jetson Orin NX 8 GB (`field-orin`) | field | nothing | does not fit; documented in the friction log |
 
@@ -53,6 +53,44 @@ tokens per second) and equal in time to first token, so sdpa stays the
 baseline and is the variant the Thor is compared against. The Thor column is
 added in phase 4.
 
+## Where the time goes (phase 3, 5090, sdpa)
+
+One decision on clip `030c760c` under `torch.profiler`, after one warm-up,
+from `runs/profile_bench-5090_sdpa.json`. The profiler adds overhead: this
+decision took 1.01 s against 0.94 s for the same clip in the
+unprofiled run, so the split below is read as shares, not as the latency.
+
+| Stage | Device time | Share of the decision |
+|---|---|---|
+| Vision tower (inside the rollout) | 117 ms | 12 % |
+| Language rollout: prefill and 22 decode steps | 784 ms | 78 % |
+| Trajectory sampling (diffusion expert) | 223 ms | 22 % |
+| Whole decision | 1009 ms | 100 % |
+
+- The first token arrives at 0.39 s; after that the decode runs at one token every
+  19 ms (53 tokens per second under the profiler). With a median
+  of 18 reasoning tokens, decode is the largest single block of a decision,
+  and a longer trace costs 19 ms per extra token (`report/tokens_vs_latency.svg`).
+- The kernel table says what that decode is: the two largest kernels are a
+  cutlass bf16 tensor-op GEMM (23 % of kernel
+  time, prefill and the diffusion head) and a bf16 GEMV (17 %
+  plus 8 % in a second instance), which is the
+  batch-one decode streaming the 8B weights once per token. Attention is third
+  (memory-efficient attention kernel, 9 %). sdpa on
+  this stack dispatches to torch's own flash kernel for the prefill and to the
+  memory-efficient kernel elsewhere.
+- The kernel names carry `sm80` and `cutlass_80`: torch 2.8.0+cu128 runs its
+  Ampere-generation kernels on this Blackwell GPU. There are no sm_120 specific
+  GEMM or attention kernels in this build, which is one reason the flash-attn
+  2.8.3 wheel (also built for older architectures) does not win either.
+- The operator table overlaps by construction (`aten::linear` contains
+  `aten::matmul` contains `aten::mm`), so its shares are of the table, not of
+  the decision. The kernel table does not overlap.
+- Plots under `report/`: `stage_split` (medians over all decisions, both
+  variants), `latency_per_clip`, `tokens_vs_latency`, `memory`,
+  `power_per_decision`, and `profile_timeline` (NVML power and utilisation
+  around the profiled decision). SVG with a PNG next to each.
+
 ## Phases
 
 1. Review and environment: the venv, the pins, the friction log, this scaffold. Done.
@@ -71,7 +109,10 @@ FRICTION_LOG.md      what broke, how it was found, what fixed it, with times
 setup_env.sh         builds .venv on the 5090 host
 capture_env.py       writes runs/env_<board>.json
 requirements.txt     the pins, for reading; setup_env.sh installs them in the right order
-runs/                committed records only (environment, decisions, later profiles)
+runs/                committed records only (environment, decisions, profile)
+report/              plots written by plot_results.py (SVG and PNG)
+profile_decision.py  torch.profiler on one decision, stage labels, kernel and op tables
+plot_results.py      the plots and the README results table, from runs/ only
 traces/              three reasoning traces per board and variant, verbatim
 clips.yaml           the eight clip ids, chosen by rule before the first run
 run_decisions.py     the decision runner (one JSON per board and variant)
