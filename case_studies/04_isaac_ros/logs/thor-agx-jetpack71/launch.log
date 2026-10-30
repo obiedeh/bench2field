@@ -1,0 +1,90 @@
+[INFO] [launch]: All log files can be found below /root/.ros/log/2026-10-30-14-51-17-873129-thor-agx-45
+[INFO] [launch]: Default logging verbosity is set to INFO
+[WARN] [1793371877.934036844] [rcl]: ROS_LOCALHOST_ONLY is deprecated but still honored if it is enabled. Use ROS_AUTOMATIC_DISCOVERY_RANGE and ROS_STATIC_PEERS instead.
+[WARN] [1793371877.934062114] [rcl]: 'localhost_only' is enabled, 'automatic_discovery_range' and 'static_peers' will be ignored.
+[INFO] [component_container_mt-1]: process started with pid [64]
+[component_container_mt-1] [WARN] [1793371878.097135469] [rcl]: ROS_LOCALHOST_ONLY is deprecated but still honored if it is enabled. Use ROS_AUTOMATIC_DISCOVERY_RANGE and ROS_STATIC_PEERS instead.
+[component_container_mt-1] [WARN] [1793371878.097156812] [rcl]: 'localhost_only' is enabled, 'automatic_discovery_range' and 'static_peers' will be ignored.
+[component_container_mt-1] [INFO] [1793371878.328896462] [isaac_ros_examples.container]: Load Library: /opt/ros/jazzy/lib/libresize_node.so
+[component_container_mt-1] [INFO] [1793371878.375389378] [isaac_ros_examples.container]: Found class: rclcpp_components::NodeFactoryTemplate<nvidia::isaac_ros::image_proc::ResizeNode>
+[component_container_mt-1] [INFO] [1793371878.376060959] [isaac_ros_examples.container]: Instantiate class: rclcpp_components::NodeFactoryTemplate<nvidia::isaac_ros::image_proc::ResizeNode>
+[component_container_mt-1] [INFO] [1793371878.746381622] [yolov8_encoder.resize_node]: [ResizeNode] ResizeNode initialized
+[component_container_mt-1] [INFO] [1793371878.747329687] [isaac_ros_examples.container]: Load Library: /opt/ros/jazzy/lib/libtensor_rt_node.so
+[INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/yolov8_encoder/resize_node' in container '/isaac_ros_examples/container'
+[component_container_mt-1] [INFO] [1793371878.804690734] [isaac_ros_examples.container]: Found class: rclcpp_components::NodeFactoryTemplate<nvidia::isaac_ros::dnn_inference::TensorRTNode>
+[component_container_mt-1] [INFO] [1793371878.804731817] [isaac_ros_examples.container]: Instantiate class: rclcpp_components::NodeFactoryTemplate<nvidia::isaac_ros::dnn_inference::TensorRTNode>
+[component_container_mt-1] [INFO] [1793371878.809134742] [tensor_rt]: Initializing TensorRT engine...
+[component_container_mt-1] [INFO] [1793371878.810147281] [tensor_rt]: Building TensorRT engine from model: /work/assets/extracted/models/yolov8n.onnx
+[component_container_mt-1] [INFO] [1793371878.810862890] [TRT]: TRT INFO: [MemUsageChange] Init CUDA: CPU +0, GPU +0, now: CPU 42, GPU 123713 (MiB)
+[component_container_mt-1] [INFO] [1793371879.030573998] [tensor_rt]: [TensorRTNode] FP16 mode enabled
+[component_container_mt-1] [INFO] [1793371879.041945132] [TRT]: TRT INFO: ----------------------------------------------------------------
+[component_container_mt-1] [INFO] [1793371879.041966835] [TRT]: TRT INFO: Input filename:   /work/assets/extracted/models/yolov8n.onnx
+[component_container_mt-1] [INFO] [1793371879.041971233] [TRT]: TRT INFO: ONNX IR version:  0.0.7
+[component_container_mt-1] [INFO] [1793371879.041975974] [TRT]: TRT INFO: Opset version:    12
+[component_container_mt-1] [INFO] [1793371879.041978688] [TRT]: TRT INFO: Producer name:    pytorch
+[component_container_mt-1] [INFO] [1793371879.041981142] [TRT]: TRT INFO: Producer version: 2.5.0
+[component_container_mt-1] [INFO] [1793371879.041983679] [TRT]: TRT INFO: Domain:           
+[component_container_mt-1] [INFO] [1793371879.041986031] [TRT]: TRT INFO: Model version:    0
+[component_container_mt-1] [INFO] [1793371879.041988105] [TRT]: TRT INFO: Doc string:       
+[component_container_mt-1] [INFO] [1793371879.041990244] [TRT]: TRT INFO: ----------------------------------------------------------------
+[component_container_mt-1] [INFO] [1793371879.472658548] [TRT]: TRT INFO: [MemUsageChange] Init builder kernel library: CPU +309, GPU -251, now: CPU 567, GPU 123498 (MiB)
+[component_container_mt-1] [INFO] [1793371879.481491184] [TRT]: TRT INFO: Local timing cache in use. Profiling results in this builder pass will not be stored.
+[component_container_mt-1] [INFO] [1793371879.490387422] [TRT]: TRT INFO: Compiler backend is used during engine build.
+[component_container_mt-1] [INFO] [1793371926.843491913] [TRT]: TRT INFO: Detected 1 inputs and 1 output network tensors.
+[component_container_mt-1] [INFO] [1793371926.936452171] [TRT]: TRT INFO: Total Host Persistent Memory: 80 bytes
+[component_container_mt-1] [INFO] [1793371926.936500116] [TRT]: TRT INFO: Total Device Persistent Memory: 0 bytes
+[component_container_mt-1] [INFO] [1793371926.936503607] [TRT]: TRT INFO: Max Scratch Memory: 35022848 bytes
+[component_container_mt-1] [INFO] [1793371926.936508413] [TRT]: TRT INFO: [BlockAssignment] Started assigning block shifts. This will take 1 steps to complete.
+[component_container_mt-1] [INFO] [1793371926.936525052] [TRT]: TRT INFO: [BlockAssignment] Algorithm ShiftNTopDown took 0.007676ms to assign 1 blocks to 1 nodes requiring 35022848 bytes.
+[component_container_mt-1] [INFO] [1793371926.936530181] [TRT]: TRT INFO: Total Activation Memory: 35022848 bytes
+[component_container_mt-1] [INFO] [1793371926.950060531] [TRT]: TRT INFO: Total Weights Memory: 12709824 bytes
+[component_container_mt-1] [INFO] [1793371926.950823243] [TRT]: TRT INFO: Compiler backend is used during engine execution.
+[component_container_mt-1] [INFO] [1793371926.950937003] [TRT]: TRT INFO: Engine generation completed in 47.4698 seconds.
+[component_container_mt-1] [INFO] [1793371926.971401359] [TRT]: TRT INFO: The following layers are used for L2 cache management and do not correspond to any layers in the INetworkDefinition: __mye18407_myl0_0, __mye18409_myl0_157
+[component_container_mt-1] [INFO] [1793371926.972060606] [TRT]: TRT INFO: [MemUsageStats] Peak memory usage of TRT CPU/GPU memory allocators: CPU 0 MiB, GPU 14 MiB
+[component_container_mt-1] [INFO] [1793371926.991025085] [tensor_rt]: [TensorRTNode] Serialized engine size: 13981796
+[component_container_mt-1] [INFO] [1793371926.991208994] [TRT]: TRT INFO: Loaded engine size: 13 MiB
+[component_container_mt-1] [INFO] [1793371927.001602832] [tensor_rt]: [TensorRTNode] Saved TensorRT engine to: /work/assets/extracted/models/yolov8n.plan
+[component_container_mt-1] [INFO] [1793371927.001697388] [tensor_rt]: Input bindings setup completed
+[component_container_mt-1] [INFO] [1793371928.372271365] [TRT]: TRT INFO: [MS] Running engine with multi stream info
+[component_container_mt-1] [INFO] [1793371928.372878807] [TRT]: TRT INFO: [MS] Number of aux streams is 4
+[component_container_mt-1] [INFO] [1793371928.373031669] [TRT]: TRT INFO: [MS] Number of total worker streams is 5
+[component_container_mt-1] [INFO] [1793371928.373143448] [TRT]: TRT INFO: [MS] The main stream provided by execute/enqueue calls is the first worker stream
+[component_container_mt-1] [INFO] [1793371928.431835860] [TRT]: TRT INFO: [MemUsageChange] TensorRT-managed allocation in IExecutionContext creation: CPU +0, GPU +33, now: CPU 0, GPU 45 (MiB)
+[component_container_mt-1] [INFO] [1793371928.432550405] [tensor_rt]: Number of CUDA bindings: 2
+[component_container_mt-1] [INFO] [1793371928.432757389] [tensor_rt]: Tensor name images: Format Row major linear FP32 format (kLINEAR)
+[component_container_mt-1] [INFO] [1793371928.432877954] [tensor_rt]: Tensor name output0: Format Row major linear FP32 format (kLINEAR)
+[component_container_mt-1] [INFO] [1793371928.432970539] [tensor_rt]: TensorRT engine initialized successfully
+[component_container_mt-1] [INFO] [1793371928.438424159] [tensor_rt]: [TensorRTNode] TensorRT Node initialized successfully
+[INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/tensor_rt' in container '/isaac_ros_examples/container'
+[component_container_mt-1] [INFO] [1793371928.439253084] [isaac_ros_examples.container]: Load Library: /opt/ros/jazzy/lib/libimage_format_converter_node.so
+[component_container_mt-1] [INFO] [1793371928.441290466] [isaac_ros_examples.container]: Found class: rclcpp_components::NodeFactoryTemplate<nvidia::isaac_ros::image_proc::ImageFormatConverterNode>
+[component_container_mt-1] [INFO] [1793371928.441315078] [isaac_ros_examples.container]: Instantiate class: rclcpp_components::NodeFactoryTemplate<nvidia::isaac_ros::image_proc::ImageFormatConverterNode>
+[component_container_mt-1] [INFO] [1793371928.446528733] [yolov8_encoder.image_format_converter_node]: [ImageFormatConverterNode] Pool sized from image_width=640, image_height=640, encoding=rgb8: block_size=1228800 bytes (40 blocks)
+[component_container_mt-1] [INFO] [1793371928.449146194] [isaac_ros_examples.container]: Load Library: /opt/ros/jazzy/lib/libyolov8_decoder_node.so
+[INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/yolov8_encoder/image_format_converter_node' in container '/isaac_ros_examples/container'
+[component_container_mt-1] [INFO] [1793371928.464929105] [isaac_ros_examples.container]: Found class: rclcpp_components::NodeFactoryTemplate<nvidia::isaac_ros::yolov8::YoloV8DecoderNode>
+[component_container_mt-1] [INFO] [1793371928.464980513] [isaac_ros_examples.container]: Instantiate class: rclcpp_components::NodeFactoryTemplate<nvidia::isaac_ros::yolov8::YoloV8DecoderNode>
+[INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/yolov8_decoder_node' in container '/isaac_ros_examples/container'
+[component_container_mt-1] [INFO] [1793371928.476713891] [isaac_ros_examples.container]: Load Library: /opt/ros/jazzy/lib/libcrop_node.so
+[component_container_mt-1] [INFO] [1793371928.480223492] [isaac_ros_examples.container]: Found class: rclcpp_components::NodeFactoryTemplate<nvidia::isaac_ros::image_proc::CropNode>
+[component_container_mt-1] [INFO] [1793371928.480252788] [isaac_ros_examples.container]: Instantiate class: rclcpp_components::NodeFactoryTemplate<nvidia::isaac_ros::image_proc::CropNode>
+[INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/yolov8_encoder/crop_node' in container '/isaac_ros_examples/container'
+[component_container_mt-1] [INFO] [1793371928.498623041] [isaac_ros_examples.container]: Load Library: /opt/ros/jazzy/lib/libimage_to_tensor_node.so
+[component_container_mt-1] [INFO] [1793371928.501731925] [isaac_ros_examples.container]: Found class: rclcpp_components::NodeFactoryTemplate<nvidia::isaac_ros::dnn_inference::ImageToTensorNode>
+[component_container_mt-1] [INFO] [1793371928.501768249] [isaac_ros_examples.container]: Instantiate class: rclcpp_components::NodeFactoryTemplate<nvidia::isaac_ros::dnn_inference::ImageToTensorNode>
+[INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/yolov8_encoder/image_to_tensor' in container '/isaac_ros_examples/container'
+[component_container_mt-1] [INFO] [1793371928.511910065] [isaac_ros_examples.container]: Load Library: /opt/ros/jazzy/lib/libimage_tensor_normalize_node.so
+[component_container_mt-1] [INFO] [1793371928.514413321] [isaac_ros_examples.container]: Found class: rclcpp_components::NodeFactoryTemplate<nvidia::isaac_ros::dnn_inference::ImageTensorNormalizeNode>
+[component_container_mt-1] [INFO] [1793371928.514448637] [isaac_ros_examples.container]: Instantiate class: rclcpp_components::NodeFactoryTemplate<nvidia::isaac_ros::dnn_inference::ImageTensorNormalizeNode>
+[component_container_mt-1] [INFO] [1793371928.534045337] [yolov8_encoder.normalize_node]: [ImageTensorNormalizeNode] Setup complete
+[INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/yolov8_encoder/normalize_node' in container '/isaac_ros_examples/container'
+[component_container_mt-1] [INFO] [1793371928.535896476] [isaac_ros_examples.container]: Load Library: /opt/ros/jazzy/lib/libinterleaved_to_planar_node.so
+[component_container_mt-1] [INFO] [1793371928.537632586] [isaac_ros_examples.container]: Found class: rclcpp_components::NodeFactoryTemplate<nvidia::isaac_ros::dnn_inference::InterleavedToPlanarNode>
+[component_container_mt-1] [INFO] [1793371928.537659142] [isaac_ros_examples.container]: Instantiate class: rclcpp_components::NodeFactoryTemplate<nvidia::isaac_ros::dnn_inference::InterleavedToPlanarNode>
+[INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/yolov8_encoder/interleaved_to_planar_node' in container '/isaac_ros_examples/container'
+[component_container_mt-1] [INFO] [1793371928.559897840] [isaac_ros_examples.container]: Load Library: /opt/ros/jazzy/lib/libreshape_node.so
+[component_container_mt-1] [INFO] [1793371928.562405977] [isaac_ros_examples.container]: Found class: rclcpp_components::NodeFactoryTemplate<nvidia::isaac_ros::dnn_inference::ReshapeNode>
+[component_container_mt-1] [INFO] [1793371928.562445125] [isaac_ros_examples.container]: Instantiate class: rclcpp_components::NodeFactoryTemplate<nvidia::isaac_ros::dnn_inference::ReshapeNode>
+[component_container_mt-1] [INFO] [1793371928.577483426] [yolov8_encoder.reshape_node]: [ReshapeNode] Setup complete
+[INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/yolov8_encoder/reshape_node' in container '/isaac_ros_examples/container'

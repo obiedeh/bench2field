@@ -40,15 +40,17 @@ its run waits for a storage decision (below) and is not measured yet.
   scores, and matches each detections message to its image by header stamp
   for an end-to-end latency. [`run_quickstart.sh`](run_quickstart.sh) does
   the launch, the playback and the measurement; the host samples
-  `nvidia-smi` beside it. [`table.py`](table.py) prints the table below from
+  `nvidia-smi` (x86) or `tegrastats` (Thor) beside it. [`table.py`](table.py) prints the table below from
   the records under `logs/`.
 
-## Results (x86_64, RTX 5090, GPU shared)
+## Results
 
-Output of `table.py`, from the records under `logs/`:
+Output of `table.py`, from the records under `logs/`. The x86 runs
+shared the GPU with another process; the Thor run had the board to itself.
 
-| run | bag rate | input frames (Hz) | detections out (Hz) | out / in | per frame | latency p50 / p95 (ms) | host GPU during the window |
+| run | bag rate | input frames (Hz) | detections out (Hz) | out / in | per frame | latency p50 / p95 (ms) | host GPU or board power |
 |---|---|---|---|---|---|---|---|
+| `thor-agx-jetpack71` | 1 | 575 (9.58) | 315 (5.25) | 0.55 | 9 | 15.48 / 911.78 | board 24.4 W, GPU rail 2.4 W (tegrastats, whole run incl. engine build) |
 | `x86_64-rtx5090-shared` | 1 | 606 (10.09) | 415 (6.91) | 0.68 | 9 | 6.21 / 893.69 | 94% util, 11.0 GiB used (host, all processes) |
 | `x86_64-rtx5090-shared-rate0.4` | 0.4 | 250 (4.16) | 172 (2.86) | 0.69 | 9 | 6.77 / 2241.16 | 94% util, 11.0 GiB used (host, all processes) |
 | `x86_64-rtx5090-shared-single-pass` | single pass | 18 (0.9) | 2 (0.1) | 0.11 | 9 | 2114.1 / 3293.64 | - |
@@ -74,15 +76,51 @@ Reading it:
 
 ## The Thor
 
-The same Dockerfile builds the Jetson image with
+Jetson AGX Thor, JetPack 7.1 (L4T r38.4), 120 W power mode, run
+2026-10-30 from `logs/thor-agx-jetpack71/`. The same Dockerfile built the
+Jetson image on the board with
 `--build-arg ARCH=sbsa --build-arg SUITE=noble-jetpack --build-arg JETSON_REPO=common`
 (the Isaac ROS `noble-jetpack` suite and the L4T r38.4 user-space
-repository, matching JetPack 7.1 on the board). Docker on the Thor stores
-images under `/var/lib/docker` on the board's root disk, which has 37 GB
-free; the x86 image is 30 GB, and the Jetson one will be of the same order.
-That is a fixed-path write on a nearly full disk, so it is a decision for the
-board's owner, not for this study. Until it runs, this case study has no
-Jetson number, and it says so.
+repository): 25.4 GB, twelve minutes once the board's network held (the
+first attempt failed on package downloads during a Wi-Fi drop). The same
+package versions as on the workstation came down (`packages.txt`:
+`libnvinfer10 10.16.1.11+cuda13.2`, Isaac ROS 4.5.0).
+[`run_thor_quickstart.sh`](run_thor_quickstart.sh) is the host side: it
+starts `tegrastats` at 1 Hz, runs `run_quickstart.sh` in the container with
+the NVIDIA runtime, and stops the sampler.
+
+- **The GPU has to be asked for.** The first run on the board produced no
+  detections: `libcuda.so.1` was missing inside the container. The image is
+  plain Ubuntu, so it carries no `NVIDIA_VISIBLE_DEVICES`, and the NVIDIA
+  runtime on JetPack 7 mounts the driver only when that variable is set
+  (`nvidia/cuda` base images set it for you). With
+  `NVIDIA_VISIBLE_DEVICES=all NVIDIA_DRIVER_CAPABILITIES=all` the container
+  sees `/dev/nvidia0` and the driver library and `nvidia-smi` lists the
+  Thor. The failed run is kept off the repository; the wrapper carries the
+  fix.
+- **Engine.** Built by `isaac_ros_tensor_rt` from the same ONNX in 50 s
+  (14.0 MB plan, against 25 s and 15.3 MB on the workstation). The Thor's
+  engine is TensorRT 10.16 on sm_110; the x86 one must not be copied over,
+  and the runner lets the node build it.
+- **Throughput and latency.** At 9.6 Hz input the graph emits 5.25 Hz of
+  nine-box detections (same classes and scores as on the workstation,
+  median 0.81), out to in 0.55 against 0.68 on the shared 5090. Stamp-matched
+  latency 15.5 ms at the median; p95 0.9 s from the same loop-restart
+  matches as on x86. The frame drop is therefore larger on the Thor and is
+  still the open item: this graph as launched by the quickstart does not
+  process every frame of the looped bag on either machine, and these runs do
+  not say which node drops them.
+- **Power** (tegrastats, whole board `VIN` and `VDD_GPU`, medians over each
+  phase): engine build 25.8 W board, 2.6 W GPU rail (max 5.9 W); graph idle
+  with the engine loaded 23.6 W, 2.0 W; the 60 s measurement window 23.5 W
+  board (max 32.7 W), 2.2 W GPU rail (max 3.9 W). The GPU rail barely
+  moves: at 5 Hz of YOLOv8n this graph is not GPU-bound on the Thor.
+  `table.py` prints the whole-run medians (24.4 W, 2.4 W) because the
+  record has no phase boundaries; the phase figures above were read from the
+  same log by the run's timestamps.
+- **Board state.** The board was otherwise idle (no other GPU process). The
+  board's image store and this run's logs sit under the owner's home
+  directory; nothing on the board was reconfigured.
 
 ## Layout
 
@@ -92,7 +130,8 @@ Jetson number, and it says so.
 | `run_quickstart.sh` | launch, playback, measurement, package inventory (runs inside the container) |
 | `measure_quickstart.py` | the rclpy meter |
 | `table.py` | the results table from `logs/*/isaac_ros_yolov8_quickstart-*.json` |
-| `logs/<run>/` | the JSON record, `launch.log`, `bag_play.log`, `nodes.txt`, `topics.txt`, `packages.txt`, host `nvidia_smi_host.csv` |
+| `run_thor_quickstart.sh` | Jetson host wrapper: tegrastats around the container run, with the GPU visibility variables the NVIDIA runtime needs |
+| `logs/<run>/` | the JSON record, `launch.log`, `bag_play.log`, `nodes.txt`, `topics.txt`, `packages.txt`, and the host sampler: `nvidia_smi_host.csv` (x86) or `tegrastats_host.log` plus `nvpmodel.txt` (Thor) |
 
 Not in the repository: the quickstart bag and the ONNX and engine files
 (fetched or built as described above).
