@@ -1,0 +1,722 @@
+{
+  "protocol": {
+    "iou": 0.5,
+    "score_threshold": 0.0,
+    "max_detections_per_image": 100,
+    "interpolation_points": 101,
+    "tie_order": "input order",
+    "crowd_policy": "reject"
+  },
+  "images": 500,
+  "images_with_predictions": 500,
+  "tp": 2473,
+  "fp": 31867,
+  "fn": 445,
+  "precision": 0.07201514269073966,
+  "recall": 0.8474982864976011,
+  "mean_ap_at_declared_iou": 0.65320480096814,
+  "per_class": [
+    {
+      "category_id": 1,
+      "positives": 838,
+      "tp": 735,
+      "fp": 3383,
+      "fn": 103,
+      "ap": 0.7961445077039537
+    },
+    {
+      "category_id": 2,
+      "positives": 34,
+      "tp": 30,
+      "fp": 434,
+      "fn": 4,
+      "ap": 0.654762823359237
+    },
+    {
+      "category_id": 3,
+      "positives": 146,
+      "tp": 123,
+      "fp": 1386,
+      "fn": 23,
+      "ap": 0.6794714801013827
+    },
+    {
+      "category_id": 4,
+      "positives": 32,
+      "tp": 30,
+      "fp": 251,
+      "fn": 2,
+      "ap": 0.7696201681916343
+    },
+    {
+      "category_id": 5,
+      "positives": 10,
+      "tp": 9,
+      "fp": 159,
+      "fn": 1,
+      "ap": 0.900990099009901
+    },
+    {
+      "category_id": 6,
+      "positives": 22,
+      "tp": 20,
+      "fp": 251,
+      "fn": 2,
+      "ap": 0.8752188262304493
+    },
+    {
+      "category_id": 7,
+      "positives": 18,
+      "tp": 16,
+      "fp": 211,
+      "fn": 2,
+      "ap": 0.8237623762376238
+    },
+    {
+      "category_id": 8,
+      "positives": 28,
+      "tp": 24,
+      "fp": 642,
+      "fn": 4,
+      "ap": 0.36575002977961846
+    },
+    {
+      "category_id": 9,
+      "positives": 30,
+      "tp": 21,
+      "fp": 506,
+      "fn": 9,
+      "ap": 0.34604188762969523
+    },
+    {
+      "category_id": 10,
+      "positives": 28,
+      "tp": 19,
+      "fp": 421,
+      "fn": 9,
+      "ap": 0.419222934582245
+    },
+    {
+      "category_id": 11,
+      "positives": 11,
+      "tp": 10,
+      "fp": 90,
+      "fn": 1,
+      "ap": 0.8016142918639696
+    },
+    {
+      "category_id": 13,
+      "positives": 4,
+      "tp": 4,
+      "fp": 104,
+      "fn": 0,
+      "ap": 1.0
+    },
+    {
+      "category_id": 14,
+      "positives": 14,
+      "tp": 11,
+      "fp": 100,
+      "fn": 3,
+      "ap": 0.662068174759803
+    },
+    {
+      "category_id": 15,
+      "positives": 35,
+      "tp": 26,
+      "fp": 1141,
+      "fn": 9,
+      "ap": 0.34558452718214255
+    },
+    {
+      "category_id": 16,
+      "positives": 22,
+      "tp": 18,
+      "fp": 542,
+      "fn": 4,
+      "ap": 0.6586763606515161
+    },
+    {
+      "category_id": 17,
+      "positives": 18,
+      "tp": 18,
+      "fp": 143,
+      "fn": 0,
+      "ap": 0.9940594059405944
+    },
+    {
+      "category_id": 18,
+      "positives": 12,
+      "tp": 12,
+      "fp": 284,
+      "fn": 0,
+      "ap": 0.9419741974197423
+    },
+    {
+      "category_id": 19,
+      "positives": 30,
+      "tp": 27,
+      "fp": 205,
+      "fn": 3,
+      "ap": 0.8546349909938491
+    },
+    {
+      "category_id": 20,
+      "positives": 18,
+      "tp": 17,
+      "fp": 303,
+      "fn": 1,
+      "ap": 0.8448638613861381
+    },
+    {
+      "category_id": 21,
+      "positives": 21,
+      "tp": 20,
+      "fp": 211,
+      "fn": 1,
+      "ap": 0.6730177004746314
+    },
+    {
+      "category_id": 22,
+      "positives": 24,
+      "tp": 24,
+      "fp": 147,
+      "fn": 0,
+      "ap": 1.0
+    },
+    {
+      "category_id": 23,
+      "positives": 4,
+      "tp": 4,
+      "fp": 56,
+      "fn": 0,
+      "ap": 1.0
+    },
+    {
+      "category_id": 24,
+      "positives": 30,
+      "tp": 29,
+      "fp": 116,
+      "fn": 1,
+      "ap": 0.9289730634475034
+    },
+    {
+      "category_id": 25,
+      "positives": 17,
+      "tp": 12,
+      "fp": 84,
+      "fn": 5,
+      "ap": 0.7029702970297029
+    },
+    {
+      "category_id": 27,
+      "positives": 32,
+      "tp": 20,
+      "fp": 753,
+      "fn": 12,
+      "ap": 0.23398731035889786
+    },
+    {
+      "category_id": 28,
+      "positives": 18,
+      "tp": 13,
+      "fp": 283,
+      "fn": 5,
+      "ap": 0.5469097006662529
+    },
+    {
+      "category_id": 31,
+      "positives": 34,
+      "tp": 24,
+      "fp": 1022,
+      "fn": 10,
+      "ap": 0.3388293598020498
+    },
+    {
+      "category_id": 32,
+      "positives": 32,
+      "tp": 23,
+      "fp": 268,
+      "fn": 9,
+      "ap": 0.6560314042931803
+    },
+    {
+      "category_id": 33,
+      "positives": 20,
+      "tp": 18,
+      "fp": 465,
+      "fn": 2,
+      "ap": 0.7728429489294472
+    },
+    {
+      "category_id": 34,
+      "positives": 14,
+      "tp": 14,
+      "fp": 109,
+      "fn": 0,
+      "ap": 0.994719471947195
+    },
+    {
+      "category_id": 35,
+      "positives": 25,
+      "tp": 21,
+      "fp": 366,
+      "fn": 4,
+      "ap": 0.4515077822116404
+    },
+    {
+      "category_id": 36,
+      "positives": 4,
+      "tp": 4,
+      "fp": 214,
+      "fn": 0,
+      "ap": 0.7807637906647806
+    },
+    {
+      "category_id": 37,
+      "positives": 18,
+      "tp": 17,
+      "fp": 221,
+      "fn": 1,
+      "ap": 0.795332933293328
+    },
+    {
+      "category_id": 38,
+      "positives": 12,
+      "tp": 11,
+      "fp": 188,
+      "fn": 1,
+      "ap": 0.7879208973528931
+    },
+    {
+      "category_id": 39,
+      "positives": 7,
+      "tp": 7,
+      "fp": 134,
+      "fn": 0,
+      "ap": 1.0
+    },
+    {
+      "category_id": 40,
+      "positives": 9,
+      "tp": 8,
+      "fp": 163,
+      "fn": 1,
+      "ap": 0.7986798679867995
+    },
+    {
+      "category_id": 41,
+      "positives": 11,
+      "tp": 6,
+      "fp": 218,
+      "fn": 5,
+      "ap": 0.3557972902553417
+    },
+    {
+      "category_id": 42,
+      "positives": 28,
+      "tp": 26,
+      "fp": 364,
+      "fn": 2,
+      "ap": 0.773672305313073
+    },
+    {
+      "category_id": 43,
+      "positives": 16,
+      "tp": 15,
+      "fp": 137,
+      "fn": 1,
+      "ap": 0.8789250353606792
+    },
+    {
+      "category_id": 44,
+      "positives": 88,
+      "tp": 61,
+      "fp": 983,
+      "fn": 27,
+      "ap": 0.46128508643265875
+    },
+    {
+      "category_id": 46,
+      "positives": 34,
+      "tp": 23,
+      "fp": 188,
+      "fn": 11,
+      "ap": 0.5650503207392078
+    },
+    {
+      "category_id": 47,
+      "positives": 83,
+      "tp": 64,
+      "fp": 883,
+      "fn": 19,
+      "ap": 0.5462391217995117
+    },
+    {
+      "category_id": 48,
+      "positives": 14,
+      "tp": 11,
+      "fp": 233,
+      "fn": 3,
+      "ap": 0.4890477421376312
+    },
+    {
+      "category_id": 49,
+      "positives": 32,
+      "tp": 26,
+      "fp": 418,
+      "fn": 6,
+      "ap": 0.4009680639594619
+    },
+    {
+      "category_id": 50,
+      "positives": 19,
+      "tp": 10,
+      "fp": 356,
+      "fn": 9,
+      "ap": 0.20448049259223608
+    },
+    {
+      "category_id": 51,
+      "positives": 52,
+      "tp": 45,
+      "fp": 733,
+      "fn": 7,
+      "ap": 0.6036555122450119
+    },
+    {
+      "category_id": 52,
+      "positives": 27,
+      "tp": 21,
+      "fp": 369,
+      "fn": 6,
+      "ap": 0.4732785923786235
+    },
+    {
+      "category_id": 53,
+      "positives": 19,
+      "tp": 14,
+      "fp": 331,
+      "fn": 5,
+      "ap": 0.24319270963718992
+    },
+    {
+      "category_id": 54,
+      "positives": 19,
+      "tp": 17,
+      "fp": 213,
+      "fn": 2,
+      "ap": 0.5434493337665857
+    },
+    {
+      "category_id": 55,
+      "positives": 28,
+      "tp": 26,
+      "fp": 241,
+      "fn": 2,
+      "ap": 0.692508488404479
+    },
+    {
+      "category_id": 56,
+      "positives": 45,
+      "tp": 39,
+      "fp": 644,
+      "fn": 6,
+      "ap": 0.3509984590670157
+    },
+    {
+      "category_id": 57,
+      "positives": 26,
+      "tp": 24,
+      "fp": 438,
+      "fn": 2,
+      "ap": 0.46919975315342977
+    },
+    {
+      "category_id": 58,
+      "positives": 15,
+      "tp": 15,
+      "fp": 173,
+      "fn": 0,
+      "ap": 0.8422004671863069
+    },
+    {
+      "category_id": 59,
+      "positives": 20,
+      "tp": 20,
+      "fp": 170,
+      "fn": 0,
+      "ap": 0.886023508340797
+    },
+    {
+      "category_id": 60,
+      "positives": 14,
+      "tp": 11,
+      "fp": 203,
+      "fn": 3,
+      "ap": 0.3831360632189716
+    },
+    {
+      "category_id": 61,
+      "positives": 10,
+      "tp": 9,
+      "fp": 242,
+      "fn": 1,
+      "ap": 0.6875313754467413
+    },
+    {
+      "category_id": 62,
+      "positives": 143,
+      "tp": 127,
+      "fp": 1797,
+      "fn": 16,
+      "ap": 0.6263075980497773
+    },
+    {
+      "category_id": 63,
+      "positives": 27,
+      "tp": 25,
+      "fp": 424,
+      "fn": 2,
+      "ap": 0.6874665054130943
+    },
+    {
+      "category_id": 64,
+      "positives": 38,
+      "tp": 23,
+      "fp": 565,
+      "fn": 15,
+      "ap": 0.3692044096169104
+    },
+    {
+      "category_id": 65,
+      "positives": 18,
+      "tp": 17,
+      "fp": 241,
+      "fn": 1,
+      "ap": 0.8556635927049444
+    },
+    {
+      "category_id": 67,
+      "positives": 59,
+      "tp": 54,
+      "fp": 810,
+      "fn": 5,
+      "ap": 0.5464621638128497
+    },
+    {
+      "category_id": 70,
+      "positives": 21,
+      "tp": 20,
+      "fp": 170,
+      "fn": 1,
+      "ap": 0.8975897589758979
+    },
+    {
+      "category_id": 72,
+      "positives": 31,
+      "tp": 31,
+      "fp": 277,
+      "fn": 0,
+      "ap": 0.8376184204105424
+    },
+    {
+      "category_id": 73,
+      "positives": 32,
+      "tp": 31,
+      "fp": 250,
+      "fn": 1,
+      "ap": 0.8260220339959944
+    },
+    {
+      "category_id": 74,
+      "positives": 15,
+      "tp": 15,
+      "fp": 138,
+      "fn": 0,
+      "ap": 0.9081370809403311
+    },
+    {
+      "category_id": 75,
+      "positives": 29,
+      "tp": 21,
+      "fp": 431,
+      "fn": 8,
+      "ap": 0.3485010287667151
+    },
+    {
+      "category_id": 76,
+      "positives": 21,
+      "tp": 18,
+      "fp": 179,
+      "fn": 3,
+      "ap": 0.5849300373233832
+    },
+    {
+      "category_id": 77,
+      "positives": 26,
+      "tp": 24,
+      "fp": 494,
+      "fn": 2,
+      "ap": 0.6512564553240637
+    },
+    {
+      "category_id": 78,
+      "positives": 3,
+      "tp": 3,
+      "fp": 100,
+      "fn": 0,
+      "ap": 0.6806930693069299
+    },
+    {
+      "category_id": 79,
+      "positives": 18,
+      "tp": 12,
+      "fp": 223,
+      "fn": 6,
+      "ap": 0.40502727128746296
+    },
+    {
+      "category_id": 80,
+      "positives": 0,
+      "tp": 0,
+      "fp": 53,
+      "fn": 0,
+      "ap": null
+    },
+    {
+      "category_id": 81,
+      "positives": 21,
+      "tp": 16,
+      "fp": 300,
+      "fn": 5,
+      "ap": 0.6977285963890504
+    },
+    {
+      "category_id": 82,
+      "positives": 13,
+      "tp": 10,
+      "fp": 179,
+      "fn": 3,
+      "ap": 0.7392739273927396
+    },
+    {
+      "category_id": 84,
+      "positives": 77,
+      "tp": 54,
+      "fp": 1121,
+      "fn": 23,
+      "ap": 0.2977233797288953
+    },
+    {
+      "category_id": 85,
+      "positives": 21,
+      "tp": 19,
+      "fp": 377,
+      "fn": 2,
+      "ap": 0.783846757722425
+    },
+    {
+      "category_id": 86,
+      "positives": 20,
+      "tp": 19,
+      "fp": 349,
+      "fn": 1,
+      "ap": 0.6296106396353921
+    },
+    {
+      "category_id": 87,
+      "positives": 0,
+      "tp": 0,
+      "fp": 114,
+      "fn": 0,
+      "ap": null
+    },
+    {
+      "category_id": 88,
+      "positives": 13,
+      "tp": 11,
+      "fp": 198,
+      "fn": 2,
+      "ap": 0.792786421499294
+    },
+    {
+      "category_id": 89,
+      "positives": 0,
+      "tp": 0,
+      "fp": 59,
+      "fn": 0,
+      "ap": null
+    },
+    {
+      "category_id": 90,
+      "positives": 1,
+      "tp": 1,
+      "fp": 125,
+      "fn": 0,
+      "ap": 0.08333333333333325
+    }
+  ],
+  "schema_version": "detection-accuracy-1",
+  "created_at": "2026-10-30T08:54:50.070127+00:00",
+  "device": "field-orin",
+  "machine": "aarch64",
+  "python": "3.10.12",
+  "evaluation_source_commit": "4f48e48d5b3e02a0b1caaa9ad4a7f42238929d98",
+  "evaluation_source_dirty": true,
+  "evaluator_sha256": "ccea964e2ef13ed4d68144361312bad8917759616527c5d22fd846d68d3d4b56",
+  "dataset_sha256": "6ec360f41b57ed65ce7f3422acc6f37023a7df74b9d0bdde27b4608f793f0b19",
+  "predictions_sha256": "c28603e3d0d94a30a5ee95641175aec3ce365caea29cad2e46bb878b8e340456",
+  "model_sha256": "00b70c44385bb5567e784b0c1efae213c4f2ec06efacfc8e3f52eca333356205",
+  "configuration": {
+    "model": "yolox_s.onnx",
+    "input_size": 640,
+    "letterbox_pad": 114,
+    "layout": "NCHW BGR 0..255",
+    "nms_threshold": 0.45,
+    "score_threshold_kept": 0.001,
+    "deployment_score_threshold": 0.3,
+    "class_map": "YOLOX index to COCO category id in id order"
+  },
+  "prediction_kind": "measured",
+  "inference_provenance": {
+    "recorded_at": "2026-10-30T02:49:01-05:00",
+    "device": "field-orin",
+    "source_sha256": "e2621d4d6ae0d1793b0ce3d24664092fdf6f57d5c792fd34760be2a4f6e37b69",
+    "source": "case_studies/01_perception_detector/eval_coco_subset.py",
+    "provider_requested": "tensorrt",
+    "provider": "TensorrtExecutionProvider",
+    "precision": "fp16",
+    "trt_cache_dir": "<home>/b2f-quant-20261030/.trt_cache",
+    "int8_calibration_table": null,
+    "int8_calibration_table_sha256": null,
+    "trt_max_workspace_mb": 1024,
+    "onnxruntime": "1.24.0",
+    "backend": {
+      "backend": "onnxruntime",
+      "onnxruntime": "1.24.0",
+      "tensorrt": "10.7.0",
+      "cudnn": "9.3.0",
+      "cuda_runtime": "12.6",
+      "provider_active": "TensorrtExecutionProvider",
+      "precision": "fp16",
+      "intra_op_threads": "default",
+      "inter_op_threads": "default",
+      "allow_spinning": true
+    },
+    "images": 500,
+    "wall_s": 22.8,
+    "inference_ms_median": 19.646,
+    "git": {
+      "commit": "4f48e48d5b3e02a0b1caaa9ad4a7f42238929d98",
+      "dirty": true
+    },
+    "data_dir": "<home>/data/coco"
+  },
+  "reference_review": {
+    "status": "unverified"
+  },
+  "scope": "fixed-IoU saved-output evaluation; no inference or speed promotion",
+  "full_coco_map": false,
+  "promotion_accepted": false
+}

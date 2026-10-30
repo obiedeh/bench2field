@@ -1,0 +1,151 @@
+{
+  "sweep": "phase2-precision-ladder",
+  "config_file": "case_studies/01_perception_detector/sweeps/phase2_precision.yaml",
+  "config": {
+    "name": "phase2-precision-ladder",
+    "variants": [
+      {
+        "label": "trt_fp32",
+        "model": "models/yolox_s.onnx",
+        "provider": "tensorrt",
+        "precision": "fp32",
+        "technique": "baseline",
+        "name": "yolox-s",
+        "trt_cache_dir": ".trt_cache/fp32",
+        "calibration_table": null,
+        "trt_workspace_mb": 0
+      },
+      {
+        "label": "trt_fp16",
+        "model": "models/yolox_s.onnx",
+        "provider": "tensorrt",
+        "precision": "fp16",
+        "technique": "fp16",
+        "name": "yolox-s",
+        "trt_cache_dir": ".trt_cache/fp16",
+        "calibration_table": null,
+        "trt_workspace_mb": 0
+      },
+      {
+        "label": "trt_int8",
+        "model": "models/yolox_s.onnx",
+        "provider": "tensorrt",
+        "precision": "int8",
+        "technique": "int8-ptq-minmax",
+        "name": "yolox-s",
+        "trt_cache_dir": ".trt_cache/int8",
+        "calibration_table": "calibration.flatbuffers",
+        "trt_workspace_mb": 0
+      }
+    ],
+    "repeats": 3,
+    "environment": "bench-idle",
+    "tiers_hz": [
+      10,
+      26,
+      30,
+      100
+    ],
+    "duration_s": 60,
+    "warmup_s": 5,
+    "deadline_ms": 33.3,
+    "drop_late": false,
+    "cooldown_c": null,
+    "replay": null,
+    "only": null,
+    "stopped": [],
+    "no_spin": true
+  },
+  "host": "bench-thor",
+  "git": {
+    "commit": "4f48e48d5b3e02a0b1caaa9ad4a7f42238929d98",
+    "dirty": true,
+    "root": "<home>/b2f-quant-20261030"
+  },
+  "started_at": "2026-10-30T08:10:17.484576+00:00",
+  "finished_at": "2026-10-30T09:19:37.655658+00:00",
+  "complete": true,
+  "runs": [
+    {
+      "order": 1,
+      "label": "trt_fp32",
+      "repeat": 1,
+      "file": "trt_fp32_r1.json",
+      "started_at": "2026-10-30T08:10:17.484654+00:00",
+      "run_id": "015f5be848ab",
+      "finished_at": "2026-10-30T08:22:43.645239+00:00"
+    },
+    {
+      "order": 2,
+      "label": "trt_fp16",
+      "repeat": 1,
+      "file": "trt_fp16_r1.json",
+      "started_at": "2026-10-30T08:22:43.645771+00:00",
+      "run_id": "1db039a7bf1a",
+      "finished_at": "2026-10-30T08:37:46.290404+00:00"
+    },
+    {
+      "order": 3,
+      "label": "trt_int8",
+      "repeat": 1,
+      "file": "trt_int8_r1.json",
+      "started_at": "2026-10-30T08:37:46.290842+00:00",
+      "run_id": "3051f36364d6",
+      "finished_at": "2026-10-30T08:53:23.806470+00:00"
+    },
+    {
+      "order": 4,
+      "label": "trt_fp32",
+      "repeat": 2,
+      "file": "trt_fp32_r2.json",
+      "started_at": "2026-10-30T08:53:23.806984+00:00",
+      "run_id": "0c305a5cdc9b",
+      "finished_at": "2026-10-30T08:57:46.145272+00:00"
+    },
+    {
+      "order": 5,
+      "label": "trt_fp16",
+      "repeat": 2,
+      "file": "trt_fp16_r2.json",
+      "started_at": "2026-10-30T08:57:46.145621+00:00",
+      "run_id": "aa66f3a7ba44",
+      "finished_at": "2026-10-30T09:02:08.416436+00:00"
+    },
+    {
+      "order": 6,
+      "label": "trt_int8",
+      "repeat": 2,
+      "file": "trt_int8_r2.json",
+      "started_at": "2026-10-30T09:02:08.416996+00:00",
+      "run_id": "152a3c148a41",
+      "finished_at": "2026-10-30T09:06:30.802429+00:00"
+    },
+    {
+      "order": 7,
+      "label": "trt_fp32",
+      "repeat": 3,
+      "file": "trt_fp32_r3.json",
+      "started_at": "2026-10-30T09:06:30.802968+00:00",
+      "run_id": "815185796c30",
+      "finished_at": "2026-10-30T09:10:53.092955+00:00"
+    },
+    {
+      "order": 8,
+      "label": "trt_fp16",
+      "repeat": 3,
+      "file": "trt_fp16_r3.json",
+      "started_at": "2026-10-30T09:10:53.093346+00:00",
+      "run_id": "cf4fc2a55599",
+      "finished_at": "2026-10-30T09:15:15.316566+00:00"
+    },
+    {
+      "order": 9,
+      "label": "trt_int8",
+      "repeat": 3,
+      "file": "trt_int8_r3.json",
+      "started_at": "2026-10-30T09:15:15.316935+00:00",
+      "run_id": "1b9eb1a4dc78",
+      "finished_at": "2026-10-30T09:19:37.655343+00:00"
+    }
+  ]
+}

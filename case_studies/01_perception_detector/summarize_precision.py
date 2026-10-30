@@ -55,22 +55,38 @@ def accuracy_row(board: str, precision: str) -> dict | None:
         p = json.loads(pred.read_text())
         n_boxes = len(p["predictions"])
         infer_ms = p["inference"].get("inference_ms_median")
-    person = next((c.get("ap") for c in a.get("per_class", []) if c.get("category_id") == 1), None)   # COCO category 1 is person
-    return {"map": a["mean_ap_at_declared_iou"], "recall": a["recall"], "precision_dep": b["precision"],
-            "recall_dep": b["recall"], "boxes": n_boxes, "infer_ms": infer_ms, "person_ap": person}
+    person = next(
+        (c.get("ap") for c in a.get("per_class", []) if c.get("category_id") == 1), None
+    )  # COCO category 1 is person
+    return {
+        "map": a["mean_ap_at_declared_iou"],
+        "recall": a["recall"],
+        "precision_dep": b["precision"],
+        "recall_dep": b["recall"],
+        "boxes": n_boxes,
+        "infer_ms": infer_ms,
+        "person_ap": person,
+    }
 
 
 def accuracy_tables() -> None:
     print("## Accuracy, 500-image COCO val2017 subset, TensorRT provider\n")
-    print("| board | precision | mean AP at IoU 0.5 | person AP | recall at 0.001 | precision / recall at 0.3 | boxes kept | session.run median |")
+    print(
+        "| board | precision | mean AP at IoU 0.5 | person AP | recall at 0.001 | precision / recall at 0.3 | boxes kept | session.run median |"
+    )
     print("|---|---|---|---|---|---|---|---|")
     for name, (_sub, board) in BOARDS.items():
         for prec in PRECISIONS:
             r = accuracy_row(board, prec)
             if r is None:
                 continue
-            print(f"| {name} | {prec} | {r['map']:.4f} | {f'{r['person_ap']:.4f}' if r['person_ap'] is not None else '-'} | {r['recall']:.3f} | {r['precision_dep']:.3f} / {r['recall_dep']:.3f} | "
-                  f"{r['boxes'] if r['boxes'] is not None else '-'} | {f'{r['infer_ms']:.2f} ms' if r['infer_ms'] else '-'} |")
+            person = f"{r['person_ap']:.4f}" if r["person_ap"] is not None else "-"
+            boxes = r["boxes"] if r["boxes"] is not None else "-"
+            infer = f"{r['infer_ms']:.2f} ms" if r["infer_ms"] else "-"
+            print(
+                f"| {name} | {prec} | {r['map']:.4f} | {person} | {r['recall']:.3f} | "
+                f"{r['precision_dep']:.3f} / {r['recall_dep']:.3f} | {boxes} | {infer} |"
+            )
     print()
 
 
@@ -85,15 +101,29 @@ def sweep_tables() -> None:
         cfg = SweepConfig.from_dict(m["config"])
         first = RunReport.load(report_path(d, cfg.variants[0], 1))
         p = first.platform
-        power_key = "power_board_w" if "power_board_w" in first.tier(cfg.tiers_hz[0]).telemetry else "power_gpu_w"
-        print(f"### {name}: `{sub}/`, sweep `{m['sweep']}`, {'complete' if m['complete'] else 'INCOMPLETE'}")
-        print(f"onnxruntime {p.get('onnxruntime')}, TensorRT {p.get('tensorrt')}, CUDA {p.get('cuda_runtime')}, "
-              f"power mode {p.get('nvpmodel') or 'n/a'}\n")
-        print(f"| variant | Hz | response p50 (median, range) | response p95 (median, range) | response p99 | "
-              f"service p95 | misses / scheduled | {power_key} p50 |")
+        power_key = (
+            "power_board_w"
+            if "power_board_w" in first.tier(cfg.tiers_hz[0]).telemetry
+            else "power_gpu_w"
+        )
+        print(
+            f"### {name}: `{sub}/`, sweep `{m['sweep']}`, {'complete' if m['complete'] else 'INCOMPLETE'}"
+        )
+        print(
+            f"onnxruntime {p.get('onnxruntime')}, TensorRT {p.get('tensorrt')}, CUDA {p.get('cuda_runtime')}, "
+            f"power mode {p.get('nvpmodel') or 'n/a'}\n"
+        )
+        print(
+            f"| variant | Hz | response p50 (median, range) | response p95 (median, range) | response p99 | "
+            f"service p95 | misses / scheduled | {power_key} p50 |"
+        )
         print("|---|---|---|---|---|---|---|---|")
         for v in cfg.variants:
-            reps = [RunReport.load(report_path(d, v, r)) for r in range(1, cfg.repeats + 1) if report_path(d, v, r).exists()]
+            reps = [
+                RunReport.load(report_path(d, v, r))
+                for r in range(1, cfg.repeats + 1)
+                if report_path(d, v, r).exists()
+            ]
             if not reps:
                 continue
             for hz in cfg.tiers_hz:
@@ -103,9 +133,11 @@ def sweep_tables() -> None:
                 svc = repeat_stat(reps, hz, "p95_ms")
                 misses = sum(r.tier(hz).deadline_misses for r in reps)
                 sched = sum(r.tier(hz).n_scheduled for r in reps)
-                print(f"| {v.label} | {hz:g} | {s50.median:.3f} ({s50.lo:.3f}–{s50.hi:.3f}) | "
-                      f"{s95.median:.3f} ({s95.lo:.3f}–{s95.hi:.3f}) | {s99.median:.3f} | {svc.median:.3f} | "
-                      f"{misses} / {sched} | {tel(reps, hz, power_key)} |")
+                print(
+                    f"| {v.label} | {hz:g} | {s50.median:.3f} ({s50.lo:.3f} to {s50.hi:.3f}) | "
+                    f"{s95.median:.3f} ({s95.lo:.3f} to {s95.hi:.3f}) | {s99.median:.3f} | {svc.median:.3f} | "
+                    f"{misses} / {sched} | {tel(reps, hz, power_key)} |"
+                )
         print()
 
 
