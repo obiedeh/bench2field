@@ -1,0 +1,4 @@
+# dataset input, bench-5090, sdpa, clip 06b483cf-6d9c-4b18-b54b-4429c80867e3, t0_us 5100000
+# generated tokens 35, latency 1.1654 s
+
+Change lanes to the left due to the upcoming pedestrian crossing and to position in the through lane while maintaining safe clearance from the right curb and following the lead vehicle.
