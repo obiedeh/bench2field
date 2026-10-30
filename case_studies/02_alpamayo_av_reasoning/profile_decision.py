@@ -17,9 +17,10 @@ Writes one JSON under runs/ with:
 
     stages        CUDA time and CPU time per labelled stage, and the wall time of
                   the decision measured outside the profiler
-    top_kernels   the 25 CUDA kernels with the most device time (name, calls,
-                  total and mean device time, share of the decision's device time)
-    top_ops       the 25 operators (aten and module level) with the most device time
+    top_kernels   the 25 device-side kernels with the most device time (name,
+                  calls, total and mean device time, share of the kernel table)
+    top_ops       the 25 host-side aten operators with the most device time, the
+                  sum of the kernels each one launched (share of the op table)
     decode        per-token timestamps of the rollout, so the decode rate can be
                   plotted over the trace
     telemetry     NVML samples (power, utilisation, clocks, temperature, memory)
@@ -108,21 +109,35 @@ def run_once(model: Any, processor: Any, data: dict[str, Any]) -> tuple[float, A
 
 
 def table(prof: Any, key: str, n: int) -> list[dict[str, Any]]:
-    rows = []
-    total_dev = sum(getattr(e, "device_time_total", 0) for e in prof.key_averages()) or 1.0
-    for e in sorted(prof.key_averages(), key=lambda e: getattr(e, "device_time_total", 0), reverse=True):
-        if key == "kernel" and not getattr(e, "device_time_total", 0):
+    """Top-n rows by device time. ``kernel`` rows are device-side events (the CUDA
+    kernels themselves); ``op`` rows are host-side aten operators, whose device
+    time is the sum of the kernels they launched. The stage labels from
+    ``record_function`` are reported in ``stages`` and excluded here, so a
+    share is a share of one table, not of a total that counts the same
+    microseconds twice."""
+    events = []
+    for e in prof.key_averages():
+        if e.key.startswith("stage:"):
             continue
+        is_kernel = str(getattr(e, "device_type", "")).endswith("CUDA")
+        if (key == "kernel") != is_kernel:
+            continue
+        if key == "op" and not e.key.startswith("aten::"):
+            continue
+        if not getattr(e, "device_time_total", 0):
+            continue
+        events.append(e)
+    total_dev = sum(getattr(e, "device_time_total", 0) for e in events) or 1.0
+    rows = []
+    for e in sorted(events, key=lambda e: getattr(e, "device_time_total", 0), reverse=True)[:n]:
         rows.append({
             "name": e.key[:160],
             "calls": int(e.count),
             "device_time_ms": round(getattr(e, "device_time_total", 0) / 1000, 3),
             "device_time_mean_us": round(getattr(e, "device_time_total", 0) / max(e.count, 1), 1),
             "cpu_time_ms": round(e.cpu_time_total / 1000, 3),
-            "share_of_device_time_pct": round(100 * getattr(e, "device_time_total", 0) / total_dev, 2),
+            "share_of_table_device_time_pct": round(100 * getattr(e, "device_time_total", 0) / total_dev, 2),
         })
-        if len(rows) >= n:
-            break
     return rows
 
 
@@ -159,7 +174,7 @@ def main(argv: list[str] | None = None) -> int:
     sampler = rd.start_sampler(args.board, interval_s=0.25)
     h = rd.nvml_handle()
 
-    model, processor, load = rd.load_model(rd.VARIANTS[args.variant])
+    model, processor, load = rd.load_model(rd.VARIANTS[args.variant], rd.EXPERT_ATTN[args.variant])
     labels = StageLabels(model)
     data = (rd.synthetic_sample if args.synthetic else rd.dataset_sample)(clip, int(cfg["t0_us"]), int(cfg["num_frames"]))
 
@@ -185,6 +200,7 @@ def main(argv: list[str] | None = None) -> int:
         "board": args.board,
         "variant": args.variant,
         "attn_implementation": rd.VARIANTS[args.variant],
+        "attn_implementation_expert": rd.EXPERT_ATTN[args.variant],
         "model_id": rd.MODEL_ID,
         "captured_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "clip_id": clip,
