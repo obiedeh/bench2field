@@ -102,7 +102,7 @@ def fig(w: float = 7.2, h: float = 3.6, n: int = 1, sharex: bool = False) -> tup
 def save(f: Any, name: str) -> None:
     REPORT.mkdir(exist_ok=True)
     f.tight_layout()
-    f.savefig(REPORT / name, facecolor=SURFACE)
+    f.savefig(REPORT / name, facecolor=SURFACE, metadata={"Date": None})  # no timestamp, so an unchanged plot is an unchanged file
     f.savefig((REPORT / name).with_suffix(".png"), facecolor=SURFACE, dpi=160)  # the README embeds the SVG; the PNG is for viewers without SVG
     pyplot().close(f)
     print(f"wrote report/{name} (+ .png)", file=sys.stderr)

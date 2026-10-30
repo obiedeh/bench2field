@@ -1,0 +1,4 @@
+# dataset input, bench-thor, sdpa, clip 030c760c-ae38-49aa-9ad8-f5650a545d26, t0_us 5100000
+# generated tokens 22, latency 4.8666 s
+
+Nudge to the left to increase clearance from the construction vehicle encroaching on the lane.

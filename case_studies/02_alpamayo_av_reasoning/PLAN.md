@@ -70,8 +70,8 @@ the numbers (AGENTS.md rule 3). Changes to this plan are appended, dated, under
 - [x] profiler and NVML timeline on one decision; plots under `report/`
 
 ### Phase 4: Thor
-- [ ] same clips, same protocol, sdpa, Jetson torch wheel named; `runs/decisions_bench-thor_sdpa.json`
-- [ ] comparison table and retention
+- [x] same clips, same protocol, sdpa, Jetson torch wheel named; `runs/decisions_bench-thor_sdpa.json`
+- [x] comparison table and retention
 
 ### Phase 5: Orin NX
 - [ ] why-not note with measured facts
