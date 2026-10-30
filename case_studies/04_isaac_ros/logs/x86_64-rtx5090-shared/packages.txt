@@ -1,0 +1,7 @@
+cuda-cudart-13-0 13.0.96-1
+libnvinfer10 10.16.1.11-1+cuda13.2
+ros-jazzy-isaac-ros-dnn-image-encoder 4.5.0-0noble.20260706171027940
+ros-jazzy-isaac-ros-nitros 4.5.0-0noble.20260706155832051
+ros-jazzy-isaac-ros-tensor-rt 4.5.0-0noble.20260706171146796
+ros-jazzy-isaac-ros-yolov8 4.5.0-0noble.20260706195202423
+tensorrt 11.4.0.106-1+cuda13.4

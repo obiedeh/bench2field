@@ -1,0 +1,39 @@
+{
+ "schema": "bench2field.isaac_ros.quickstart/1",
+ "label": "x86_64-rtx5090-shared-single-pass",
+ "window_s": 20.0,
+ "input": {
+  "topic": "/image_rect",
+  "messages": 18,
+  "hz": 0.9,
+  "encoding": "bgr8",
+  "shape_hw": [
+   640,
+   640
+  ]
+ },
+ "output": {
+  "topic": "/detections_output",
+  "messages": 2,
+  "hz": 0.1,
+  "detections_per_frame_mean": 9,
+  "detections_per_frame_min_max": [
+   9,
+   9
+  ],
+  "frames_with_no_detection": 0,
+  "class_ids": {
+   "0": 10,
+   "1": 8
+  },
+  "score_median": 0.811
+ },
+ "latency_ms_image_stamp_to_detections": {
+  "n": 2,
+  "p50": 2114.1,
+  "p95": 3293.64,
+  "max": 3293.64,
+  "note": "wall time between the meter receiving the image and receiving the detections with the same header stamp; includes the meter's own subscription path"
+ },
+ "recorded_at": "2026-10-30T08:06:28+0000"
+}
