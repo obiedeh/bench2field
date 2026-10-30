@@ -1,0 +1,101 @@
+{
+  "attention": {
+    "flash_attn_error": "ModuleNotFoundError: No module named 'flash_attn'",
+    "flash_attn_importable": false
+  },
+  "background": {
+    "containers_running": [],
+    "load_avg_1m": 1.083984375,
+    "stopped_for_this_run": [],
+    "top_processes": [
+      {
+        "cpu_pct": 100.0,
+        "exe": "ps",
+        "mem_pct": 0.0,
+        "pid": 9617
+      },
+      {
+        "cpu_pct": 30.1,
+        "exe": "sshd:",
+        "mem_pct": 0.0,
+        "pid": 9042
+      },
+      {
+        "cpu_pct": 10.9,
+        "exe": "rsync",
+        "mem_pct": 0.0,
+        "pid": 9044
+      },
+      {
+        "cpu_pct": 6.2,
+        "exe": "u44:0-TX_HDL]",
+        "mem_pct": 0.0,
+        "pid": 9045
+      },
+      {
+        "cpu_pct": 4.9,
+        "exe": "u44:2-TX_HDL]",
+        "mem_pct": 0.0,
+        "pid": 8462
+      }
+    ]
+  },
+  "board": "bench-thor",
+  "captured_at": "2026-10-29T21:15:35+00:00",
+  "gpu": {
+    "compute_capability": "11.0",
+    "cuda_available": true,
+    "driver": "580.00",
+    "multiprocessors": 20,
+    "name": "NVIDIA Thor",
+    "nvml_name": "NVIDIA Thor",
+    "total_memory_gib": 122.82
+  },
+  "os": {
+    "machine": "aarch64",
+    "release": "6.8.12-tegra",
+    "system": "Linux"
+  },
+  "packages": {
+    "alpamayo_r1": {
+      "commit": "11a0e01c13a5622377c45ee37d653351453ec43b",
+      "installed": true,
+      "source": "https://github.com/NVlabs/alpamayo",
+      "version": "0.1.0"
+    },
+    "bench2field": {
+      "commit": null,
+      "dirty": null,
+      "installed": true,
+      "source": "file://~/alpamayo-work/bench2field",
+      "version": "1.0.1"
+    },
+    "flash_attn": {
+      "installed": false
+    },
+    "physical_ai_av": {
+      "installed": true,
+      "version": "0.2.3"
+    },
+    "torch": {
+      "cuda_runtime": "13.0",
+      "installed": true,
+      "version": "2.11.0+cu130"
+    },
+    "torchvision": {
+      "installed": true,
+      "version": "0.26.0+cu130"
+    },
+    "transformers": {
+      "installed": true,
+      "version": "4.57.1"
+    }
+  },
+  "python": "3.12.3",
+  "resources": {
+    "disk_free_gib_under_hf_cache": 43.3,
+    "disk_total_gib_under_hf_cache": 936.0,
+    "ram_total_gib": 122.8
+  },
+  "schema": "bench2field.case_study_02.env/1"
+}

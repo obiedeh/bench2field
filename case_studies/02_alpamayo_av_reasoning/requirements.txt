@@ -1,0 +1,21 @@
+# Case study 02 environment, installed into this folder's own venv only.
+# These are the Alpamayo 1 pins (NVlabs/alpamayo pyproject: Python 3.12.x,
+# torch 2.8.0, transformers 4.57.1, flash-attn >= 2.8.3) plus what the
+# runner and plots need. b2f itself never needs any of this.
+#
+# Install order matters: torch first (flash-attn and alpamayo_r1 import it),
+# then the prebuilt flash-attn wheel, then everything else. setup_env.sh does
+# exactly this; the exact versions that resulted on the 5090 host are in
+# runs/env_bench-5090.json.
+#
+#   --index-url https://download.pytorch.org/whl/cu128
+torch==2.8.0
+torchvision==0.23.0
+#   prebuilt wheel, no source build (the sdist builds for about an hour):
+#   https://github.com/Dao-AILab/flash-attention/releases/download/v2.8.3/flash_attn-2.8.3+cu12torch2.8cxx11abiTRUE-cp312-cp312-linux_x86_64.whl
+flash-attn==2.8.3
+transformers==4.57.1
+alpamayo_r1 @ git+https://github.com/NVlabs/alpamayo@11a0e01c13a5622377c45ee37d653351453ec43b
+physical-ai-av>=0.2.0
+nvidia-ml-py>=12
+matplotlib>=3.10

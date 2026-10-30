@@ -1,0 +1,15 @@
+# Case study 02: nothing heavy is committed. Weights live in the Hugging Face
+# cache, clips are streamed per clip id, and the venv is local to this folder.
+.venv/
+weights/
+clips/
+data/
+hf_cache/
+*.safetensors
+*.pt
+*.pth
+*.bin
+*.nsys-rep
+*.ncu-rep
+*.pt.trace.json
+runs/scratch/

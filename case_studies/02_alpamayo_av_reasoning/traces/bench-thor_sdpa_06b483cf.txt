@@ -1,0 +1,4 @@
+# dataset input, bench-thor, sdpa, clip 06b483cf-6d9c-4b18-b54b-4429c80867e3, t0_us 5100000
+# generated tokens 32, latency 5.8878 s
+
+Change lanes to the left to position in the clearer through lane and maintain progress, while keeping safe clearance from the right curb and the lead vehicle.

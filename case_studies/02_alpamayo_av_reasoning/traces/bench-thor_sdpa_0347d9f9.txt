@@ -1,0 +1,4 @@
+# dataset input, bench-thor, sdpa, clip 0347d9f9-1493-4954-865d-1d8464e28501, t0_us 5100000
+# generated tokens 18, latency 4.4546 s
+
+Nudge left to increase clearance from the parked vehicle at the right shoulder.
