@@ -154,6 +154,15 @@ def _cmd_verdict(a: argparse.Namespace) -> int:
     return 0 if v.passed else 1
 
 
+def _cmd_accuracy(a: argparse.Namespace) -> int:
+    from .accuracy import run
+
+    run(Path(a.truth), Path(a.predictions), Path(a.out), device=a.device,
+        iou=a.iou, score_threshold=a.score_threshold, max_detections=a.max_detections)
+    print(f"wrote {a.out}; saved-output accuracy only, no speed promotion")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="b2f", description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -238,6 +247,16 @@ def build_parser() -> argparse.ArgumentParser:
     rp.add_argument("--out", required=True, help="HTML file to write")
     rp.add_argument("--headline-svg", help="also write the headline chart as a standalone SVG")
     rp.set_defaults(fn=_cmd_report)
+
+    ac = sub.add_parser("accuracy", help="fixed-IoU saved detector accuracy; no speed promotion")
+    ac.add_argument("--truth", required=True)
+    ac.add_argument("--predictions", required=True)
+    ac.add_argument("--out", required=True)
+    ac.add_argument("--device", required=True, help="recorded execution board label")
+    ac.add_argument("--iou", type=float, default=.5)
+    ac.add_argument("--score-threshold", type=float, default=0.)
+    ac.add_argument("--max-detections", type=int, default=100)
+    ac.set_defaults(fn=_cmd_accuracy)
 
     v = sub.add_parser("verdict", help="go/no-go against a deployment budget")
     v.add_argument("report")

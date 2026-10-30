@@ -1,0 +1,58 @@
+{
+  "protocol": {
+    "iou": 0.5,
+    "score_threshold": 0.0,
+    "max_detections_per_image": 100,
+    "interpolation_points": 101,
+    "tie_order": "input order",
+    "crowd_policy": "reject"
+  },
+  "images": 2,
+  "images_with_predictions": 1,
+  "tp": 1,
+  "fp": 2,
+  "fn": 1,
+  "precision": 0.3333333333333333,
+  "recall": 0.5,
+  "mean_ap_at_declared_iou": 0.504950495049505,
+  "per_class": [
+    {
+      "category_id": 1,
+      "positives": 2,
+      "tp": 1,
+      "fp": 1,
+      "fn": 1,
+      "ap": 0.504950495049505
+    },
+    {
+      "category_id": 2,
+      "positives": 0,
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "ap": null
+    }
+  ],
+  "schema_version": "detection-accuracy-1",
+  "created_at": "2026-10-20T03:58:14.915447+00:00",
+  "device": "bench-5090",
+  "machine": "x86_64",
+  "python": "3.12.3",
+  "evaluation_source_commit": "0f34616a3fd6b982ea85703dd8d9b6c5b74e1096",
+  "evaluation_source_dirty": true,
+  "evaluator_sha256": "cc99d7632ab4ec63e0ea3e8f41de026bc2c97e422d1f556adcd433b28a84a910",
+  "dataset_sha256": "aca866d94ebb84101b3e8f92a3cbb5ce788a1b9e54ab65a22b69febc85496753",
+  "predictions_sha256": "5bed2009aa5560c72c3513dba477e3e9836ae5076b5403e857994c6b2865eb62",
+  "model_sha256": null,
+  "configuration": {
+    "fixture": true
+  },
+  "prediction_kind": "synthetic",
+  "inference_provenance": null,
+  "reference_review": {
+    "status": "synthetic fixture only"
+  },
+  "scope": "fixed-IoU saved-output evaluation; no inference or speed promotion",
+  "full_coco_map": false,
+  "promotion_accepted": false
+}

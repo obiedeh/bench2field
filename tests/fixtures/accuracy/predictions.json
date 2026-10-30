@@ -1,0 +1,42 @@
+{
+  "prediction_kind": "synthetic",
+  "configuration": {
+    "fixture": true
+  },
+  "predictions": [
+    {
+      "image_id": 1,
+      "category_id": 1,
+      "bbox": [
+        10,
+        10,
+        20,
+        20
+      ],
+      "score": 0.9
+    },
+    {
+      "image_id": 1,
+      "category_id": 1,
+      "bbox": [
+        10,
+        10,
+        20,
+        20
+      ],
+      "score": 0.8
+    },
+    {
+      "image_id": 1,
+      "category_id": 2,
+      "bbox": [
+        10,
+        10,
+        20,
+        20
+      ],
+      "score": 0.7
+    }
+  ],
+  "dataset_sha256": "aca866d94ebb84101b3e8f92a3cbb5ce788a1b9e54ab65a22b69febc85496753"
+}
