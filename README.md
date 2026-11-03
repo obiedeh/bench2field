@@ -6,7 +6,7 @@
 
 Bench2Field measures how much of a model optimization survives contact with the robot, and why. v1 measures and diagnoses; v2 (phases 2 to 5 of the case study) will optimize and close the gap.
 
-An EmbodiedEdge Labs project. Apache-2.0.
+An EmbodiedEdge project. Apache-2.0.
 
 ## What it measures
 
@@ -31,6 +31,9 @@ One report schema across all three, so results compare directly.
 
 - [Case study 01 findings](case_studies/01_perception_detector/PHASE1_FINDINGS.md): what phase 1 measured and what it means.
 - [The report](https://obiedeh.github.io/bench2field/case_studies/01_perception_detector/report/index.html): every chart, from the committed runs. GitHub shows an HTML file in a repository as source, so the link goes to the same file served as a page; the file itself is `case_studies/01_perception_detector/report/index.html` and works offline.
+- [Case study 02](case_studies/02_alpamayo_av_reasoning/README.md): Alpamayo 1, NVIDIA's 10B driving-reasoning model, measured and profiled on the RTX 5090 and the Jetson AGX Thor.
+- [Case study 03](case_studies/03_deepstream_orin/README.md): DeepStream 7.1 on the rover's Jetson Orin NX, YOLOv8n in TensorRT fp16, from the rover's camera and a recorded clip.
+- [Case study 04](case_studies/04_isaac_ros/README.md): Isaac ROS 4.5 object detection in a container, measured on the RTX 5090 as a lower bound; the Jetson AGX Thor run is still to come.
 - [Case study 05](case_studies/05_cosmos_predict/README.md): Cosmos Predict 2.5, the cost of one video forecast on the 5090 (773.9 s, 30.9 GiB peak), and what admission on the Thor's unified memory revealed.
 - [Methodology](docs/METHODOLOGY.md): the rules every result follows.
 - [Changelog](CHANGELOG.md): what changed in each release and what is still unreleased.
@@ -65,7 +68,7 @@ Other commands: `b2f sweep` (repeats of several variants, alternated, one proces
 
 ## Status
 
-**v1.0: measure and diagnose.** Bring-up on three boards with real-hardware fixtures, the run contract, repeats and sweeps, the end-to-end profiler, the report, and case study 01 phase 1: FP32 baselines and the full-frame profile on all three boards.
+**v1.0: measure and diagnose.** Bring-up on three boards with real-hardware fixtures, the run contract, repeats and sweeps, the end-to-end profiler, the report, and case study 01 phase 1: FP32 baselines and the full-frame profile on all three boards. Since then: the FP32 baseline's accuracy on a 500-image COCO val2017 subset (person AP 0.796, identical on the CUDA and TensorRT providers) and case studies 02 to 05 on other workloads.
 
 **v2: optimize and close the gap.** Case study 01 phases 2 to 5: the FP16 / INT8 / 2:4-sparsity / distillation ladder with accuracy at every step, a fused preprocessing CUDA kernel with a HIP port, Nsight and MIGraphX runs, and the field-load replay and gap attribution on the rover. Plan in `case_studies/01_perception_detector/PLAN.md`.
 
