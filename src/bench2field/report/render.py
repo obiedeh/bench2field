@@ -483,7 +483,7 @@ def render(cs: CaseStudy) -> str:
 <div class="scroll">{provenance_table(cs)}</div>
 {('<div class="note"><b>Loader warnings</b><ul>' + warn + '</ul></div>') if warn else ''}
 
-<footer>Generated {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')} by <code>b2f report</code> (Bench2Field {esc(__version__)}, commit {esc((gen.get('commit') or 'unknown')[:8])}{' dirty' if gen.get('dirty') else ''}). Budget: <code>{esc(cs.budget.name)}</code>. No number on this page was typed in.<span class="lab">An <a href="{LAB_URL}">EmbodiedEdge Labs</a> project. Measured on real hardware, published as found.</span></footer>
+<footer>Generated {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')} by <code>b2f report</code> (Bench2Field {esc(__version__)}, commit {esc((gen.get('commit') or 'unknown')[:8])}{' dirty' if gen.get('dirty') else ''}). Budget: <code>{esc(cs.budget.name)}</code>. No number on this page was typed in.<span class="lab">An <a href="{LAB_URL}">EmbodiedEdge</a> project. Measured on real hardware, published as found.</span></footer>
 </main><script>{JS}</script></body></html>"""
     return page
 
