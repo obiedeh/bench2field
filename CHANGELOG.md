@@ -22,6 +22,7 @@ Alpamayo 1 on the bench and the edge, with a custom CUDA preprocessing kernel.
 
 ## Unreleased
 
+- 2026-11-03: The report header band reads "EmbodiedEdge Evidence"; the retired Labs label is removed from the renderer and the case study 01 report.
 - 2026-11-03: Evidence pages and their theme name the lab EmbodiedEdge; the retired EmbodiedEdge Labs name is removed.
 - README: case studies 02 to 04 linked from Read the results, the measured baseline accuracy and later case studies in Status, and "EmbodiedEdge project" in place of the retired EmbodiedEdge Labs name.
 - Case study 02, Alpamayo 1 on the bench and the edge: measured decision latency, memory and power on the RTX 5090 (sdpa and flash-attn) and the Jetson AGX Thor (sdpa, board power), a torch.profiler stage split with plots, and an Orin NX feasibility note. Findings in the case study README and friction log, including that upstream's flash-attention default does not run under its own pins.

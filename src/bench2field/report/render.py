@@ -443,7 +443,7 @@ def render(cs: CaseStudy) -> str:
     warn = "".join(f"<li>{esc(w)}</li>" for w in cs.warnings)
     page = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{esc(cs.title)} – Bench2Field report</title><style>{CSS}</style></head><body>
-<div class="ee-band"><div class="in"><a class="ee-mark" href="{LAB_URL}"><i></i>EmbodiedEdge <span>Labs · Evidence</span></a>
+<div class="ee-band"><div class="in"><a class="ee-mark" href="{LAB_URL}"><i></i>EmbodiedEdge <span>Evidence</span></a>
 <nav><a href="{REPO_URL}">Repository</a><a href="{LAB_URL}">Lab</a><a href="{PROFILE_URL}">Obinna Edeh</a></nav></div></div><main>
 <header><div><p class="eyebrow">Bench2Field · Case study</p><h1>{title_html(cs.title)}</h1><div class="sub">{esc(cs.config.get('model', ''))} · Bench2Field {esc(__version__)} report, generated from <code>{esc(cs.root.name)}/runs/</code></div></div>
 <button class="theme" id="theme">Light theme</button></header>
