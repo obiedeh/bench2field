@@ -80,7 +80,7 @@ cache and compared.
 ## Jetson Orin NX 8 GB (the rover's computer): tried, does not run reliably
 
 The rover's Orin NX (JetPack 6, Python 3.10 only, 7.6 GB shared by CPU and GPU, about
-2.2 GB of it held by the desktop and the rover's services) was tried in ten load attempts.
+2.2 GB of it held by the desktop and the rover's services) was tried in fifteen load attempts (corrected 2026-11-10 from "ten", recounted from the logs).
 Every step is in FRICTION_LOG.md; the logs are kept outside git.
 
 | Attempt | Outcome |
@@ -88,7 +88,7 @@ Every step is in FRICTION_LOG.md; the logs are kept outside git.
 | Environment on Python 3.10 (Edge targets 3.12) | works after three workarounds: virtualenv (no python3-venv on JetPack 6), SciPy 1.15.3 and NumPy 1.26 (Edge pins SciPy 1.16, which needs 3.11), and a runtime replacement for one 3.11-only format string in Edge's prompt code |
 | BF16, upstream loader | out of memory: the 5.0 GB model is built in host memory and then copied to the GPU, which is the same memory |
 | BF16, 8-bit and 4-bit (language model only), loaded straight to the GPU | out of memory; CUDA could allocate only about 3.0 GiB although 4.9 GiB was reported free |
-| 4-bit on every linear layer (about 1.5 GiB of weights, not NVIDIA's scheme) | loaded twice (19.3 s and 21.3 s), never completed a decision; the other attempts ran out of memory during loading, including after a page-cache drop and with PyTorch's caching allocator off |
+| 4-bit on every linear layer (about 1.5 GiB of weights, not NVIDIA's scheme) | loaded twice (19.3 s and 21.3 s), never completed a decision; the other thirteen attempts ran out of memory during loading, including after a page-cache drop and with PyTorch's caching allocator off |
 
 Finding: with the rover running as configured, an 8 GB Orin NX does not hold the student
 reliably even at 4-bit. Freeing more memory means stopping the desktop or rover services
