@@ -1,0 +1,4 @@
+# bench-thor, eager, clip 0347d9f9-1493-4954-865d-1d8464e28501, t0_us 5100000, nav "Turn right in 10m"
+# generated tokens 6, latency 1.9643 s
+
+<NOMINAL>

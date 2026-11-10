@@ -1,0 +1,4 @@
+# bench-thor, eager, clip 174407b0-b040-475b-8c1e-512b0bab4675, t0_us 5100000, nav "Continue straight"
+# generated tokens 18, latency 2.4011 s
+
+Decelerate to stop at the stop line for the upcoming all-way stop sign.

@@ -1,0 +1,363 @@
+{
+ "schema": "bench2field.case_study_06.stream/1",
+ "label": "lab result",
+ "board": "bench-thor",
+ "variant": "tuned",
+ "diffusion_steps": 5,
+ "fp8": {
+  "library": "torchao 0.17.0",
+  "scheme": "float8 weights, dynamic float8 activations, per tensor",
+  "linear_layers": {
+   "language_model": 168
+  },
+  "kept_bf16": [
+   "vision tower",
+   "projector",
+   "lm_head",
+   "action_in_proj",
+   "action_out_proj"
+  ]
+ },
+ "model": {
+  "id": "nvidia/Alpamayo2-Edge",
+  "revision": "f8951d095de3589b3face1dec3f4394c8ecedb38"
+ },
+ "stream": {
+  "clips": [
+   "0347d9f9-1493-4954-865d-1d8464e28501",
+   "174407b0-b040-475b-8c1e-512b0bab4675",
+   "195f1fc6-2a7b-4833-9b7f-753530fda044"
+  ],
+  "steps": 30,
+  "warm_steps": 20,
+  "t_start_us": 3100000,
+  "rate_hz": 10
+ },
+ "cache": {
+  "hits": 1200,
+  "misses": 780,
+  "fingerprint_mismatch": 0
+ },
+ "reuse_vs_full_check": {
+  "clip_id": "0347d9f9-1493-4954-865d-1d8464e28501",
+  "t0_us": 5100000,
+  "waypoints_max_abs_diff_m": 0.0
+ },
+ "finished_at": "2026-11-10T19:59:49+00:00",
+ "results": {
+  "baseline": {
+   "n": 30,
+   "latency_median_s": 0.5573,
+   "latency_p95_s": 0.771,
+   "decisions": [
+    {
+     "clip_id": "0347d9f9-1493-4954-865d-1d8464e28501",
+     "t0_us": 5100000,
+     "latency_s": 0.5552
+    },
+    {
+     "clip_id": "0347d9f9-1493-4954-865d-1d8464e28501",
+     "t0_us": 5200000,
+     "latency_s": 0.5568
+    },
+    {
+     "clip_id": "0347d9f9-1493-4954-865d-1d8464e28501",
+     "t0_us": 5300000,
+     "latency_s": 0.559
+    },
+    {
+     "clip_id": "0347d9f9-1493-4954-865d-1d8464e28501",
+     "t0_us": 5400000,
+     "latency_s": 0.5566
+    },
+    {
+     "clip_id": "0347d9f9-1493-4954-865d-1d8464e28501",
+     "t0_us": 5500000,
+     "latency_s": 0.5586
+    },
+    {
+     "clip_id": "0347d9f9-1493-4954-865d-1d8464e28501",
+     "t0_us": 5600000,
+     "latency_s": 0.5543
+    },
+    {
+     "clip_id": "0347d9f9-1493-4954-865d-1d8464e28501",
+     "t0_us": 5700000,
+     "latency_s": 0.5576
+    },
+    {
+     "clip_id": "0347d9f9-1493-4954-865d-1d8464e28501",
+     "t0_us": 5800000,
+     "latency_s": 0.5552
+    },
+    {
+     "clip_id": "0347d9f9-1493-4954-865d-1d8464e28501",
+     "t0_us": 5900000,
+     "latency_s": 0.5599
+    },
+    {
+     "clip_id": "0347d9f9-1493-4954-865d-1d8464e28501",
+     "t0_us": 6000000,
+     "latency_s": 0.5564
+    },
+    {
+     "clip_id": "174407b0-b040-475b-8c1e-512b0bab4675",
+     "t0_us": 5100000,
+     "latency_s": 0.7238
+    },
+    {
+     "clip_id": "174407b0-b040-475b-8c1e-512b0bab4675",
+     "t0_us": 5200000,
+     "latency_s": 0.7661
+    },
+    {
+     "clip_id": "174407b0-b040-475b-8c1e-512b0bab4675",
+     "t0_us": 5300000,
+     "latency_s": 0.6905
+    },
+    {
+     "clip_id": "174407b0-b040-475b-8c1e-512b0bab4675",
+     "t0_us": 5400000,
+     "latency_s": 0.7694
+    },
+    {
+     "clip_id": "174407b0-b040-475b-8c1e-512b0bab4675",
+     "t0_us": 5500000,
+     "latency_s": 0.768
+    },
+    {
+     "clip_id": "174407b0-b040-475b-8c1e-512b0bab4675",
+     "t0_us": 5600000,
+     "latency_s": 0.771
+    },
+    {
+     "clip_id": "174407b0-b040-475b-8c1e-512b0bab4675",
+     "t0_us": 5700000,
+     "latency_s": 0.7696
+    },
+    {
+     "clip_id": "174407b0-b040-475b-8c1e-512b0bab4675",
+     "t0_us": 5800000,
+     "latency_s": 0.7716
+    },
+    {
+     "clip_id": "174407b0-b040-475b-8c1e-512b0bab4675",
+     "t0_us": 5900000,
+     "latency_s": 0.7238
+    },
+    {
+     "clip_id": "174407b0-b040-475b-8c1e-512b0bab4675",
+     "t0_us": 6000000,
+     "latency_s": 0.7623
+    },
+    {
+     "clip_id": "195f1fc6-2a7b-4833-9b7f-753530fda044",
+     "t0_us": 5100000,
+     "latency_s": 0.5544
+    },
+    {
+     "clip_id": "195f1fc6-2a7b-4833-9b7f-753530fda044",
+     "t0_us": 5200000,
+     "latency_s": 0.5515
+    },
+    {
+     "clip_id": "195f1fc6-2a7b-4833-9b7f-753530fda044",
+     "t0_us": 5300000,
+     "latency_s": 0.5519
+    },
+    {
+     "clip_id": "195f1fc6-2a7b-4833-9b7f-753530fda044",
+     "t0_us": 5400000,
+     "latency_s": 0.5528
+    },
+    {
+     "clip_id": "195f1fc6-2a7b-4833-9b7f-753530fda044",
+     "t0_us": 5500000,
+     "latency_s": 0.5546
+    },
+    {
+     "clip_id": "195f1fc6-2a7b-4833-9b7f-753530fda044",
+     "t0_us": 5600000,
+     "latency_s": 0.5569
+    },
+    {
+     "clip_id": "195f1fc6-2a7b-4833-9b7f-753530fda044",
+     "t0_us": 5700000,
+     "latency_s": 0.5535
+    },
+    {
+     "clip_id": "195f1fc6-2a7b-4833-9b7f-753530fda044",
+     "t0_us": 5800000,
+     "latency_s": 0.5539
+    },
+    {
+     "clip_id": "195f1fc6-2a7b-4833-9b7f-753530fda044",
+     "t0_us": 5900000,
+     "latency_s": 0.551
+    },
+    {
+     "clip_id": "195f1fc6-2a7b-4833-9b7f-753530fda044",
+     "t0_us": 6000000,
+     "latency_s": 0.5581
+    }
+   ]
+  },
+  "reuse": {
+   "n": 30,
+   "latency_median_s": 0.3314,
+   "latency_p95_s": 0.5439,
+   "decisions": [
+    {
+     "clip_id": "0347d9f9-1493-4954-865d-1d8464e28501",
+     "t0_us": 5100000,
+     "latency_s": 0.333
+    },
+    {
+     "clip_id": "0347d9f9-1493-4954-865d-1d8464e28501",
+     "t0_us": 5200000,
+     "latency_s": 0.3304
+    },
+    {
+     "clip_id": "0347d9f9-1493-4954-865d-1d8464e28501",
+     "t0_us": 5300000,
+     "latency_s": 0.3293
+    },
+    {
+     "clip_id": "0347d9f9-1493-4954-865d-1d8464e28501",
+     "t0_us": 5400000,
+     "latency_s": 0.3291
+    },
+    {
+     "clip_id": "0347d9f9-1493-4954-865d-1d8464e28501",
+     "t0_us": 5500000,
+     "latency_s": 0.3299
+    },
+    {
+     "clip_id": "0347d9f9-1493-4954-865d-1d8464e28501",
+     "t0_us": 5600000,
+     "latency_s": 0.3283
+    },
+    {
+     "clip_id": "0347d9f9-1493-4954-865d-1d8464e28501",
+     "t0_us": 5700000,
+     "latency_s": 0.3304
+    },
+    {
+     "clip_id": "0347d9f9-1493-4954-865d-1d8464e28501",
+     "t0_us": 5800000,
+     "latency_s": 0.329
+    },
+    {
+     "clip_id": "0347d9f9-1493-4954-865d-1d8464e28501",
+     "t0_us": 5900000,
+     "latency_s": 0.3267
+    },
+    {
+     "clip_id": "0347d9f9-1493-4954-865d-1d8464e28501",
+     "t0_us": 6000000,
+     "latency_s": 0.3326
+    },
+    {
+     "clip_id": "174407b0-b040-475b-8c1e-512b0bab4675",
+     "t0_us": 5100000,
+     "latency_s": 0.4977
+    },
+    {
+     "clip_id": "174407b0-b040-475b-8c1e-512b0bab4675",
+     "t0_us": 5200000,
+     "latency_s": 0.5408
+    },
+    {
+     "clip_id": "174407b0-b040-475b-8c1e-512b0bab4675",
+     "t0_us": 5300000,
+     "latency_s": 0.4642
+    },
+    {
+     "clip_id": "174407b0-b040-475b-8c1e-512b0bab4675",
+     "t0_us": 5400000,
+     "latency_s": 0.5439
+    },
+    {
+     "clip_id": "174407b0-b040-475b-8c1e-512b0bab4675",
+     "t0_us": 5500000,
+     "latency_s": 0.5447
+    },
+    {
+     "clip_id": "174407b0-b040-475b-8c1e-512b0bab4675",
+     "t0_us": 5600000,
+     "latency_s": 0.5376
+    },
+    {
+     "clip_id": "174407b0-b040-475b-8c1e-512b0bab4675",
+     "t0_us": 5700000,
+     "latency_s": 0.5435
+    },
+    {
+     "clip_id": "174407b0-b040-475b-8c1e-512b0bab4675",
+     "t0_us": 5800000,
+     "latency_s": 0.54
+    },
+    {
+     "clip_id": "174407b0-b040-475b-8c1e-512b0bab4675",
+     "t0_us": 5900000,
+     "latency_s": 0.5005
+    },
+    {
+     "clip_id": "174407b0-b040-475b-8c1e-512b0bab4675",
+     "t0_us": 6000000,
+     "latency_s": 0.5439
+    },
+    {
+     "clip_id": "195f1fc6-2a7b-4833-9b7f-753530fda044",
+     "t0_us": 5100000,
+     "latency_s": 0.3289
+    },
+    {
+     "clip_id": "195f1fc6-2a7b-4833-9b7f-753530fda044",
+     "t0_us": 5200000,
+     "latency_s": 0.3352
+    },
+    {
+     "clip_id": "195f1fc6-2a7b-4833-9b7f-753530fda044",
+     "t0_us": 5300000,
+     "latency_s": 0.3317
+    },
+    {
+     "clip_id": "195f1fc6-2a7b-4833-9b7f-753530fda044",
+     "t0_us": 5400000,
+     "latency_s": 0.331
+    },
+    {
+     "clip_id": "195f1fc6-2a7b-4833-9b7f-753530fda044",
+     "t0_us": 5500000,
+     "latency_s": 0.3291
+    },
+    {
+     "clip_id": "195f1fc6-2a7b-4833-9b7f-753530fda044",
+     "t0_us": 5600000,
+     "latency_s": 0.3308
+    },
+    {
+     "clip_id": "195f1fc6-2a7b-4833-9b7f-753530fda044",
+     "t0_us": 5700000,
+     "latency_s": 0.3307
+    },
+    {
+     "clip_id": "195f1fc6-2a7b-4833-9b7f-753530fda044",
+     "t0_us": 5800000,
+     "latency_s": 0.3295
+    },
+    {
+     "clip_id": "195f1fc6-2a7b-4833-9b7f-753530fda044",
+     "t0_us": 5900000,
+     "latency_s": 0.3311
+    },
+    {
+     "clip_id": "195f1fc6-2a7b-4833-9b7f-753530fda044",
+     "t0_us": 6000000,
+     "latency_s": 0.3363
+    }
+   ]
+  }
+ }
+}

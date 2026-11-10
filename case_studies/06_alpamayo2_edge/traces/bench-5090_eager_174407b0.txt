@@ -1,0 +1,4 @@
+# bench-5090, eager, clip 174407b0-b040-475b-8c1e-512b0bab4675, t0_us 5100000, nav "Continue straight"
+# generated tokens 25, latency 1.014 s
+
+Decelerate to stop at the stop line for the stop sign before continuing straight through the intersection to follow our route.

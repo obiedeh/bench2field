@@ -1,0 +1,4 @@
+# bench-thor, eager, clip 06b483cf-6d9c-4b18-b54b-4429c80867e3, t0_us 5100000, nav "Continue straight"
+# generated tokens 22, latency 2.5312 s
+
+Proceed straight through the intersection to follow our route, as the roadway and crosswalk are clear.

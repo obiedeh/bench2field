@@ -1,0 +1,4 @@
+# bench-thor, eager, clip 09ad74a2-a499-4355-a302-da69ff7d0a57, t0_us 5100000, nav "Continue straight"
+# generated tokens 26, latency 2.6831 s
+
+Proceed straight through the intersection to follow our route, as the traffic signal is green and the lead vehicle ahead is departing.
