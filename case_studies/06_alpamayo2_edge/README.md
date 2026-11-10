@@ -15,8 +15,9 @@ in the order met, is in [FRICTION_LOG.md](FRICTION_LOG.md).
 optimizations, singly and combined. On the Jetson AGX Thor the p95 decision
 latency went from 2.70 s as shipped to 0.61 s on a 10 Hz stream. Neither board
 meets the 0.1 s deadline at p95; the 5090 reaches it at the median (0.100 s).
-NVIDIA's TensorRT deployment is blocked on a recipe that is not public yet. All
-Thor runs are at the 90 W power mode; MAXN is pending an owner decision.
+NVIDIA's TensorRT deployment is blocked on a recipe that is not public yet. Thor runs
+are at 90 W unless marked MAXN (best p95 0.544 s at MAXN). The rover's Orin NX 8 GB was
+tried and does not run the model reliably.
 
 ## The model, and how one decision works
 
@@ -76,6 +77,37 @@ cache and compared.
 | Jetson AGX Thor, acceleration + 5 steps | 0.797 s / 1.090 s | 0.429 s / 0.722 s | 0.0 cm |
 | Jetson AGX Thor, acceleration + FP8 + 5 steps | 0.780 s / 0.983 s | **0.404 s / 0.611 s** | 0.0 cm |
 
+## Jetson Orin NX 8 GB (the rover's computer): tried, does not run reliably
+
+The rover's Orin NX (JetPack 6, Python 3.10 only, 7.6 GB shared by CPU and GPU, about
+2.2 GB of it held by the desktop and the rover's services) was tried in ten load attempts.
+Every step is in FRICTION_LOG.md; the logs are kept outside git.
+
+| Attempt | Outcome |
+|---|---|
+| Environment on Python 3.10 (Edge targets 3.12) | works after three workarounds: virtualenv (no python3-venv on JetPack 6), SciPy 1.15.3 and NumPy 1.26 (Edge pins SciPy 1.16, which needs 3.11), and a runtime replacement for one 3.11-only format string in Edge's prompt code |
+| BF16, upstream loader | out of memory: the 5.0 GB model is built in host memory and then copied to the GPU, which is the same memory |
+| BF16, 8-bit and 4-bit (language model only), loaded straight to the GPU | out of memory; CUDA could allocate only about 3.0 GiB although 4.9 GiB was reported free |
+| 4-bit on every linear layer (about 1.5 GiB of weights, not NVIDIA's scheme) | loaded twice (19.3 s and 21.3 s), never completed a decision; the other attempts ran out of memory during loading, including after a page-cache drop and with PyTorch's caching allocator off |
+
+Finding: with the rover running as configured, an 8 GB Orin NX does not hold the student
+reliably even at 4-bit. Freeing more memory means stopping the desktop or rover services
+for the test, which was not done. NVIDIA's own guidance is that Orin is too slow for this
+model at production rates.
+
+## Thor power mode: 90 W against MAXN
+
+| Jetson AGX Thor | 90 W: median / p95 / energy | MAXN: median / p95 / energy |
+|---|---|---|
+| BF16 eager (as shipped) | 2.150 / 2.703 s / 130 J | 1.395 / 2.125 s / 112 J |
+| Upstream acceleration | 0.934 / 1.209 s / 74 J | 0.784 / 1.174 s / 69 J |
+| Acceleration + FP8 + 5 steps | 1.024 / 1.344 s / 66 J | 0.714 / 1.051 s / 56 J |
+| Stream, acceleration + vision reuse | 0.458 / 0.743 s | 0.381 / 0.682 s |
+| Stream, acceleration + FP8 + 5 steps + vision reuse | 0.404 / 0.611 s | **0.331 / 0.544 s** |
+
+MAXN was faster and also used less energy per decision: the board draws more power but
+finishes sooner. The mode was switched by the owner and recorded in each MAXN run.
+
 ## Teacher against student, same clips, as shipped
 
 | | RTX 5090 | Jetson AGX Thor |
@@ -114,8 +146,8 @@ the student's in a sustained block. Both models ran as shipped.
    instead of on every call cut preparation from 0.80 to 0.04 s per clip on the
    5090 and from 1.88 to 0.12 s on the Thor, with byte-identical inputs.
 
-Not done: the TensorRT Edge-LLM deployment (recipe not public), speculative
-decoding (no Edge drafter released), MAXN power mode (owner decision pending).
+Not done: the TensorRT Edge-LLM deployment (recipe not public) and speculative
+decoding (no Edge drafter released).
 
 ## Issues found
 

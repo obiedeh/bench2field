@@ -45,13 +45,39 @@ import numpy as np
 import torch
 
 HERE = Path(__file__).resolve().parent
-BOARDS = ("bench-5090", "bench-thor")
+BOARDS = ("bench-5090", "bench-thor", "field-orin")
 VARIANTS = ("eager", "tuned", "compile")
 MODEL_REVISION = "f8951d095de3589b3face1dec3f4394c8ecedb38"
 # The upstream CLI's settings (alpamayo2_edge/inference.py at 02f55a7), unchanged.
 SETTINGS = dict(top_p=0.98, top_k=None, temperature=0.6, num_traj_sets=1, num_traj_samples=1,
                 max_generation_length=256, diffusion_steps=10)
 SEED = 43  # the upstream CLI default
+
+
+def patch_python310() -> bool:
+    """On Python 3.10 (the Orin's only interpreter), replace the upstream time-label helper.
+
+    ``alpamayo2_edge.chat_template.relative_time_labels`` formats with the ``z`` option
+    (``:z.1f``, Python 3.11+, turns -0.0 into 0.0), which raises ``Invalid format specifier``
+    on 3.10. The replacement formats with ``.1f`` and maps "-0.0" to "0.0", which is the
+    same text. Upstream code on disk is not changed. Returns True when the patch is applied.
+    """
+    import sys
+
+    if sys.version_info >= (3, 11):
+        return False
+    from alpamayo2_edge import chat_template
+
+    def relative_time_labels(timestamps: torch.Tensor) -> list[str]:
+        timestamps = timestamps.reshape(-1)
+        out = []
+        for delta in (timestamps - timestamps[-1]).tolist():
+            text = f"{delta / 1_000_000:.1f}"
+            out.append(f"<t={'0.0' if text == '-0.0' else text}s>")
+        return out
+
+    chat_template.relative_time_labels = relative_time_labels
+    return True
 
 
 def install_prep_mode(mode: str) -> None:
@@ -108,6 +134,59 @@ def quantize_fp8(model: Any) -> dict[str, Any]:
 
     return {"library": f"torchao {torchao.__version__}", "scheme": "float8 weights, dynamic float8 activations, per tensor",
             "linear_layers": counts, "kept_bf16": ["vision tower", "projector", "lm_head", "action_in_proj", "action_out_proj"]}
+
+
+def load_lowbit(model_dir: str, mode: str) -> tuple[Any, dict[str, Any]]:
+    """Load for a board whose memory cannot hold the upstream load (the Orin NX 8 GB).
+
+    The upstream loader builds the whole BF16 model in host memory and then moves it to
+    the GPU; on a Jetson those are the same memory, so the model is held twice. Here the
+    same ``from_pretrained`` call loads each tensor straight to the GPU (``device_map``),
+    and for ``int8`` and ``nf4`` quantizes the language model's linear layers with
+    bitsandbytes as they load. The vision tower, projector, lm_head and action expert stay
+    BF16. ``bf16`` is the direct load with no quantization. The same completeness check
+    as upstream (no missing or unexpected keys) is applied.
+    """
+    import json as _json
+
+    from alpamayo2_edge.config import Alpamayo2EdgeConfig, normalize_checkpoint_config
+    from alpamayo2_edge.models.alpamayo2_edge import Alpamayo2Edge
+
+    path = Path(model_dir)
+    config = Alpamayo2EdgeConfig(**normalize_checkpoint_config(_json.loads((path / "config.json").read_text())))
+    config._name_or_path = str(path)
+    config.set_dtype("bfloat16")
+    kw: dict[str, Any] = {}
+    info: dict[str, Any] = {"lowbit": mode, "load": "from_pretrained with device_map to the GPU"}
+    if mode in ("int8", "nf4", "nf4_all"):
+        import bitsandbytes as bnb
+        from transformers import BitsAndBytesConfig
+
+        # nf4_all quantizes every linear layer (vision tower, lm_head and action expert too):
+        # not NVIDIA's scheme, a does-it-run-at-all test for the smallest footprint.
+        # The vision patch embedding stays BF16 in every mode: Cosmos3-Edge casts the pixels to
+        # that layer's weight dtype, which would be uint8 once quantized (case study 06 log).
+        skip = ["patch_embedding"] if mode == "nf4_all" else ["visual", "projector", "lm_head", "expert"]
+        kw["quantization_config"] = (
+            BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4", bnb_4bit_compute_dtype=torch.bfloat16,
+                               llm_int8_skip_modules=skip)
+            if mode in ("nf4", "nf4_all") else BitsAndBytesConfig(load_in_8bit=True, llm_int8_skip_modules=skip))
+        info.update({"library": f"bitsandbytes {bnb.__version__}", "kept_bf16": skip})
+    # transformers reserves one block the size of the whole model before loading
+    # (caching_allocator_warmup); the Orin's memory driver refuses a block that large, so the
+    # warm-up is skipped and tensors are allocated as they load.
+    import transformers.modeling_utils as _mu
+
+    _mu.caching_allocator_warmup = lambda *a, **k: None
+    info["caching_allocator_warmup"] = "skipped"
+    model, loading = Alpamayo2Edge.from_pretrained(str(path), config=config, dtype=torch.bfloat16,
+                                                   attn_implementation="sdpa", local_files_only=True,
+                                                   output_loading_info=True, device_map={"": 0}, **kw)
+    problems = {k: loading.get(k) for k in ("missing_keys", "unexpected_keys", "mismatched_keys") if loading.get(k)}
+    if problems:
+        raise RuntimeError(f"Checkpoint did not load completely: {problems}")
+    model.eval()
+    return model, info
 
 
 def prepare(sample: dict, model: Any, mode: str) -> dict:
@@ -193,7 +272,7 @@ def start_sampler(board: str, interval_s: float = 0.1) -> Any | None:
         from bench2field.telemetry.nvml import NvmlSampler
         from bench2field.telemetry.tegrastats import TegrastatsSampler
 
-        cls = TegrastatsSampler if board == "bench-thor" else NvmlSampler
+        cls = NvmlSampler if board == "bench-5090" else TegrastatsSampler
         if not cls.available():
             return None
         s = cls(interval_s=interval_s)
@@ -332,6 +411,7 @@ def main(argv: list[str] | None = None) -> int:
                     help="directory for loaded clips (torch.save), kept outside git; skips re-streaming")
     ap.add_argument("--tag", default="", help="suffix for the record name, e.g. steps5")
     ap.add_argument("--fp8", action="store_true", help="torchao FP8 on the language model and expert")
+    ap.add_argument("--lowbit", choices=("bf16", "int8", "nf4", "nf4_all"), default=None, help="direct-to-GPU load for small boards, optionally bitsandbytes")
     ap.add_argument("--sustained-s", type=float, default=30.0)
     args = ap.parse_args(argv)
 
@@ -350,10 +430,14 @@ def main(argv: list[str] | None = None) -> int:
     started = datetime.now(timezone.utc).isoformat(timespec="seconds")
     torch.cuda.reset_peak_memory_stats()
     t0 = time.perf_counter()
-    model, loading_info = load_model(args.model, device="cuda", dtype="bfloat16", attn_implementation="sdpa")
+    lowbit_info = None
+    if args.lowbit:
+        model, lowbit_info = load_lowbit(args.model, args.lowbit)
+    else:
+        model, loading_info = load_model(args.model, device="cuda", dtype="bfloat16", attn_implementation="sdpa")
     torch.cuda.synchronize()
     load = {"load_total_s": round(time.perf_counter() - t0, 2), "memory_after_load": gpu_memory(),
-            "parameters_total": sum(p.numel() for p in model.parameters())}
+            "parameters_total": sum(p.numel() for p in model.parameters()), "lowbit": lowbit_info}
     if args.fp8:
         load["fp8"] = quantize_fp8(model)
         torch.cuda.synchronize()
@@ -373,6 +457,7 @@ def main(argv: list[str] | None = None) -> int:
             torch.save(smp, cached)
         samples.append(smp)
     data_load_s = round(time.perf_counter() - t_data, 2)
+    py310_patch = patch_python310()
     install_prep_mode(args.prep)
     prepared, prep_s = [], []
     for smp in samples:
@@ -447,9 +532,9 @@ def main(argv: list[str] | None = None) -> int:
         "versions": {"torch": torch.__version__, "cuda_runtime": torch.version.cuda,
                      "transformers": transformers.__version__, "gpu": torch.cuda.get_device_name(0)},
         "started_at": started, "finished_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "protocol": {**SETTINGS, "diffusion_steps": args.diffusion_steps, "prep": args.prep, "fp8": args.fp8, "seed": SEED, "repeats": args.repeats, "warmup": args.warmup,
+        "protocol": {**SETTINGS, "diffusion_steps": args.diffusion_steps, "prep": args.prep, "fp8": args.fp8, "lowbit": args.lowbit, "seed": SEED, "repeats": args.repeats, "warmup": args.warmup,
                      "nav_rule": nav["rule"], "clips": [m["clip_id"] for m in metas]},
-        "load": load, "data_load_s": data_load_s, "input_prep_s": prep_s, "input_prep_median_s": statistics.median(prep_s), "prep_check": prep_check, "acceleration": accel_info,
+        "load": load, "data_load_s": data_load_s, "input_prep_s": prep_s, "python310_label_patch": py310_patch, "input_prep_median_s": statistics.median(prep_s), "prep_check": prep_check, "acceleration": accel_info,
         "summary": summarize(decisions), "sustained": sustained, "telemetry_interval_s": args.sample_interval,
         "warmup": warm, "decisions": decisions,
     }
