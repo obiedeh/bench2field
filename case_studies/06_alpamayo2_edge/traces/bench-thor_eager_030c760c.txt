@@ -1,0 +1,4 @@
+# bench-thor, eager, clip 030c760c-ae38-49aa-9ad8-f5650a545d26, t0_us 5100000, nav "Continue straight"
+# generated tokens 16, latency 2.3102 s
+
+Decelerate to maintain a safe following distance behind the slowing lead vehicle.

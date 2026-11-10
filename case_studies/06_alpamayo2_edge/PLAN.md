@@ -82,4 +82,14 @@ in latency, energy, memory and trajectory error on the same clips?
 
 ## Amendments
 
-(none yet)
+- **2026-11-10, after the first full 5090 run (record not kept as a result):** a
+  student decision takes about 0.35 s, shorter than the 0.5 s telemetry interval,
+  so most decisions held zero or one power sample and the energy per decision was
+  not trustworthy. The teacher's decisions (0.9 to 4.4 s) did not have this
+  problem. Changes: telemetry every 0.1 s; on the 5090, the NVML cumulative energy
+  counter read before and after each decision; and a sustained block after the
+  timed decisions (about 30 s of decisions back to back over the clips), whose
+  energy per decision is mean power times the window divided by the decisions in
+  it. The sustained figure is the one reported for both boards; the per-decision
+  counter is reported beside it on the 5090. Latency, tokens, memory and minADE
+  are unchanged by this. The first record is kept outside git with the run log.

@@ -1,0 +1,4 @@
+# bench-5090, eager, clip 195f1fc6-2a7b-4833-9b7f-753530fda044, t0_us 5100000, nav "Turn left in 30m"
+# generated tokens 6, latency 0.342 s
+
+<NOMINAL>

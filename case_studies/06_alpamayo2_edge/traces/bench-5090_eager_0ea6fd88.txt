@@ -1,0 +1,4 @@
+# bench-5090, eager, clip 0ea6fd88-dcdd-434e-9fa3-56ce0fb35bf2, t0_us 5100000, nav "Continue straight"
+# generated tokens 6, latency 0.34 s
+
+<NOMINAL>

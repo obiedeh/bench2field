@@ -114,7 +114,18 @@ def gpu_memory() -> dict[str, float]:
     }
 
 
-def start_sampler(board: str, interval_s: float = 0.5) -> Any | None:
+def energy_counter_mj() -> int | None:
+    """The 5090's cumulative NVML energy counter in millijoules; None where NVML has none (the Thor)."""
+    try:
+        import pynvml
+
+        pynvml.nvmlInit()
+        return int(pynvml.nvmlDeviceGetTotalEnergyConsumption(pynvml.nvmlDeviceGetHandleByIndex(0)))
+    except Exception:
+        return None
+
+
+def start_sampler(board: str, interval_s: float = 0.1) -> Any | None:
     """NVML on the 5090 (GPU rail), tegrastats on the Thor (VIN, whole board)."""
     try:
         from bench2field.telemetry.nvml import NvmlSampler
@@ -162,12 +173,14 @@ def one_decision(model: Any, hooks: Hooks, prepared: dict[str, Any], meta: dict[
     hooks.reset()
     torch.cuda.reset_peak_memory_stats()
     torch.cuda.synchronize()
+    e0 = energy_counter_mj()
     m0 = time.monotonic()
     t0 = time.perf_counter()
     xyz, _rot, extra = predict(model, prepared)
     torch.cuda.synchronize()
     t1 = time.perf_counter()
     m1 = time.monotonic()
+    e1 = energy_counter_mj()
     ids = extra["generated_ids"]
     gen = int((ids[0] >= 0).sum().item()) if torch.is_tensor(ids) else None
     ttft = (hooks.first_token - t0) if hooks.first_token else None
@@ -185,6 +198,8 @@ def one_decision(model: Any, hooks: Hooks, prepared: dict[str, Any], meta: dict[
         "decode_s": round(decode_s, 4) if decode_s else None,
         "trajectory_s": round(hooks.trajectory_s, 4) if hooks.trajectory_s else None,
         "generated_tokens": gen,
+        "nominal_path": trace is not None and trace.strip() == "<NOMINAL>",
+        "energy_counter_j": round((e1 - e0) / 1000.0, 2) if e0 is not None and e1 is not None else None,
         "decode_tokens_per_s": round((gen - 1) / decode_s, 2) if decode_s and gen and gen > 1 else None,
         "peak_memory": gpu_memory(),
         "min_ade_m_sanity_only": round(ade, 3),
@@ -216,7 +231,23 @@ def summarize(ds: list[dict[str, Any]]) -> dict[str, Any]:
         "power_channel": next((d["power"]["channel"] for d in ds if d.get("power")), None),
         "energy_per_decision_j_median": round(statistics.median(en), 1) if en else None,
         "min_ade_m_median_sanity_only": med_of("min_ade_m_sanity_only"),
+        "energy_counter_j_median": med_of("energy_counter_j"),
+        "nominal_path_share": round(sum(1 for d in ds if d.get("nominal_path")) / len(ds), 3),
     }
+
+
+def sustained_block(model: Any, prepared: list, seconds: float) -> tuple[float, float, int, int | None, int | None]:
+    """Decisions back to back over the clips for about ``seconds``; returns the window and counters."""
+    torch.cuda.synchronize()
+    e0 = energy_counter_mj()
+    m0 = time.monotonic()
+    n = 0
+    while time.monotonic() - m0 < seconds:
+        predict(model, prepared[n % len(prepared)])
+        n += 1
+    torch.cuda.synchronize()
+    m1 = time.monotonic()
+    return m0, m1, n, e0, energy_counter_mj()
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -229,6 +260,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--warmup", type=int, default=1)
     ap.add_argument("--max-clips", type=int, default=None)
     ap.add_argument("--out", type=Path, default=None)
+    ap.add_argument("--sample-interval", type=float, default=0.1)
+    ap.add_argument("--sustained-s", type=float, default=30.0)
     args = ap.parse_args(argv)
 
     from alpamayo2_edge.checkpoint import load_model
@@ -241,7 +274,7 @@ def main(argv: list[str] | None = None) -> int:
     out.parent.mkdir(parents=True, exist_ok=True)
     (HERE / "traces").mkdir(exist_ok=True)
 
-    sampler = start_sampler(args.board)
+    sampler = start_sampler(args.board, args.sample_interval)
     started = datetime.now(timezone.utc).isoformat(timespec="seconds")
     torch.cuda.reset_peak_memory_stats()
     t0 = time.perf_counter()
@@ -291,9 +324,17 @@ def main(argv: list[str] | None = None) -> int:
                     f"# {args.board}, {args.variant}, clip {m['clip_id']}, t0_us {m['t0_us']}, nav \"{m['nav_text']}\"\n"
                     f"# generated tokens {d['generated_tokens']}, latency {d['latency_total_s']} s\n\n{d['trace']}\n")
 
+    sm0, sm1, sn, se0, se1 = sustained_block(model, prepared, args.sustained_s)
     if sampler:
         sampler.stop()
     tel = sampler.samples if sampler else []
+    sus_win = [s for s in tel if sm0 <= s.get("t", -1) <= sm1]
+    sus_pw = power_summary(sus_win)
+    sustained = {"seconds": round(sm1 - sm0, 2), "decisions": sn,
+                 "seconds_per_decision": round((sm1 - sm0) / sn, 4), "power": sus_pw,
+                 "energy_per_decision_j_from_mean_power": round(sus_pw["mean_w"] * (sm1 - sm0) / sn, 1) if sus_pw else None,
+                 "energy_per_decision_j_from_counter": round((se1 - se0) / 1000.0 / sn, 1) if se0 is not None and se1 is not None else None}
+    print(f"[sustained] {sustained}", flush=True)
     for d in warm + decisions:
         win = [s for s in tel if d["wall_start"] <= s.get("t", -1) <= d["wall_end"]]
         d["power"] = power_summary(win)
@@ -312,7 +353,8 @@ def main(argv: list[str] | None = None) -> int:
         "protocol": {**SETTINGS, "seed": SEED, "repeats": args.repeats, "warmup": args.warmup,
                      "nav_rule": nav["rule"], "clips": [m["clip_id"] for m in metas]},
         "load": load, "data_load_s": data_load_s, "input_prep_s": prep_s, "acceleration": accel_info,
-        "summary": summarize(decisions), "warmup": warm, "decisions": decisions,
+        "summary": summarize(decisions), "sustained": sustained, "telemetry_interval_s": args.sample_interval,
+        "warmup": warm, "decisions": decisions,
     }
     out.write_text(json.dumps(record, indent=1))
     print(json.dumps(record["summary"], indent=1))
