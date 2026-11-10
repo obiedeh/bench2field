@@ -100,6 +100,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--sample-cache", type=Path, required=True)
     ap.add_argument("--diffusion-steps", type=int, default=rd.SETTINGS["diffusion_steps"])
     ap.add_argument("--tag", default="")
+    ap.add_argument("--fp8", action="store_true", help="torchao FP8 on the language model (run_decisions.quantize_fp8)")
     args = ap.parse_args(argv)
     rd.DIFFUSION_STEPS[0] = args.diffusion_steps
 
@@ -109,6 +110,7 @@ def main(argv: list[str] | None = None) -> int:
     nav = {s["clip_id"]: s["nav_text"] for s in json.loads(args.nav.read_text())["samples"]}
     model, _ = load_model(args.model, device="cuda", dtype="bfloat16", attn_implementation="sdpa")
     rd.install_prep_mode("cached")
+    fp8 = rd.quantize_fp8(model) if args.fp8 else None
 
     streams = {}
     for clip in STREAM_CLIPS:
@@ -168,7 +170,7 @@ def main(argv: list[str] | None = None) -> int:
 
     record = {
         "schema": "bench2field.case_study_06.stream/1", "label": "lab result",
-        "board": args.board, "variant": args.variant, "diffusion_steps": args.diffusion_steps,
+        "board": args.board, "variant": args.variant, "diffusion_steps": args.diffusion_steps, "fp8": fp8,
         "model": {"id": "nvidia/Alpamayo2-Edge", "revision": rd.MODEL_REVISION},
         "stream": {"clips": list(STREAM_CLIPS), "steps": STEPS, "warm_steps": WARM, "t_start_us": T_START_US, "rate_hz": 10},
         "cache": {"hits": cache.hits, "misses": cache.misses, "fingerprint_mismatch": cache.fingerprint_mismatch},
