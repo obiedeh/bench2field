@@ -1,4 +1,4 @@
 # bench-5090, eager, clip 06b483cf-6d9c-4b18-b54b-4429c80867e3, t0_us 5100000, nav "Continue straight"
-# generated tokens 20, latency 0.438 s
+# generated tokens 20, latency 0.8827 s
 
 Proceed straight through the intersection to follow our route, as the roadway ahead is clear.

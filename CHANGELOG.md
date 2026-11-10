@@ -8,6 +8,7 @@ run file on named hardware, as the project rules require.
 
 - 2026-11-10: Case study 06 scaffold, NVIDIA Alpamayo 2 Edge (the 2B-class student released 2026-11-10) on the same eight clips as case study 02: plan and budgets fixed before any timed run (0.1 s decision deadline), navigation text derived by a fixed rule from the logged path, a runner that times the upstream call without changing it, and a friction log started at setup. Results pending.
 - 2026-11-10: Case study 06, BF16 eager results on both boards (24 decisions each): 0.344 s median per decision on the RTX 5090 and 2.150 s on the Jetson AGX Thor, 135 J and 130 J per decision in a sustained block, 6.0 GiB peak; the 0.1 s deadline is missed on both, as NVIDIA states for BF16 PyTorch. Energy method amended after the first run (0.1 s sampling, NVML energy counter, 30 s sustained block). Issues logged, including the missing Edge TensorRT recipe.
+- 2026-11-10: Case study 06, optimization runs on the RTX 5090: upstream acceleration (0.186 s median, 0.249 s p95, 93 J), five diffusion steps, input preparation with the processor built once (0.80 s to 0.04 s per clip, identical inputs), torchao FP8 (worse in eager mode, best under compilation: 0.172 s median, 0.219 s p95, 80 J). Runner options for steps, preparation mode, FP8 and a local sample cache.
 
 ## 1.1 (release notes drafted 2026-10-29, not yet tagged)
 

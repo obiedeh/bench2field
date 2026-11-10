@@ -1,4 +1,4 @@
 # bench-5090, eager, clip 09ad74a2-a499-4355-a302-da69ff7d0a57, t0_us 5100000, nav "Continue straight"
-# generated tokens 19, latency 0.4321 s
+# generated tokens 19, latency 0.8535 s
 
 Proceed straight through the intersection to follow our route, as the traffic light is green.
