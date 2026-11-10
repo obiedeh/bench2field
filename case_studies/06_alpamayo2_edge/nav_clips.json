@@ -1,0 +1,70 @@
+{
+ "rule": {
+  "turn_deg": 30.0,
+  "start_deg": 10.0,
+  "horizon_s": 6.4,
+  "source": "logged egomotion, PhysicalAI-AV"
+ },
+ "dataset_revision": "2ac2e9c056e0c8426face5bfad64b0961a295b28",
+ "samples": [
+  {
+   "clip_id": "030c760c-ae38-49aa-9ad8-f5650a545d26",
+   "t0_us": 5100000,
+   "nav_text": "Continue straight",
+   "final_heading_deg": 1.1,
+   "path_length_m": 47.5
+  },
+  {
+   "clip_id": "0347d9f9-1493-4954-865d-1d8464e28501",
+   "t0_us": 5100000,
+   "nav_text": "Turn right in 10m",
+   "final_heading_deg": -66.7,
+   "path_length_m": 93.1,
+   "turn_starts_at_m": 14.5
+  },
+  {
+   "clip_id": "06b483cf-6d9c-4b18-b54b-4429c80867e3",
+   "t0_us": 5100000,
+   "nav_text": "Continue straight",
+   "final_heading_deg": 26.0,
+   "path_length_m": 80.7
+  },
+  {
+   "clip_id": "09ad74a2-a499-4355-a302-da69ff7d0a57",
+   "t0_us": 5100000,
+   "nav_text": "Continue straight",
+   "final_heading_deg": -0.3,
+   "path_length_m": 75.0
+  },
+  {
+   "clip_id": "0a1ef808-c891-4da2-919d-c44aa3be5085",
+   "t0_us": 5100000,
+   "nav_text": "Continue straight",
+   "final_heading_deg": 7.1,
+   "path_length_m": 77.7
+  },
+  {
+   "clip_id": "0ea6fd88-dcdd-434e-9fa3-56ce0fb35bf2",
+   "t0_us": 5100000,
+   "nav_text": "Continue straight",
+   "final_heading_deg": 19.3,
+   "path_length_m": 57.2
+  },
+  {
+   "clip_id": "174407b0-b040-475b-8c1e-512b0bab4675",
+   "t0_us": 5100000,
+   "nav_text": "Continue straight",
+   "final_heading_deg": -3.5,
+   "path_length_m": 68.3
+  },
+  {
+   "clip_id": "195f1fc6-2a7b-4833-9b7f-753530fda044",
+   "t0_us": 5100000,
+   "nav_text": "Turn left in 30m",
+   "final_heading_deg": 42.0,
+   "path_length_m": 120.9,
+   "turn_starts_at_m": 27.3
+  }
+ ],
+ "futures": "logged future poses kept outside git (gated dataset); regenerate with derive_nav.py --futures"
+}

@@ -4,6 +4,10 @@ What changed in each Bench2Field release, newest first. Versions follow
 `pyproject.toml` and the git tags. A result named here came from a committed
 run file on named hardware, as the project rules require.
 
+## Unreleased
+
+- 2026-11-10: Case study 06 scaffold, NVIDIA Alpamayo 2 Edge (the 2B-class student released 2026-11-10) on the same eight clips as case study 02: plan and budgets fixed before any timed run (0.1 s decision deadline), navigation text derived by a fixed rule from the logged path, a runner that times the upstream call without changing it, and a friction log started at setup. Results pending.
+
 ## 1.1 (release notes drafted 2026-10-29, not yet tagged)
 
 Alpamayo 1 on the bench and the edge, with a custom CUDA preprocessing kernel.
