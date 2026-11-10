@@ -44,3 +44,13 @@ from bench2field.telemetry.tegrastats import TegrastatsSampler
 print("alpamayo2_edge imports; tegrastats available:", TegrastatsSampler.available())
 PY
 elapsed "verified"
+# Optional, for the accelerated and FP8 variants (case study 06 FRICTION_LOG):
+# ninja first, or the flash-attn source build runs one file at a time; then flash-attn
+# for sm_110 only (about 18 minutes with MAX_JOBS=10), and torchao for FP8.
+# Runs that use torch.compile need TRITON_PTXAS_BLACKWELL_PATH=/usr/local/cuda/bin/ptxas.
+if [ "${WITH_ACCEL:-0}" = "1" ]; then
+    "$VENV/bin/pip" install -q ninja "torchao==0.17.0"
+    PATH="$VENV/bin:/usr/local/cuda/bin:$PATH" MAX_JOBS=10 FLASH_ATTN_CUDA_ARCHS=110 \
+        "$VENV/bin/pip" install --no-build-isolation --no-deps "flash-attn==2.8.3"
+    elapsed "ninja, torchao and flash-attn installed"
+fi

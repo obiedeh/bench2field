@@ -128,10 +128,10 @@ def main(argv: list[str] | None = None) -> int:
         streams[clip] = steps
         print(f"[stream] {clip[:8]}: {len(steps)} steps ready", flush=True)
 
-    if args.variant == "tuned":
+    if args.variant in ("tuned", "compile"):
         from alpamayo2_edge.accel import AccelConfig, enable_acceleration
 
-        enable_acceleration(model, AccelConfig(mode="tuned"))
+        enable_acceleration(model, AccelConfig(mode=args.variant))
     cache = VisionCache(model.vlm.model)
 
     def timed(prepared: dict) -> tuple[float, Any]:

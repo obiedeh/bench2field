@@ -46,7 +46,7 @@ import torch
 
 HERE = Path(__file__).resolve().parent
 BOARDS = ("bench-5090", "bench-thor")
-VARIANTS = ("eager", "tuned")
+VARIANTS = ("eager", "tuned", "compile")
 MODEL_REVISION = "f8951d095de3589b3face1dec3f4394c8ecedb38"
 # The upstream CLI's settings (alpamayo2_edge/inference.py at 02f55a7), unchanged.
 SETTINGS = dict(top_p=0.98, top_k=None, temperature=0.6, num_traj_sets=1, num_traj_samples=1,
@@ -394,10 +394,10 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[run] {len(samples)} clips loaded in {data_load_s} s; input prep median {statistics.median(prep_s)} s", flush=True)
 
     accel_info = None
-    if args.variant == "tuned":
+    if args.variant in ("tuned", "compile"):
         from alpamayo2_edge.accel import AccelConfig, enable_acceleration
 
-        acc = enable_acceleration(model, AccelConfig(mode="tuned"))
+        acc = enable_acceleration(model, AccelConfig(mode=args.variant))
         tw = time.perf_counter()
         for p in prepared:  # build graphs for every input shape before timing
             predict(model, p)
