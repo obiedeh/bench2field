@@ -9,6 +9,10 @@ made it slower on this software stack and changed the chain on two of nine clips
 numbers Embedl publishes for this board (91.9 ms median) are not reached with the
 public pieces available today; what stands between is listed at the end.
 
+The report, every chart from the committed runs: [report/index.html](https://obiedeh.github.io/bench2field/case_studies/07_alpamayo2_edge_edgellm/report/index.html) (the file itself is `report/index.html`, built by `tools/make_report.py`, works offline).
+
+![Median and tail latency per decision, by build](report/headline.svg)
+
 Question, budget and protocol: [PLAN.md](PLAN.md). Every issue in the order it
 happened: [FRICTION_LOG.md](FRICTION_LOG.md). Run records: `runs/` (every decision
 with stage times and board power; one decoded trajectory set per clip and build).
@@ -93,8 +97,10 @@ both runtimes; not done here.
    because the toolchain file takes the `cuda` alternative, 13.2 on this board, against
    the 13.0 headers (FRICTION_LOG, issue 2). Result: tail latency 544 to 427 ms against
    the PyTorch stream; median 331 to 367 ms, so no gain at the median.
-2. **Vision cache across decisions** (the recipe's `--rolling` on a loop): 70 ms and
-   8 J per decision against encoding all 22 frames.
+2. **Vision cache across decisions** (the recipe's `--rolling` on a loop): the vision
+   stage 98 to 27 ms, the p95 613 to 525 ms and 8 J less per decision against encoding
+   all 22 frames; the median moved only 9 ms on the example clip because the cold run
+   decoded faster there (`runs/stream/example_cold_c6.json`).
 3. **One candidate instead of six:** expert 84 to 35 ms, about 45 ms per decision.
 4. **NVFP4 W4A16 language model:** negative. Decode 11.8 to 15.0 ms per token, prefill
    96 to 129 ms, vision 25 to 35 ms (the projector was quantized too). The engine's

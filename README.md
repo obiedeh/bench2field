@@ -36,7 +36,7 @@ One report schema across all three, so results compare directly.
 - [Case study 04](case_studies/04_isaac_ros/README.md): Isaac ROS 4.5 object detection in a container, measured on the RTX 5090 as a lower bound; the Jetson AGX Thor run is still to come.
 - [Case study 05](case_studies/05_cosmos_predict/README.md): Cosmos Predict 2.5, the cost of one video forecast on the 5090 (773.9 s, 30.9 GiB peak), and what admission on the Thor's unified memory revealed.
 - [Case study 06](case_studies/06_alpamayo2_edge/README.md): Alpamayo 2 Edge, the 2B-class student, on the 5090 and the Thor in PyTorch: as shipped, with NVIDIA's acceleration, vision reuse on a 10 Hz stream, five steps and FP8; the Thor stream at 0.331 s median, 0.544 s p95.
-- [Case study 07](case_studies/07_alpamayo2_edge_edgellm/README.md): Alpamayo 2 Edge with NVIDIA's TensorRT Edge-LLM recipe on the Jetson AGX Thor: FP8 engines at 367 ms median and 427 ms p95 per decision (one candidate, nine clips), NVFP4 W4A16 slower on this stack, trajectories checked across builds, seven issues with fixes.
+- [Case study 07](case_studies/07_alpamayo2_edge_edgellm/README.md): Alpamayo 2 Edge with NVIDIA's TensorRT Edge-LLM recipe on the Jetson AGX Thor: FP8 engines at 367 ms median and 427 ms p95 per decision (one candidate, nine clips), NVFP4 W4A16 slower on this stack, trajectories checked across builds, seven issues with fixes. [The report](https://obiedeh.github.io/bench2field/case_studies/07_alpamayo2_edge_edgellm/report/index.html): every chart, from the committed runs.
 - [Methodology](docs/METHODOLOGY.md): the rules every result follows.
 - [Changelog](CHANGELOG.md): what changed in each release and what is still unreleased.
 

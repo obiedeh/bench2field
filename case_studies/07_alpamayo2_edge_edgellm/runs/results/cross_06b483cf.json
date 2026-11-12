@@ -9,9 +9,21 @@
    "first_candidates_m": 0.154,
    "closest_candidates_m": 0.154
   },
+  "fp8 vs nvfp4-w4a16": {
+   "first_candidates_m": 0.054,
+   "closest_candidates_m": 0.037
+  },
   "fp8-c1 vs fp8-s3-c1": {
    "first_candidates_m": 0.155,
    "closest_candidates_m": 0.155
+  },
+  "fp8-c1 vs nvfp4-w4a16": {
+   "first_candidates_m": 0.056,
+   "closest_candidates_m": 0.056
+  },
+  "fp8-s3-c1 vs nvfp4-w4a16": {
+   "first_candidates_m": 0.145,
+   "closest_candidates_m": 0.145
   }
  },
  "pytorch": {
@@ -29,6 +41,11 @@
    "repeats": 3,
    "closest_m": 0.464,
    "mean_m": 0.464
+  },
+  "nvfp4-w4a16": {
+   "repeats": 3,
+   "closest_m": 0.445,
+   "mean_m": 0.445
   },
   "pytorch_repeat_spread_m": 0.0
  }
