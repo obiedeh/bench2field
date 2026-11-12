@@ -289,6 +289,89 @@ def energy_chart(title, width=720, label_w=250):
     return "".join(out)
 
 
+# --- instrument cluster ----------------------------------------------------------
+
+
+def _pt(cx, cy, r, deg):
+    import math
+    a = math.radians(deg)
+    return cx + r * math.cos(a), cy + r * math.sin(a)
+
+
+def _arc(cx, cy, r, a0, a1):
+    """SVG path for the arc from a0 to a1 degrees (clockwise, y down)."""
+    x0, y0 = _pt(cx, cy, r, a0)
+    x1, y1 = _pt(cx, cy, r, a1)
+    large = 1 if a1 - a0 > 180 else 0
+    return f"M{x0:.1f} {y0:.1f}A{r:.1f} {r:.1f} 0 {large} 1 {x1:.1f} {y1:.1f}"
+
+
+def dial(value, vmin, vmax, *, title, readout, sub, unit, major, minor=None, zones=(), markers=(), size=320, fmt_tick=lambda t: f"{t:g}"):
+    """A speedometer: a 270 degree arc from bottom-left to bottom-right, a needle at `value`, coloured zones on the
+    ring, labelled markers for reference values, and a digital readout under the hub.
+    zones: (lo, hi, colour, name); markers: (value, label, published)."""
+    import math
+    A0, A1 = 135.0, 405.0
+    cx, cy = size / 2, size / 2
+    r = size * 0.36
+    rb = r + 20  # bezel
+    ang = lambda v: A0 + (A1 - A0) * (min(max(v, vmin), vmax) - vmin) / (vmax - vmin)
+    out = [f'<svg class="dial" viewBox="-48 0 {size + 96} {size * 1.16:.0f}" role="img" aria-label="{esc(title)}: {esc(readout)} {esc(unit)}">'
+           f'<title>{esc(title)}: {esc(readout)} {esc(unit)}, {esc(sub)}</title>']
+    # bezel and track
+    out.append(f'<circle cx="{cx}" cy="{cy}" r="{rb:.1f}" class="bezel"/>')
+    out.append(f'<path d="{_arc(cx, cy, r, A0, A1)}" class="track"/>')
+    for lo, hi, colour, name in zones:
+        a, b = ang(lo), ang(hi)
+        out.append(f'<path d="{_arc(cx, cy, r, a + 0.6, b - 0.6)}" class="zone" stroke="{colour}"><title>{esc(name)}</title></path>')
+    # ticks
+    step = minor or major
+    t = vmin
+    while t <= vmax + 1e-9:
+        a = ang(t)
+        is_major = abs((t - vmin) / major - round((t - vmin) / major)) < 1e-6
+        r0 = r - 14 if is_major else r - 9
+        x0, y0 = _pt(cx, cy, r0, a)
+        x1, y1 = _pt(cx, cy, r - 2, a)
+        out.append(f'<line x1="{x0:.1f}" y1="{y0:.1f}" x2="{x1:.1f}" y2="{y1:.1f}" class="{"tick-major" if is_major else "tick-minor"}"/>')
+        if is_major:
+            tx, ty = _pt(cx, cy, r - 30, a)
+            out.append(text(tx, ty, fmt_tick(t), "dial-num", "middle"))
+        t += step
+    # reference markers outside the ring
+    for v, label, published in markers:
+        a = ang(v)
+        x0, y0 = _pt(cx, cy, r + 7, a)
+        x1, y1 = _pt(cx, cy, r + 17, a)
+        xl, yl = _pt(cx, cy, r + 10, a - 4.0)
+        xr, yr = _pt(cx, cy, r + 10, a + 4.0)
+        cls = "marker-pub" if published else "marker-ref"
+        out.append(f'<g class="hit"><polygon points="{x0:.1f},{y0:.1f} {xl:.1f},{yl:.1f} {x1:.1f},{y1:.1f} {xr:.1f},{yr:.1f}" class="{cls}"/>'
+                   f'<title>{esc(label)}: {v:g} {esc(unit)}{", published, not run here" if published else ""}</title></g>')
+        lx, ly = _pt(cx, cy, rb + 12, a)
+        anchor = "middle" if abs(math.cos(math.radians(a))) < 0.35 else ("end" if math.cos(math.radians(a)) < 0 else "start")
+        out.append(text(lx, ly, label, "dial-mark", anchor))
+    # needle
+    a = ang(value)
+    tipx, tipy = _pt(cx, cy, r - 6, a)
+    bl, br = _pt(cx, cy, 10, a + 90), _pt(cx, cy, 10, a - 90)
+    tail = _pt(cx, cy, 22, a + 180)
+    out.append(f'<polygon points="{tipx:.1f},{tipy:.1f} {bl[0]:.1f},{bl[1]:.1f} {tail[0]:.1f},{tail[1]:.1f} {br[0]:.1f},{br[1]:.1f}" class="needle"/>')
+    out.append(f'<circle cx="{cx}" cy="{cy}" r="13" class="hub"/><circle cx="{cx}" cy="{cy}" r="4" class="hub-dot"/>')
+    # readout
+    out.append(text(cx, cy + r * 0.50, readout, "dial-readout", "middle"))
+    out.append(text(cx, cy + r * 0.50 + 24, unit, "dial-unit", "middle"))
+    out.append(text(cx, cy + rb + 28, title, "dial-title", "middle"))
+    out.append(text(cx, cy + rb + 50, sub, "dial-sub", "middle"))
+    out.append("</svg>")
+    return "".join(out)
+
+
+def lamp(state, icon, label, detail):
+    """A tell-tale: a lit square with an icon, a label and one line of detail. state: ok, warn, bad."""
+    return (f'<div class="lamp {state}"><div class="lens">{ICON[icon]}</div><div><b>{esc(label)}</b><span>{esc(detail)}</span></div></div>')
+
+
 # --- icons (inline, stroke follows text colour) ----------------------------------
 
 ICON = {
@@ -302,6 +385,10 @@ ICON = {
     "chip": '<svg class="ico" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4" stroke="currentColor" stroke-width="2"/></svg>',
     "target": '<svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>',
     "text": '<svg class="ico" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    "warn": '<svg class="ico" viewBox="0 0 24 24"><path d="M12 3l9 16H3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 9v5m0 3v.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
+    "check": '<svg class="ico" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    "speed": '<svg class="ico" viewBox="0 0 24 24"><path d="M4 16a8 8 0 1 1 16 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 16l4-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="16" r="1.6" fill="currentColor"/></svg>',
+    "lock": '<svg class="ico" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
 }
 
 ISSUES = [
@@ -340,33 +427,47 @@ a{color:var(--sim);text-decoration:none}a:hover{text-decoration:underline}
 .ee-mark{display:inline-flex;align-items:center;gap:8px;color:var(--fg);font-weight:600;letter-spacing:-.01em}.ee-mark:hover{text-decoration:none}
 .ee-mark i{display:inline-block;width:14px;height:14px;background:linear-gradient(135deg,var(--field) 0 50%,var(--sim) 50% 100%);border-radius:2px}
 .ee-mark span{color:var(--muted);font-weight:400}.ee-band nav{display:flex;gap:16px}.ee-band nav a{color:var(--muted)}.ee-band nav a:hover{color:var(--fg)}
-main{max-width:960px;margin:0 auto;padding:24px 16px 48px}
-.eyebrow{color:var(--field);font:600 12px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;margin:0 0 8px}
-header{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:flex-end;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:8px}
-h1{font-size:clamp(40px,4.6vw,64px);line-height:1;font-weight:500;letter-spacing:-.06em;margin:0}h1 .ee-g{color:var(--field)}h1 .ee-b{color:var(--sim)}
-h2{font-size:clamp(28px,3.2vw,40px);line-height:1.08;font-weight:500;letter-spacing:-.04em;margin:40px 0 8px;padding-top:16px;border-top:1px solid var(--line)}
-h3{font-size:1.1rem;font-weight:600;margin:24px 0 6px}
-.sub{color:var(--muted);margin-top:6px}button.theme{background:transparent;color:var(--fg);border:1px solid var(--line-strong);border-radius:0;padding:6px 12px;cursor:pointer;font:600 .8rem var(--sans)}
-.big{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:16px 0}.big .n{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
-.big .n b{display:block;font-size:2rem;line-height:1.1;font-weight:500;letter-spacing:-.03em}.big .n.bad b{color:var(--signal)}.big .n.ok b{color:var(--field)}.big .n span{color:var(--muted);font-size:.85rem}
-.big .n .ico{width:20px;height:20px;color:var(--muted)}
-.chartbox{overflow-x:auto}svg.chart{width:100%;min-width:600px;height:auto;display:block;margin:8px 0;font:13px var(--sans)}
+main{max-width:1040px;margin:0 auto;padding:40px 24px 80px}
+p{max-width:78ch;margin:12px 0 20px}
+.eyebrow{color:var(--field);font:600 12px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;margin:0 0 12px}
+header{display:flex;flex-wrap:wrap;gap:16px 24px;align-items:flex-end;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:28px;margin-bottom:36px}
+h1{font-size:clamp(40px,4.6vw,64px);line-height:1;font-weight:500;letter-spacing:-.06em;margin:0;max-width:24ch}h1 .ee-g{color:var(--field)}h1 .ee-b{color:var(--sim)}
+h2{font-size:clamp(28px,3.2vw,40px);line-height:1.08;font-weight:500;letter-spacing:-.04em;margin:80px 0 16px;padding-top:28px;border-top:1px solid var(--line)}
+h3{font-size:1.1rem;font-weight:600;margin:32px 0 8px}
+.sub{color:var(--muted);margin-top:14px;max-width:70ch}button.theme{background:transparent;color:var(--fg);border:1px solid var(--line-strong);border-radius:0;padding:8px 14px;cursor:pointer;font:600 .8rem var(--sans)}
+.cluster{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:36px 20px 28px;margin:8px 0 28px;position:relative}
+.cluster .strip{position:absolute;left:28px;right:28px;top:0;height:3px;background:linear-gradient(90deg,var(--sim),var(--field));border-radius:0 0 3px 3px;opacity:.9}
+.dials{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:12px;align-items:end}
+.dials .side{padding-bottom:4%}
+svg.dial{width:100%;height:auto;display:block;font:13px var(--sans)}
+svg.dial .bezel{fill:var(--bg);stroke:var(--line-strong);stroke-width:1.5}svg.dial .track{fill:none;stroke:var(--line-strong);stroke-width:12;stroke-linecap:butt}
+svg.dial .zone{fill:none;stroke-width:12;stroke-linecap:butt}svg.dial .tick-major{stroke:var(--fg);stroke-width:2}svg.dial .tick-minor{stroke:var(--muted);stroke-width:1}
+svg.dial .dial-num{fill:var(--fg);font-size:15px;font-weight:600;font-family:var(--mono)}svg.dial .dial-mark{fill:var(--muted);font-size:13px}
+svg.dial .marker-ref{fill:var(--fg)}svg.dial .marker-pub{fill:var(--muted)}
+svg.dial .needle{fill:var(--signal);stroke:var(--bg);stroke-width:1}svg.dial .hub{fill:var(--card);stroke:var(--line-strong);stroke-width:2}svg.dial .hub-dot{fill:var(--signal)}
+svg.dial .dial-readout{fill:var(--fg);font:500 44px var(--mono);letter-spacing:-.03em}svg.dial .dial-unit{fill:var(--muted);font:12px var(--mono);letter-spacing:.08em;text-transform:uppercase}
+svg.dial .dial-title{fill:var(--fg);font-size:19px;font-weight:600;letter-spacing:-.01em}svg.dial .dial-sub{fill:var(--muted);font-size:14px}
+.lamps{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px 24px;margin-top:28px;padding-top:24px;border-top:1px solid var(--line)}
+.lamp{display:flex;gap:12px;align-items:flex-start}.lamp .lens{flex:none;width:40px;height:40px;border-radius:10px;display:grid;place-items:center;border:1px solid var(--line-strong);background:var(--bg)}
+.lamp .lens .ico{width:22px;height:22px}.lamp b{display:block;font-size:.9rem;line-height:1.25}.lamp span{display:block;color:var(--muted);font-size:.8rem;line-height:1.35;margin-top:2px}
+.lamp.ok .lens{color:var(--field);border-color:var(--field);box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--field) 18%,transparent)}
+.lamp.warn .lens{color:var(--signal);border-color:var(--signal);box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--signal) 18%,transparent)}
+.lamp.bad .lens{color:var(--deadline);border-color:var(--deadline);box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--deadline) 18%,transparent)}
+.lamp.off .lens{color:var(--dim)}
+@media(max-width:760px){.dials{grid-template-columns:1fr}.dials .side{padding:0;max-width:300px;margin:0 auto}.cluster{padding:28px 16px 20px}}
+.chartbox{overflow-x:auto}svg.chart{width:100%;min-width:600px;height:auto;display:block;margin:20px 0 8px;font:13px var(--sans)}
 svg .grid{stroke:var(--line);stroke-width:1}svg .tick,svg .axis{fill:var(--muted)}svg .label{fill:var(--fg);font-size:13px}svg .value{fill:var(--fg)}svg .value-on{fill:#111;font-size:12px;font-weight:600}
 svg .deadline{stroke:var(--deadline);stroke-width:1.5;stroke-dasharray:6 4}svg .deadline-label{fill:var(--deadline);font-size:11px}
 svg .mean{stroke:var(--fg);stroke-width:1.5}svg .marker{stroke:var(--bg);stroke-width:2}svg .hit:hover rect,svg .hit:hover circle{filter:brightness(1.15)}
-.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.85rem;color:var(--muted);margin:4px 0 12px}.key i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:.85rem;color:var(--muted);margin:8px 0 4px}.key i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
 .key i.hatch{background:repeating-linear-gradient(45deg,var(--muted) 0 2px,transparent 2px 6px)}.key i.diamond{transform:rotate(45deg);border-radius:1px}.key i.dot{border-radius:50%}
-table{border-collapse:collapse;width:100%;font-size:.9rem;margin:8px 0}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:600}
-.scroll{overflow-x:auto}td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
-.list{list-style:none;padding:0;margin:8px 0;display:grid;gap:10px}.list li{display:grid;grid-template-columns:28px 1fr;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:12px 14px}
-.list .ico{width:22px;height:22px;margin-top:2px}.list b{display:block;font-weight:600}.list span{color:var(--muted);font-size:.92rem}
-.note{border-left:3px solid var(--signal);padding:4px 12px;color:var(--muted);margin:8px 0}code{font:.88em var(--mono);color:var(--fg)}
-footer{color:var(--muted);font-size:.85rem;margin-top:48px;border-top:1px solid var(--line);padding-top:12px}footer .lab{display:block;margin-top:6px;color:var(--dim)}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:24px 0 8px}th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:600}
+.scroll{overflow-x:auto;margin-bottom:12px}td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.list{list-style:none;padding:0;margin:20px 0;display:grid;gap:14px}.list li{display:grid;grid-template-columns:28px 1fr;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px}
+.list .ico{width:22px;height:22px;margin-top:2px}.list b{display:block;font-weight:600;margin-bottom:4px}.list span{color:var(--muted);font-size:.92rem;line-height:1.5}
+.note{border-left:3px solid var(--signal);padding:6px 16px;color:var(--muted);margin:20px 0}code{font:.88em var(--mono);color:var(--fg)}
+footer{color:var(--muted);font-size:.85rem;margin-top:80px;border-top:1px solid var(--line);padding-top:20px;max-width:78ch}footer .lab{display:block;margin-top:10px;color:var(--dim)}
 """
-
-
-def tile(value, caption, icon, cls=""):
-    return f'<div class="n {cls}">{ICON[icon]}<b>{esc(value)}</b><span>{esc(caption)}</span></div>'
 
 
 def render() -> str:
@@ -390,14 +491,34 @@ def render() -> str:
                  f'<div class="sub">NVIDIA\'s deployment recipe replicated on the Jetson board and pushed further · {esc(BOARD["jetpack"].replace("Installed: ", "JetPack "))}, TensorRT {esc(BOARD["tensorrt"])}, CUDA {esc(BOARD["cuda"])}, {esc(BOARD["power_mode"].replace("NV Power Mode: ", ""))} · 12 November 2026 · generated from <code>07_alpamayo2_edge_edgellm/runs/</code></div></div>'
                  '<button class="theme" id="theme">Light theme</button></header>')
 
-    parts.append('<div class="big">'
-                 + tile(f'{fp8["median_ms"]:.0f} ms', "median per decision, NVIDIA's FP8 recipe as written, nine clips, one candidate; the deadline is 100 ms", "clock", "bad")
-                 + tile(f'{fp8["p95_ms"]:.0f} ms', f'p95, down from {PYTORCH["tail"]:.0f} ms in the PyTorch stream of 10 November; the median rose from {PYTORCH["median"]:.0f}', "target")
-                 + tile(f'{MS_PER_TOKEN:.1f} ms', "per token of reasoning, median over the decisions that reason: GPU work streaming 2 GB of FP8 weights, the largest cost of a decision", "bolt")
-                 + tile(f'{fp8["energy_per_decision_j"]:.0f} J', f'per decision at MAXN, {fp8["power_timed"]["mean_w"]:.0f} W mean while deciding; Embedl publishes {PUBLISHED[1]["energy"]:.2f} J on this board', "chip")
-                 + tile(f'{nv["median_ms"]:.0f} ms', "with the language model in NVFP4 W4A16: slower, not faster, on this software stack", "up", "bad")
-                 + tile(f'{len(ISSUES)}', "issues found, each with its cause and fix, in the friction log", "fix", "ok")
-                 + '</div>')
+    # The instrument cluster: decisions per second in the middle (the planner wants 10 Hz), reasoning tokens per
+    # second on the left, energy per decision on the right, and the tell-tales under them.
+    hz = 1000.0 / fp8["median_ms"]
+    hz_p95 = 1000.0 / fp8["p95_ms"]
+    tok_s = 1000.0 / MS_PER_TOKEN
+    nv_tok_ms = S["ex_nvfp4_c1"]["stage_median_ms"]["decode_ms"] / S["ex_nvfp4_c1"]["per_clip"]["ea7bbd31"]["generated_tokens"]
+    fp8_tok_ms = S["ex_fp8_c1"]["stage_median_ms"]["decode_ms"] / S["ex_fp8_c1"]["per_clip"]["ea7bbd31"]["generated_tokens"]
+    speedo = dial(hz, 0, 12, title="Decisions per second", readout=f"{hz:.1f}", unit="Hz, median decision", size=360,
+                  sub=f'{fp8["median_ms"]:.0f} ms median, {fp8["p95_ms"]:.0f} ms p95, FP8 recipe, nine clips', major=2, minor=0.5,
+                  zones=[(1000.0 / DEADLINE_MS, 12, "var(--field)", "meets the 10 Hz planner deadline")],
+                  markers=[(1000.0 / PYTORCH["median"], "PyTorch", False), (1000.0 / PUBLISHED[0]["median"], "NVIDIA", True), (1000.0 / PUBLISHED[1]["median"], "Embedl", True)])
+    tach = dial(tok_s, 0, 150, title="Reasoning tokens per second", readout=f"{tok_s:.0f}", unit="tokens / s", size=300,
+                sub=f"{MS_PER_TOKEN:.1f} ms per token, greedy", major=50, minor=10,
+                markers=[(1000.0 / nv_tok_ms, "NVFP4", False)])
+    energy = dial(fp8["energy_per_decision_j"], 0, 50, title="Energy per decision", readout=f'{fp8["energy_per_decision_j"]:.0f}', unit="joules", size=300,
+                  sub=f'{fp8["power_timed"]["mean_w"]:.0f} W mean while deciding, MAXN', major=10, minor=5,
+                  markers=[(PUBLISHED[1]["energy"], "Embedl", True), (nv["energy_per_decision_j"], "NVFP4", False)])
+    parts.append('<section class="cluster"><div class="strip"></div>'
+                 f'<div class="dials"><div class="side">{tach}</div><div>{speedo}</div><div class="side">{energy}</div></div>'
+                 '<div class="lamps">'
+                 + lamp("bad", "speed", "Deadline missed", f'{fp8["median_ms"]:.0f} ms against the 100 ms planner budget')
+                 + lamp("ok", "check", "Same chain of causation", "NVIDIA's example sentence, word for word")
+                 + lamp("ok", "target", "Tail improved", f'p95 {PYTORCH["tail"]:.0f} to {fp8["p95_ms"]:.0f} ms against the PyTorch stream')
+                 + lamp("warn", "up", "NVFP4 slower", f'{nv["median_ms"]:.0f} ms median with the language model in W4A16')
+                 + lamp("warn", "lock", "Drafter not released", "the recipe's 220 ms needs a DFlash2 drafter")
+                 + lamp("warn", "warn", f"{len(ISSUES)} issues logged", "each with its cause and fix, in the friction log")
+                 + '</div></section>'
+                 '<div class="legend"><span class="key"><i style="background:var(--signal)"></i>needle, measured here</span><span class="key"><i style="background:var(--muted)"></i>grey marker, published figure, not run here</span><span class="key"><i style="background:var(--fg)"></i>marker in text colour, another build measured here</span><span class="key"><i style="background:var(--field)"></i>green band, deadline met</span></div>')
 
     parts.append('<h2>Where every build lands</h2>'
                  '<p>Per decision, back to back with the engines loaded once, five Euler steps, the six newest camera frames encoded per decision (the recipe\'s rolling mode), MAXN. '
