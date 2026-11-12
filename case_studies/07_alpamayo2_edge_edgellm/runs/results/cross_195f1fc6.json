@@ -1,0 +1,52 @@
+{
+ "clip": "195f1fc6",
+ "pairs": {
+  "fp8 vs fp8-c1": {
+   "first_candidates_m": 0.011,
+   "closest_candidates_m": 0.011
+  },
+  "fp8 vs fp8-s3-c1": {
+   "first_candidates_m": 0.586,
+   "closest_candidates_m": 0.262
+  },
+  "fp8 vs nvfp4-w4a16": {
+   "first_candidates_m": 0.205,
+   "closest_candidates_m": 0.188
+  },
+  "fp8-c1 vs fp8-s3-c1": {
+   "first_candidates_m": 0.596,
+   "closest_candidates_m": 0.596
+  },
+  "fp8-c1 vs nvfp4-w4a16": {
+   "first_candidates_m": 0.206,
+   "closest_candidates_m": 0.206
+  },
+  "fp8-s3-c1 vs nvfp4-w4a16": {
+   "first_candidates_m": 0.667,
+   "closest_candidates_m": 0.319
+  }
+ },
+ "pytorch": {
+  "fp8": {
+   "repeats": 3,
+   "closest_m": 0.969,
+   "mean_m": 0.969
+  },
+  "fp8-c1": {
+   "repeats": 3,
+   "closest_m": 0.973,
+   "mean_m": 0.973
+  },
+  "fp8-s3-c1": {
+   "repeats": 3,
+   "closest_m": 0.905,
+   "mean_m": 0.905
+  },
+  "nvfp4-w4a16": {
+   "repeats": 3,
+   "closest_m": 1.156,
+   "mean_m": 1.156
+  },
+  "pytorch_repeat_spread_m": 0.0
+ }
+}

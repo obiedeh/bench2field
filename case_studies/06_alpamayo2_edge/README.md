@@ -173,6 +173,9 @@ developer should know before starting:
 7. **NVIDIA's 160 to 190 ms on DRIVE AGX Thor cannot be reproduced yet:** the
    Edge TensorRT recipe named in NVIDIA's blog is not in the public recipes
    repository.
+   Correction, 2026-11-12: the recipe (`recipes/alpamayo2edge_edgellm`, TensorRT
+   Edge-LLM) was published in the public repository on 2026-11-10 and is run on the
+   Jetson AGX Thor in case study 07; the drafter it uses is still unreleased.
 
 ## Reproduce
 

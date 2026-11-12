@@ -1,0 +1,12 @@
+{
+ "platform": "Jetson AGX Thor",
+ "label": "bench-thor",
+ "l4t": "# R38 (release), REVISION: 4.0, GCID: 43443517, BOARD: generic, EABI: aarch64, DATE: Wed Dec 31 00:15:19 UTC 2025",
+ "jetpack": "Installed: 7.1-b112",
+ "kernel": "6.8.12-tegra",
+ "cuda": "13.0",
+ "tensorrt": "10.13.3.9",
+ "torch": "2.10.0+cu130",
+ "power_mode": "NV Power Mode: MAXN",
+ "cpus": 14
+}
