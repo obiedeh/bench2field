@@ -1,0 +1,31 @@
+{
+ "platform": "Jetson AGX Thor",
+ "engines": "<home>/alpamayo2-edge-edgellm-work/work/engines/nvfp4-w4a16",
+ "clip": "<home>/alpamayo2-edge-edgellm-work/work/inputs/030c760c",
+ "rolling": true,
+ "candidates": 6,
+ "steps": 5,
+ "warmup": 1,
+ "load_s": 4.3,
+ "prompt_tokens": 3256,
+ "images": 22,
+ "vit_images_encoded_in_timed_run": 6,
+ "generated_tokens": 27,
+ "decode_steps": 27,
+ "stages_ms": {
+  "vit_ms": 35.98,
+  "prefill_ms": 131.35,
+  "decode_ms": 405.73,
+  "action_kv_ms": 2.89,
+  "action_ms": 86.85
+ },
+ "total_ms": 662.8,
+ "decode_ms_per_step": 15.03,
+ "gpu_mem_allocated_mb": 1750,
+ "tap_layers": null,
+ "drafter": null,
+ "rounds": [],
+ "noise": "torch.randn seed 0",
+ "spec_ms": null,
+ "accepted_per_round": null
+}

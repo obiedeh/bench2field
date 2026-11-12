@@ -1,0 +1,35 @@
+{
+ "clip": "0347d9f9",
+ "pairs": {
+  "fp8 vs fp8-c1": {
+   "first_candidates_m": 0.009,
+   "closest_candidates_m": 0.009
+  },
+  "fp8 vs fp8-s3-c1": {
+   "first_candidates_m": 0.187,
+   "closest_candidates_m": 0.187
+  },
+  "fp8-c1 vs fp8-s3-c1": {
+   "first_candidates_m": 0.192,
+   "closest_candidates_m": 0.192
+  }
+ },
+ "pytorch": {
+  "fp8": {
+   "repeats": 3,
+   "closest_m": 1.519,
+   "mean_m": 1.519
+  },
+  "fp8-c1": {
+   "repeats": 3,
+   "closest_m": 1.525,
+   "mean_m": 1.525
+  },
+  "fp8-s3-c1": {
+   "repeats": 3,
+   "closest_m": 1.341,
+   "mean_m": 1.341
+  },
+  "pytorch_repeat_spread_m": 0.0
+ }
+}

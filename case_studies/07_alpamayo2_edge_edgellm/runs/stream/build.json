@@ -1,0 +1,12 @@
+{
+ "onnx_dir": "<home>/alpamayo2-edge-edgellm-work/work/onnx/fp8",
+ "started": "2026-11-12 13:06:25 CST",
+ "edgellm_build_s": 80,
+ "max_kv_cache_capacity": 3584,
+ "llm_engine_s": 46,
+ "visual_engine_s": 32,
+ "engines": {
+  "llm/llm.engine": 1982101396,
+  "visual/visual.engine": 525853164
+ }
+}

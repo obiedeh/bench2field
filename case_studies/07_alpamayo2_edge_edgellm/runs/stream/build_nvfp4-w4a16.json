@@ -1,0 +1,12 @@
+{
+ "onnx_dir": "<home>/alpamayo2-edge-edgellm-work/work/onnx/nvfp4-w4a16",
+ "started": "2026-11-12 13:41:52 CST",
+ "edgellm_build_s": 79,
+ "max_kv_cache_capacity": 3584,
+ "llm_engine_s": 43,
+ "visual_engine_s": 41,
+ "engines": {
+  "llm/llm.engine": 1620774092,
+  "visual/visual.engine": 872141948
+ }
+}
