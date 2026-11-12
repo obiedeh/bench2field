@@ -289,6 +289,75 @@ def energy_chart(title, width=720, label_w=250):
     return "".join(out)
 
 
+def _wrap(label, width=18):
+    words, lines, cur = label.split(), [], ""
+    for w in words:
+        if cur and len(cur) + 1 + len(w) > width:
+            lines.append(cur)
+            cur = w
+        else:
+            cur = f"{cur} {w}".strip()
+    if cur:
+        lines.append(cur)
+    return lines[:3]
+
+
+def _vaxis(out, sy, hi, x0, x1, y0, y1, unit):
+    for t in nice_ticks(hi):
+        out.append(f'<line x1="{x0}" y1="{sy(t):.1f}" x2="{x1}" y2="{sy(t):.1f}" class="grid"/>')
+        out.append(text(x0 - 8, sy(t), f"{t:g}", "tick", "end"))
+    out.append(text(x0, y0 - 16, unit, "tick", "start"))
+
+
+def vstacked_chart(rows, title, width=720, height=380):
+    """rows: (label, summary). Vertical stacked columns of stage medians, one column per build."""
+    x0, x1, y0, y1 = 60, width - 20, 36, height - 64
+    hi = max(sum(s["stage_median_ms"].values()) for _, s in rows) * 1.12
+    sy = lambda v: y1 - (y1 - y0) * v / hi
+    slot = (x1 - x0) / len(rows)
+    bw = min(slot * 0.56, 90)
+    out = [svg_open(width, height, title)]
+    _vaxis(out, sy, hi, x0, x1, y0, y1, "ms, sum of stage medians")
+    for i, (label, s) in enumerate(rows):
+        cx = x0 + slot * (i + 0.5)
+        acc = 0.0
+        for key, name, colour in STAGES:
+            v = s["stage_median_ms"][key]
+            ya, yb = sy(acc + v), sy(acc)
+            out.append(bar(cx - bw / 2, ya + 1, bw, max(yb - ya - 2, 0), colour, f"{label}: {name} {v:.1f} ms", rx=2))
+            if yb - ya > 18:
+                out.append(text(cx, (ya + yb) / 2, f"{v:.0f}", "value-on", "middle"))
+            acc += v
+        out.append(text(cx, sy(acc) - 10, f"{acc:.0f} ms", "value", "middle"))
+        for j, line in enumerate(_wrap(label, max(10, int(slot / 7.2)))):
+            out.append(text(cx, y1 + 16 + j * 15, line, "label", "middle"))
+    out.append(f'<line x1="{x0}" y1="{y1}" x2="{x1}" y2="{y1}" class="axis-line"/>')
+    out.append("</svg>")
+    return "".join(out)
+
+
+def venergy_chart(title, width=720, height=380):
+    rows = [(l, s["energy_per_decision_j"], s["power_timed"]["mean_w"], False) for l, s in BUILDS]
+    rows.append((PUBLISHED[1]["label"], PUBLISHED[1]["energy"], None, True))
+    x0, x1, y0, y1 = 60, width - 20, 36, height - 64
+    hi = max(r[1] for r in rows) * 1.25
+    sy = lambda v: y1 - (y1 - y0) * v / hi
+    slot = (x1 - x0) / len(rows)
+    bw = min(slot * 0.56, 90)
+    out = [svg_open(width, height, title)]
+    _vaxis(out, sy, hi, x0, x1, y0, y1, "joules per decision")
+    for i, (label, e, w, pub) in enumerate(rows):
+        cx = x0 + slot * (i + 0.5)
+        out.append(bar(cx - bw / 2, sy(e), bw, y1 - sy(e), "url(#hatch)" if pub else "var(--field)", f"{label}: {e:.1f} J per decision" + (", published" if pub else f", {w:.0f} W mean")))
+        out.append(text(cx, sy(e) - 24, f"{e:.1f} J", "value", "middle"))
+        out.append(text(cx, sy(e) - 10, "published" if pub else f"{w:.0f} W mean", "tick", "middle"))
+        for j, line in enumerate(_wrap(label, max(10, int(slot / 7.2)))):
+            out.append(text(cx, y1 + 16 + j * 15, line, "label", "middle"))
+    out.append(f'<line x1="{x0}" y1="{y1}" x2="{x1}" y2="{y1}" class="axis-line"/>')
+    out.append("</svg>")
+    return "".join(out)
+
+
 # --- instrument cluster ----------------------------------------------------------
 
 
@@ -431,7 +500,7 @@ main{max-width:1040px;margin:0 auto;padding:40px 24px 80px}
 p{max-width:78ch;margin:12px 0 20px}
 .eyebrow{color:var(--field);font:600 12px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;margin:0 0 12px}
 header{display:flex;flex-wrap:wrap;gap:16px 24px;align-items:flex-end;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:28px;margin-bottom:36px}
-h1{font-size:clamp(40px,4.6vw,64px);line-height:1;font-weight:500;letter-spacing:-.06em;margin:0;max-width:24ch}h1 .ee-g{color:var(--field)}h1 .ee-b{color:var(--sim)}
+h1{font-size:clamp(40px,4.6vw,64px);line-height:1;font-weight:500;letter-spacing:-.06em;margin:0}h1 .ee-g,h1 .nw{white-space:nowrap}h1 .ee-g{color:var(--field)}h1 .ee-b{color:var(--sim)}
 h2{font-size:clamp(28px,3.2vw,40px);line-height:1.08;font-weight:500;letter-spacing:-.04em;margin:80px 0 16px;padding-top:28px;border-top:1px solid var(--line)}
 h3{font-size:1.1rem;font-weight:600;margin:32px 0 8px}
 .sub{color:var(--muted);margin-top:14px;max-width:70ch}button.theme{background:transparent;color:var(--fg);border:1px solid var(--line-strong);border-radius:0;padding:8px 14px;cursor:pointer;font:600 .8rem var(--sans)}
@@ -456,7 +525,7 @@ svg.dial .dial-title{fill:var(--fg);font-size:19px;font-weight:600;letter-spacin
 .lamp.off .lens{color:var(--dim)}
 @media(max-width:760px){.dials{grid-template-columns:1fr}.dials .side{padding:0;max-width:300px;margin:0 auto}.cluster{padding:28px 16px 20px}}
 .chartbox{overflow-x:auto}svg.chart{width:100%;min-width:600px;height:auto;display:block;margin:20px 0 8px;font:13px var(--sans)}
-svg .grid{stroke:var(--line);stroke-width:1}svg .tick,svg .axis{fill:var(--muted)}svg .label{fill:var(--fg);font-size:13px}svg .value{fill:var(--fg)}svg .value-on{fill:#111;font-size:12px;font-weight:600}
+svg .grid{stroke:var(--line);stroke-width:1}svg .axis-line{stroke:var(--line-strong);stroke-width:1}svg .tick,svg .axis{fill:var(--muted)}svg .label{fill:var(--fg);font-size:13px}svg .value{fill:var(--fg)}svg .value-on{fill:#111;font-size:12px;font-weight:600}
 svg .deadline{stroke:var(--deadline);stroke-width:1.5;stroke-dasharray:6 4}svg .deadline-label{fill:var(--deadline);font-size:11px}
 svg .mean{stroke:var(--fg);stroke-width:1.5}svg .marker{stroke:var(--bg);stroke-width:2}svg .hit:hover rect,svg .hit:hover circle{filter:brightness(1.15)}
 .legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:.85rem;color:var(--muted);margin:8px 0 4px}.key i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
@@ -487,7 +556,7 @@ def render() -> str:
              '<div class="ee-band"><div class="in"><a class="ee-mark" href="https://embodiededge.ai"><i></i>EmbodiedEdge <span>Evidence</span></a>'
              '<nav><a href="https://github.com/obiedeh/bench2field">Repository</a><a href="https://github.com/obiedeh/bench2field/tree/master/case_studies/07_alpamayo2_edge_edgellm">Case study</a><a href="https://embodiededge.ai">Lab</a><a href="https://github.com/obiedeh">Obinna Edeh</a></nav></div></div><main>']
     parts.append('<header><div><p class="eyebrow">Bench2Field · Case study 07</p>'
-                 '<h1><span class="ee-b">Alpamayo 2 Edge</span> with TensorRT Edge-LLM on the <span class="ee-g">Jetson AGX Thor</span></h1>'
+                 '<h1><span class="ee-b">Alpamayo 2 Edge</span> with <span class="nw">TensorRT Edge-LLM</span> on the <span class="ee-g">Jetson AGX Thor</span></h1>'
                  f'<div class="sub">NVIDIA\'s deployment recipe replicated on the Jetson board and pushed further · {esc(BOARD["jetpack"].replace("Installed: ", "JetPack "))}, TensorRT {esc(BOARD["tensorrt"])}, CUDA {esc(BOARD["cuda"])}, {esc(BOARD["power_mode"].replace("NV Power Mode: ", ""))} · 12 November 2026 · generated from <code>07_alpamayo2_edge_edgellm/runs/</code></div></div>'
                  '<button class="theme" id="theme">Light theme</button></header>')
 
@@ -539,7 +608,7 @@ def render() -> str:
     parts.append('<h2>Where a decision\'s time goes</h2>'
                  '<p>Stage medians, stream-synchronized at each boundary as the recipe\'s own runner does. The chain of causation is greedy decoding, one token at a time; the recipe\'s speculative drafter is not released for the Edge model.</p>'
                  '<div class="legend">' + "".join(f'<span class="key"><i style="background:{c}"></i>{n}</span>' for _, n, c in STAGES) + '</div>'
-                 f'<div class="chartbox">{stacked_chart(stack_rows, "Stage cost per decision, median, by build")}</div>'
+                 f'<div class="chartbox">{vstacked_chart(stack_rows, "Stage cost per decision, median, by build")}</div>'
                  f'<p>With no reasoning at all the floor is vision, prefill and expert: about <b>{floor:.0f} ms</b> at one candidate, already above Embedl\'s published median. '
                  f'Each token of reasoning costs {MS_PER_TOKEN:.1f} ms of GPU work (measured with the engine alone, with and without a host sync per token), so a 22-token sentence is about {22 * MS_PER_TOKEN:.0f} ms of the decision. '
                  f'The NVFP4 engine holds {BUILD_NVFP4["engines"]["llm/llm.engine"] / 1e9:.2f} GB of packed weights against {BUILD_FP8["engines"]["llm/llm.engine"] / 1e9:.2f} GB in FP8, yet its token costs {S["ex_nvfp4_c1"]["stage_median_ms"]["decode_ms"] / S["ex_nvfp4_c1"]["per_clip"]["ea7bbd31"]["generated_tokens"]:.1f} ms on the example clip against {S["ex_fp8_c1"]["stage_median_ms"]["decode_ms"] / S["ex_fp8_c1"]["per_clip"]["ea7bbd31"]["generated_tokens"]:.1f} in FP8: on Edge-LLM 0.11.1 with TensorRT {esc(BOARD["tensorrt"])} the single-token NVFP4-A16 kernel does not turn halved bytes into time, and W4A16 adds dequantization work to the compute-bound prefill.</p>')
@@ -572,8 +641,10 @@ def render() -> str:
     parts.append('<h2>What each change bought</h2><ul class="list">')
     for icon, title, body in CHANGES:
         parts.append(f'<li>{ICON[icon]}<div><b>{esc(title)}</b><span>{esc(body)}</span></div></li>')
-    parts.append('</ul>'
-                 f'<div class="chartbox">{energy_chart("Energy per decision, by build")}</div>')
+    parts.append('</ul><h3>Energy per decision</h3>'
+                 '<p>Board input rail by tegrastats at 100 ms, integrated over the timed block and divided by the decisions; the mean power while deciding is printed above each column.</p>'
+                 '<div class="legend"><span class="key"><i style="background:var(--field)"></i>measured here</span><span class="key"><i class="hatch"></i>published, not run here</span></div>'
+                 f'<div class="chartbox">{venergy_chart("Energy per decision, by build")}</div>')
 
     parts.append('<h2>Issues found, with causes</h2><p>In the order they happened. The full log with times is <a href="https://github.com/obiedeh/bench2field/blob/master/case_studies/07_alpamayo2_edge_edgellm/FRICTION_LOG.md">FRICTION_LOG.md</a>.</p><ul class="list">')
     for i, (title, cause, fix) in enumerate(ISSUES, 1):
