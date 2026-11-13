@@ -523,6 +523,7 @@ svg.dial .dial-title{fill:var(--fg);font-size:19px;font-weight:600;letter-spacin
 .lamp.warn .lens{color:var(--signal);border-color:var(--signal);box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--signal) 18%,transparent)}
 .lamp.bad .lens{color:var(--deadline);border-color:var(--deadline);box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--deadline) 18%,transparent)}
 .lamp.off .lens{color:var(--dim)}
+@media(max-width:480px){h1{font-size:29px;letter-spacing:-.05em}.sub{font-size:.86rem;line-height:1.45;margin-top:10px}main{padding:28px 16px 64px}.eyebrow{font-size:11px}}
 @media(max-width:760px){.dials{grid-template-columns:1fr}.dials .side{padding:0;max-width:300px;margin:0 auto}.cluster{padding:28px 16px 20px}}
 .chartbox{overflow-x:auto}svg.chart{width:100%;min-width:600px;height:auto;display:block;margin:20px 0 8px;font:13px var(--sans)}
 svg .grid{stroke:var(--line);stroke-width:1}svg .axis-line{stroke:var(--line-strong);stroke-width:1}svg .tick,svg .axis{fill:var(--muted)}svg .label{fill:var(--fg);font-size:13px}svg .value{fill:var(--fg)}svg .value-on{fill:#111;font-size:12px;font-weight:600}
@@ -557,7 +558,7 @@ def render() -> str:
              '<nav><a href="https://github.com/obiedeh/bench2field">Repository</a><a href="https://github.com/obiedeh/bench2field/tree/master/case_studies/07_alpamayo2_edge_edgellm">Case study</a><a href="https://embodiededge.ai">Lab</a><a href="https://github.com/obiedeh">Obinna Edeh</a></nav></div></div><main>']
     parts.append('<header><div><p class="eyebrow">Bench2Field · Case study 07</p>'
                  '<h1><span class="ee-b">Alpamayo 2 Edge</span> with <span class="nw">TensorRT Edge-LLM</span> <span class="nw">on the <span class="ee-g">Jetson AGX Thor</span></span></h1>'
-                 f'<div class="sub">NVIDIA\'s deployment recipe replicated on the Jetson board and pushed further · {esc(BOARD["jetpack"].replace("Installed: ", "JetPack "))}, TensorRT {esc(BOARD["tensorrt"])}, CUDA {esc(BOARD["cuda"])}, {esc(BOARD["power_mode"].replace("NV Power Mode: ", ""))} · 12 November 2026 · generated from <code>07_alpamayo2_edge_edgellm/runs/</code></div></div>'
+                 f'<div class="sub">NVIDIA\'s deployment recipe replicated on the Jetson board and pushed further · {esc(BOARD["jetpack"].replace("Installed: ", "JetPack "))}, TensorRT {esc(BOARD["tensorrt"])}, CUDA {esc(BOARD["cuda"])}, {esc(BOARD["power_mode"].replace("NV Power Mode: ", ""))} · 12 November 2026</div></div>'
                  '<button class="theme" id="theme">Light theme</button></header>')
 
     # The instrument cluster: decisions per second in the middle (the planner wants 10 Hz), reasoning tokens per
