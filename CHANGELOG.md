@@ -6,6 +6,7 @@ run file on named hardware, as the project rules require.
 
 ## Unreleased
 
+- 2026-11-12: Case study 07 report: link preview. Shared links to the report now show the gauge panel (`report/preview.png`, 1200 x 630: tokens per second, decisions per second against the 10 Hz deadline, energy per decision, and the six findings) with a title and description; the tags are written by `tools/make_report.py`.
 - 2026-11-12: Case study 07 report: the title keeps "on the Jetson AGX Thor" together on every screen width (two lines on a desktop, three on a phone, title and subtitle smaller on phones); the issue cards no longer force a horizontal page scroll on phones.
 - 2026-11-12: Case study 07 report: the stage breakdown and the energy chart are vertical columns (the build, clip and trajectory charts stay horizontal for their long labels); the title keeps "Jetson AGX Thor" on one line.
 - 2026-11-12: Case study 07 report redesigned as an instrument cluster: a speedometer for decisions per second against the 10 Hz deadline (PyTorch, NVIDIA and Embedl marked), a tachometer for reasoning tokens per second, an energy gauge, and six tell-tale lamps for the findings; wider page, more space between sections, larger cards and tables. Same numbers, same sources.

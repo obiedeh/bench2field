@@ -61,6 +61,10 @@ PUBLISHED = [
 ]
 
 
+# Link preview (owner, 2026-11-12): the gauge panel, report/preview.png, 1200 x 630.
+PREVIEW_META = '<meta name="description" content="NVIDIA\'s FP8 Edge-LLM recipe for Alpamayo 2 Edge on the Jetson AGX Thor: 367 ms median per decision against a 100 ms deadline on nine clips, with energy per decision and seven issues logged."><meta property="og:type" content="article"><meta property="og:title" content="Case study 07: Alpamayo 2 Edge with TensorRT Edge-LLM on the Jetson AGX Thor"><meta property="og:description" content="NVIDIA\'s FP8 Edge-LLM recipe for Alpamayo 2 Edge on the Jetson AGX Thor: 367 ms median per decision against a 100 ms deadline on nine clips, with energy per decision and seven issues logged."><meta property="og:url" content="https://obiedeh.github.io/bench2field/case_studies/07_alpamayo2_edge_edgellm/report/index.html"><meta property="og:image" content="https://obiedeh.github.io/bench2field/case_studies/07_alpamayo2_edge_edgellm/report/preview.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Three gauges: 93 reasoning tokens per second, 2.7 decisions per second against a 10 Hz deadline, 29 joules per decision"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://obiedeh.github.io/bench2field/case_studies/07_alpamayo2_edge_edgellm/report/preview.png">'
+
+
 def esc(x) -> str:
     return html.escape(str(x))
 
@@ -553,7 +557,7 @@ def render() -> str:
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
     parts = [f'<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-             f'<title>Case study 07: Alpamayo 2 Edge with TensorRT Edge-LLM on the Jetson AGX Thor – Bench2Field report</title><style>{CSS}</style></head><body>'
+             f'<title>Case study 07: Alpamayo 2 Edge with TensorRT Edge-LLM on the Jetson AGX Thor – Bench2Field report</title>{PREVIEW_META}<style>{CSS}</style></head><body>'
              '<div class="ee-band"><div class="in"><a class="ee-mark" href="https://embodiededge.ai"><i></i>EmbodiedEdge <span>Evidence</span></a>'
              '<nav><a href="https://github.com/obiedeh/bench2field">Repository</a><a href="https://github.com/obiedeh/bench2field/tree/master/case_studies/07_alpamayo2_edge_edgellm">Case study</a><a href="https://embodiededge.ai">Lab</a><a href="https://github.com/obiedeh">Obinna Edeh</a></nav></div></div><main>']
     parts.append('<header><div><p class="eyebrow">Bench2Field · Case study 07</p>'
