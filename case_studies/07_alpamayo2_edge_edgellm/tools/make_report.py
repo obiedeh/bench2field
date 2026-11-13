@@ -500,7 +500,7 @@ main{max-width:1040px;margin:0 auto;padding:40px 24px 80px}
 p{max-width:78ch;margin:12px 0 20px}
 .eyebrow{color:var(--field);font:600 12px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;margin:0 0 12px}
 header{display:flex;flex-wrap:wrap;gap:16px 24px;align-items:flex-end;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:28px;margin-bottom:36px}
-h1{font-size:clamp(40px,4.6vw,64px);line-height:1;font-weight:500;letter-spacing:-.06em;margin:0}h1 .ee-g,h1 .nw{white-space:nowrap}h1 .ee-g{color:var(--field)}h1 .ee-b{color:var(--sim)}
+h1{font-size:clamp(31px,4.2vw,56px);line-height:1;font-weight:500;letter-spacing:-.06em;margin:0}h1 .ee-g,h1 .nw{white-space:nowrap}h1 .ee-g{color:var(--field)}h1 .ee-b{color:var(--sim)}
 h2{font-size:clamp(28px,3.2vw,40px);line-height:1.08;font-weight:500;letter-spacing:-.04em;margin:80px 0 16px;padding-top:28px;border-top:1px solid var(--line)}
 h3{font-size:1.1rem;font-weight:600;margin:32px 0 8px}
 .sub{color:var(--muted);margin-top:14px;max-width:70ch}button.theme{background:transparent;color:var(--fg);border:1px solid var(--line-strong);border-radius:0;padding:8px 14px;cursor:pointer;font:600 .8rem var(--sans)}
@@ -533,7 +533,7 @@ svg .mean{stroke:var(--fg);stroke-width:1.5}svg .marker{stroke:var(--bg);stroke-
 table{border-collapse:collapse;width:100%;font-size:.9rem;margin:24px 0 8px}th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:600}
 .scroll{overflow-x:auto;margin-bottom:12px}td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .list{list-style:none;padding:0;margin:20px 0;display:grid;gap:14px}.list li{display:grid;grid-template-columns:28px 1fr;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px}
-.list .ico{width:22px;height:22px;margin-top:2px}.list b{display:block;font-weight:600;margin-bottom:4px}.list span{color:var(--muted);font-size:.92rem;line-height:1.5}
+.list li>div{min-width:0}.list .ico{width:22px;height:22px;margin-top:2px}.list b{display:block;font-weight:600;margin-bottom:4px}.list span{color:var(--muted);font-size:.92rem;line-height:1.5;overflow-wrap:anywhere}
 .note{border-left:3px solid var(--signal);padding:6px 16px;color:var(--muted);margin:20px 0}code{font:.88em var(--mono);color:var(--fg)}
 footer{color:var(--muted);font-size:.85rem;margin-top:80px;border-top:1px solid var(--line);padding-top:20px;max-width:78ch}footer .lab{display:block;margin-top:10px;color:var(--dim)}
 """
@@ -556,7 +556,7 @@ def render() -> str:
              '<div class="ee-band"><div class="in"><a class="ee-mark" href="https://embodiededge.ai"><i></i>EmbodiedEdge <span>Evidence</span></a>'
              '<nav><a href="https://github.com/obiedeh/bench2field">Repository</a><a href="https://github.com/obiedeh/bench2field/tree/master/case_studies/07_alpamayo2_edge_edgellm">Case study</a><a href="https://embodiededge.ai">Lab</a><a href="https://github.com/obiedeh">Obinna Edeh</a></nav></div></div><main>']
     parts.append('<header><div><p class="eyebrow">Bench2Field · Case study 07</p>'
-                 '<h1><span class="ee-b">Alpamayo 2 Edge</span> with <span class="nw">TensorRT Edge-LLM</span> on the <span class="ee-g">Jetson AGX Thor</span></h1>'
+                 '<h1><span class="ee-b">Alpamayo 2 Edge</span> with <span class="nw">TensorRT Edge-LLM</span> <span class="nw">on the <span class="ee-g">Jetson AGX Thor</span></span></h1>'
                  f'<div class="sub">NVIDIA\'s deployment recipe replicated on the Jetson board and pushed further · {esc(BOARD["jetpack"].replace("Installed: ", "JetPack "))}, TensorRT {esc(BOARD["tensorrt"])}, CUDA {esc(BOARD["cuda"])}, {esc(BOARD["power_mode"].replace("NV Power Mode: ", ""))} · 12 November 2026 · generated from <code>07_alpamayo2_edge_edgellm/runs/</code></div></div>'
                  '<button class="theme" id="theme">Light theme</button></header>')
 

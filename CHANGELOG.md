@@ -6,6 +6,7 @@ run file on named hardware, as the project rules require.
 
 ## Unreleased
 
+- 2026-11-12: Case study 07 report: the title keeps "on the Jetson AGX Thor" together on every screen width (two lines on a desktop, three on a phone); the issue cards no longer force a horizontal page scroll on phones.
 - 2026-11-12: Case study 07 report: the stage breakdown and the energy chart are vertical columns (the build, clip and trajectory charts stay horizontal for their long labels); the title keeps "Jetson AGX Thor" on one line.
 - 2026-11-12: Case study 07 report redesigned as an instrument cluster: a speedometer for decisions per second against the 10 Hz deadline (PyTorch, NVIDIA and Embedl marked), a tachometer for reasoning tokens per second, an energy gauge, and six tell-tale lamps for the findings; wider page, more space between sections, larger cards and tables. Same numbers, same sources.
 - 2026-11-12: Case study 07 report (`report/index.html`, `tools/make_report.py`): one self-contained page in the Bench2Field theme with every build's median and tail against the deadline, the stage breakdown, the nine clips, the trajectory comparison against the candidate spread, energy, what each change bought, the seven issues and provenance; every number read from `runs/`. Vision-cache line corrected (stage 98 to 27 ms, p95 613 to 525; the median moved 9 ms).
