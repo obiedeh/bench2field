@@ -1,0 +1,14 @@
+[0;93m2026-11-11 18:00:01.214162475 [W:onnxruntime:Default, tensorrt_execution_provider.h:100 log] [2026-11-12 00:00:01 WARNING] WeightsContext.cpp:468: Empty initializer /backbone/upsample/Constant_1_output_0 was provided with non-empty data. Overriding data to nullptr[m
+[0;93m2026-11-11 18:00:01.214212572 [W:onnxruntime:Default, tensorrt_execution_provider.h:100 log] [2026-11-12 00:00:01 WARNING] WeightsContext.cpp:468: Empty initializer /backbone/upsample_1/Constant_1_output_0 was provided with non-empty data. Overriding data to nullptr[m
+[0;93m2026-11-11 18:00:01.250709476 [W:onnxruntime:Default, tensorrt_execution_provider.h:100 log] [2026-11-12 00:00:01 WARNING] WeightsContext.cpp:468: Empty initializer /backbone/upsample/Constant_1_output_0 was provided with non-empty data. Overriding data to nullptr[m
+[0;93m2026-11-11 18:00:01.250741051 [W:onnxruntime:Default, tensorrt_execution_provider.h:100 log] [2026-11-12 00:00:01 WARNING] WeightsContext.cpp:468: Empty initializer /backbone/upsample_1/Constant_1_output_0 was provided with non-empty data. Overriding data to nullptr[m
+stage          p50 ms   p95 ms   share
+decode          1.714    1.772     32%
+preprocess      0.709    0.829     13%
+h2d             0.277    0.347      5%
+inference       1.272    1.356     24%
+d2h             0.265    0.289      5%
+postprocess     1.154    1.236     21%
+total           5.388    5.812
+session.run with numpy feeds (what b2f run times): p50 1.759 ms
+detections per frame: mean 0.0; wrote runs/busy_spin_2.json

@@ -1,0 +1,12 @@
+[0;93m2026-11-11 19:42:22.013195531 [W:onnxruntime:Default, device_discovery.cc:211 DiscoverDevicesForPlatform] GPU device discovery failed: device_discovery.cc:91 ReadFileContents Failed to open file: "/sys/class/drm/card1/device/vendor"[m
+stage          p50 ms   p95 ms   share
+decode          1.964    2.005      9%
+preprocess      1.656    1.732      8%
+h2d             0.755    0.794      4%
+inference      10.873   10.933     52%
+d2h             0.643    0.673      3%
+postprocess     4.890    5.371     24%
+total          20.798   21.225
+session.run with numpy feeds (what b2f run times): p50 11.956 ms
+cpu frequency (mean across cores): p50 1984 MHz, range 1984-1984 MHz, governor schedutil
+detections per frame: mean 0.0; wrote /tmp/spin-repeat/pinned_480p/06_pinned.json

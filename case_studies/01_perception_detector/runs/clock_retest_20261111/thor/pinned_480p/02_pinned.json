@@ -1,0 +1,236 @@
+{
+  "what": "end-to-end pipeline profile, one frame at a time, stages timed on the host clock",
+  "model": {
+    "file": "models/yolox_s.onnx",
+    "sha256": "00b70c44385bb5567e784b0c1efae213c4f2ec06efacfc8e3f52eca333356205"
+  },
+  "frames": {
+    "dir": "data/rover_frames_480p",
+    "n": 300,
+    "warmup": 30,
+    "set_sha256": "b39dce6618b8ae269beeedcadaa7dd34f5c4160534fc7f60e94c196717d088b5",
+    "decoded_shape": [
+      480,
+      640,
+      3
+    ],
+    "jpeg_bytes_mean": 38664.88
+  },
+  "stages": {
+    "decode": {
+      "n": 300,
+      "p50_ms": 1.3103974924888462,
+      "p95_ms": 1.3271528012410272,
+      "p99_ms": 1.332075006357627,
+      "mean_ms": 1.3130180108904217,
+      "max_ms": 1.360462003503926
+    },
+    "preprocess": {
+      "n": 300,
+      "p50_ms": 0.811388497822918,
+      "p95_ms": 0.8583945469581522,
+      "p99_ms": 0.8686255321663339,
+      "mean_ms": 0.8178792997205164,
+      "max_ms": 0.8761470089666545
+    },
+    "h2d": {
+      "n": 300,
+      "p50_ms": 0.11449099838500842,
+      "p95_ms": 0.3102961964032147,
+      "p99_ms": 0.317826943937689,
+      "mean_ms": 0.1787085601245053,
+      "max_ms": 0.32996200025081635
+    },
+    "inference": {
+      "n": 300,
+      "p50_ms": 2.449692998197861,
+      "p95_ms": 2.588597795693204,
+      "p99_ms": 2.619978652219288,
+      "mean_ms": 2.476334499757892,
+      "max_ms": 2.632340998388827
+    },
+    "d2h": {
+      "n": 300,
+      "p50_ms": 0.1369580058963038,
+      "p95_ms": 0.14866630517644808,
+      "p99_ms": 0.16158428392373025,
+      "mean_ms": 0.13811657035451694,
+      "max_ms": 0.16399999731220305
+    },
+    "postprocess": {
+      "n": 300,
+      "p50_ms": 2.034299999650102,
+      "p95_ms": 2.094903108809376,
+      "p99_ms": 2.114786544989329,
+      "mean_ms": 2.038428876597512,
+      "max_ms": 2.1410920016933233
+    }
+  },
+  "stage_share_of_total_p50": {
+    "decode": 0.19109726174094588,
+    "preprocess": 0.11832602018152812,
+    "h2d": 0.016696396635960745,
+    "inference": 0.35724246020377953,
+    "d2h": 0.019972794553028916,
+    "postprocess": 0.29666506668475684
+  },
+  "total_per_frame": {
+    "n": 300,
+    "p50_ms": 6.954707998374943,
+    "p95_ms": 7.169448089553043,
+    "p99_ms": 7.2135608350799885,
+    "mean_ms": 6.962485817445365,
+    "max_ms": 7.248024005093612
+  },
+  "session_run_numpy": {
+    "n": 300,
+    "p50_ms": 2.5564519964973442,
+    "p95_ms": 2.7038414496928453,
+    "p99_ms": 2.7386372040200513,
+    "mean_ms": 2.5821705768369916,
+    "max_ms": 3.023905010195449
+  },
+  "copies_h2d_plus_d2h_p50_ms": 0.2514490042813122,
+  "throughput_fps_sequential": 142.97567615983402,
+  "detections_per_frame": {
+    "mean": 0.0,
+    "max": 0,
+    "frames_with_any": 0
+  },
+  "thresholds": {
+    "conf": 0.3,
+    "nms": 0.45
+  },
+  "settings": {
+    "ort_allow_spinning": false,
+    "cv2_threads": 14
+  },
+  "telemetry": {
+    "n_samples": 5,
+    "cpu_cores_online": {
+      "p50": 14.0,
+      "peak": 14.0
+    },
+    "cpu_util_max_pct": {
+      "p50": 79.5,
+      "peak": 82.0
+    },
+    "cpu_util_mean_pct": {
+      "p50": 5.857142857142858,
+      "peak": 6.071428571428571
+    },
+    "power_board_w": {
+      "p50": 42.37,
+      "peak": 60.294
+    },
+    "power_vdd_cpu_soc_mss_w": {
+      "p50": 10.810500000000001,
+      "peak": 11.007
+    },
+    "power_vdd_gpu_w": {
+      "p50": 18.076,
+      "peak": 19.262
+    },
+    "power_vin_sys_5v0_w": {
+      "p50": 8.3615,
+      "peak": 8.52
+    },
+    "power_vin_w": {
+      "p50": 42.37,
+      "peak": 60.294
+    },
+    "ram_total_mb": {
+      "p50": 125772.0,
+      "peak": 125772.0
+    },
+    "ram_used_mb": {
+      "p50": 14526.0,
+      "peak": 14530.0
+    },
+    "temp_cpu_c": {
+      "p50": 36.75,
+      "peak": 37.093
+    },
+    "temp_gpu_c": {
+      "p50": 38.2185,
+      "peak": 38.562
+    },
+    "temp_soc012_c": {
+      "p50": 36.3435,
+      "peak": 36.531
+    },
+    "temp_soc345_c": {
+      "p50": 38.375,
+      "peak": 38.5
+    },
+    "temp_tj_c": {
+      "p50": 38.375,
+      "peak": 38.562
+    }
+  },
+  "platform": {
+    "host": "bench-thor",
+    "machine": "aarch64",
+    "system": "Linux",
+    "kernel": "6.8.12-tegra",
+    "python": "3.12.3",
+    "l4t_release": "# R38 (release), REVISION: 4.0, GCID: 43443517, BOARD: generic, EABI: aarch64, DATE: Wed Dec 31 00:15:19 UTC 2025",
+    "is_jetson": true,
+    "telemetry": "tegrastats",
+    "nvpmodel": "NV Power Mode: MAXN",
+    "backend": "onnxruntime",
+    "onnxruntime": "1.24.0",
+    "tensorrt": "10.13.3",
+    "cudnn": "9.12.0",
+    "cuda_runtime": "13.2",
+    "provider_active": "TensorrtExecutionProvider",
+    "precision": "fp32",
+    "intra_op_threads": "default",
+    "inter_op_threads": "default",
+    "allow_spinning": false,
+    "git": {
+      "commit": "dadbabefb9297e4101265d759e81723fe44741e6",
+      "dirty": false,
+      "root": "~/github/bench2field"
+    }
+  },
+  "background": {
+    "stopped_for_this_run": [],
+    "containers_running": [],
+    "top_processes": [
+      {
+        "pid": 16052,
+        "cpu_pct": 1.1,
+        "mem_pct": 0.0,
+        "cmd": "[kworker/u28:1+devfreq_wq]"
+      },
+      {
+        "pid": 3244,
+        "cpu_pct": 0.4,
+        "mem_pct": 0.1,
+        "cmd": "/usr/bin/gnome-shell"
+      },
+      {
+        "pid": 2270,
+        "cpu_pct": 0.2,
+        "mem_pct": 0.0,
+        "cmd": "[nv_queue]"
+      },
+      {
+        "pid": 2403,
+        "cpu_pct": 0.2,
+        "mem_pct": 0.0,
+        "cmd": "~/github/physical-ai-safety-observability/.venv/bin/python3 ~/github/physical-ai-safety-observabilit"
+      },
+      {
+        "pid": 3081,
+        "cpu_pct": 0.2,
+        "mem_pct": 0.0,
+        "cmd": "(udev-worker)"
+      }
+    ],
+    "load_avg_1m": 0.44384765625
+  },
+  "nvtx": false,
+  "created_at": "2026-11-12T01:40:24.948237+00:00"
+}
