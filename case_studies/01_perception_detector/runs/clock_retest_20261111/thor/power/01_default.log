@@ -1,0 +1,2 @@
+[0;93m2026-11-11 19:48:38.766468676 [W:onnxruntime:Default, device_discovery.cc:211 DiscoverDevicesForPlatform] GPU device discovery failed: device_discovery.cc:91 ReadFileContents Failed to open file: "/sys/class/drm/card3/device/vendor"[m
+[0;93m2026-11-11 19:48:40.810903071 [W:onnxruntime:Default, tensorrt_execution_provider.h:92 log] [2026-11-12 01:48:40 WARNING] Using an engine plan file across different models of devices is not supported and is likely to affect performance or even cause errors or deadlock.[m

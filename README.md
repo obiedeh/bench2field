@@ -1,6 +1,10 @@
 # Bench2Field
 
-**The detector fits the robot's frame; the frame doesn't.** On the rover's Jetson Orin NX, YOLOX-s in FP32 answers in **26.9 ms** at the camera's real 26 Hz, inside the 33.3 ms deadline. The whole frame around it, decode to detections, takes **47.8 ms**. A benchmark that times the model alone says GO; the robot would drop one frame in eight.
+**The detector fits the robot's frame; the frame doesn't.** On the rover's Jetson Orin NX, YOLOX-s in FP32 answers in **26.9 ms** at the camera's real 26 Hz, inside the 33.3 ms deadline. The whole frame around it, decode to detections, takes **47.8 ms** at the board's default clocks. A benchmark that times the model alone says GO; at default clocks the robot would drop one frame in eight.
+
+**Corrected 2026-11-14:** the original figure was measured at default clocks; see the retest below.
+
+**Retest, 2026-11-11:** with the board's clocks pinned at maximum (`jetson_clocks`, which raises the CPU, GPU and memory clocks together) the same frame takes **21.1 to 21.5 ms** at p95 on the Orin NX, inside the 33.3 ms deadline. At default clocks the GPU sat mostly at 408 of 1,173 MHz and the retest reproduced the original figure (48.6 to 49.3 ms). Pinning cost about 60% more board power at 30 frames per second (8.9 W to 14.5 W). On the Jetson AGX Thor the frame went from about 14 ms to about 7 ms. Limits: saved image files, not the live camera with the rover's stack running; the three clocks were pinned together, not separated; one test session per board. The same session did not reproduce the thread-spinning frame spikes reported in phase 1. Records and method: [clock and thread-spinning retest](case_studies/01_perception_detector/runs/clock_retest_20261111/README.md).
 
 ![Model alone versus the full frame on the RTX 5090, the Jetson AGX Thor and the rover's Jetson Orin NX, against the 33.3 ms deadline](case_studies/01_perception_detector/report/headline.svg)
 

@@ -1,0 +1,12 @@
+[0;93m2026-11-11 19:40:04.878103183 [W:onnxruntime:Default, device_discovery.cc:211 DiscoverDevicesForPlatform] GPU device discovery failed: device_discovery.cc:91 ReadFileContents Failed to open file: "/sys/class/drm/card3/device/vendor"[m
+[0;93m2026-11-11 19:40:06.607718806 [W:onnxruntime:Default, tensorrt_execution_provider.h:92 log] [2026-11-12 01:40:06 WARNING] Using an engine plan file across different models of devices is not supported and is likely to affect performance or even cause errors or deadlock.[m
+stage          p50 ms   p95 ms   share
+decode          3.086    3.411     22%
+preprocess      1.523    1.674     11%
+h2d             0.550    0.693      4%
+inference       4.712    5.082     33%
+d2h             0.232    0.277      2%
+postprocess     4.083    4.471     29%
+total          14.221   15.322
+session.run with numpy feeds (what b2f run times): p50 3.021 ms
+detections per frame: mean 0.0; wrote /tmp/spin-repeat/pinned_480p/01_default.json

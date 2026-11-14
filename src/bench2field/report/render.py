@@ -474,7 +474,7 @@ def render(cs: CaseStudy) -> str:
 <div class="scroll">{stage_table(same) if same else ''}</div>
 
 <h2>Stage breakdown on the 5090 and the spin effect</h2>
-<p>onnxruntime's intra-op threads spin-wait between runs by default. In an inference-only sweep that costs almost nothing; in a frame with host-side stages they compete for the CPU.</p>
+<p>onnxruntime's intra-op threads spin-wait between runs by default. The chart and table below are one run per setting from 2026-10-03. <b>Correction, 2026-11-14:</b> the difference did not hold on retest. Alternating repeats on 2026-11-11 on the workstation, the Jetson AGX Thor and the Jetson Orin NX, idle and under load, showed the same frame tail with spinning on or off; the larger effect found was the board's clock state (<a href="https://github.com/obiedeh/bench2field/blob/master/case_studies/01_perception_detector/runs/clock_retest_20261111/README.md">records</a>).</p>
 <div class="chartbox">{stacked_stages(spin, None, 'Stage cost per frame on the 5090, spinning on and off') if spin else '<p>No spin pair.</p>'}</div>
 <div class="scroll">{stage_table(spin) if spin else ''}</div>
 

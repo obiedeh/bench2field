@@ -1,0 +1,12 @@
+[0;93m2026-11-11 18:08:13.571946249 [W:onnxruntime:Default, device_discovery.cc:211 DiscoverDevicesForPlatform] GPU device discovery failed: device_discovery.cc:91 ReadFileContents Failed to open file: "/sys/class/drm/card1/device/vendor"[m
+stage          p50 ms   p95 ms   share
+decode          5.174    5.229     11%
+preprocess      3.394    3.555      7%
+h2d             1.288    1.395      3%
+inference      24.887   25.115     53%
+d2h             1.230    1.307      3%
+postprocess    11.312   12.731     24%
+total          47.309   48.875
+session.run with numpy feeds (what b2f run times): p50 22.999 ms
+cpu frequency (mean across cores): p50 730 MHz, range 730-1591 MHz, governor schedutil
+detections per frame: mean 0.0; wrote /tmp/spin-repeat/rover_frames_480p/nospin_4.json

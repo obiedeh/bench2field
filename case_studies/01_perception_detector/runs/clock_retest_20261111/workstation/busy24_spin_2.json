@@ -1,0 +1,210 @@
+{
+  "what": "end-to-end pipeline profile, one frame at a time, stages timed on the host clock",
+  "model": {
+    "file": "models/yolox_s.onnx",
+    "sha256": "00b70c44385bb5567e784b0c1efae213c4f2ec06efacfc8e3f52eca333356205"
+  },
+  "frames": {
+    "dir": "~/github/bench2field/data/rover_frames_720p",
+    "n": 300,
+    "warmup": 30,
+    "set_sha256": "4eb92662a7477da28206816836c084e36b5457b596b1d8a7f83b6718b1820c47",
+    "decoded_shape": [
+      720,
+      1280,
+      3
+    ],
+    "jpeg_bytes_mean": 115988.98666666666
+  },
+  "stages": {
+    "decode": {
+      "n": 300,
+      "p50_ms": 1.6569920117035508,
+      "p95_ms": 1.7123406403698027,
+      "p99_ms": 2.3772387695498725,
+      "mean_ms": 1.6858685947954655,
+      "max_ms": 4.711097804829478
+    },
+    "preprocess": {
+      "n": 300,
+      "p50_ms": 0.6911088712513447,
+      "p95_ms": 0.7643408025614917,
+      "p99_ms": 1.7288418114185151,
+      "mean_ms": 0.7342437266682585,
+      "max_ms": 4.273037193343043
+    },
+    "h2d": {
+      "n": 300,
+      "p50_ms": 0.24401198606938124,
+      "p95_ms": 0.28679720126092434,
+      "p99_ms": 0.3148378455080091,
+      "mean_ms": 0.2507463803825279,
+      "max_ms": 0.5909670144319534
+    },
+    "inference": {
+      "n": 300,
+      "p50_ms": 1.2351133627817035,
+      "p95_ms": 1.3648262014612556,
+      "p99_ms": 2.300968535710113,
+      "mean_ms": 1.2607879059699674,
+      "max_ms": 5.259581143036485
+    },
+    "d2h": {
+      "n": 300,
+      "p50_ms": 0.21889503113925457,
+      "p95_ms": 0.27655785670503974,
+      "p99_ms": 0.4145341599360108,
+      "mean_ms": 0.23258697396765152,
+      "max_ms": 1.4290320686995983
+    },
+    "postprocess": {
+      "n": 300,
+      "p50_ms": 1.1131553910672665,
+      "p95_ms": 1.5710456878878178,
+      "p99_ms": 1.9081263546831895,
+      "mean_ms": 1.1678229443108041,
+      "max_ms": 4.167749080806971
+    }
+  },
+  "stage_share_of_total_p50": {
+    "decode": 0.3211675052189469,
+    "preprocess": 0.13395460596474346,
+    "h2d": 0.04729577466632011,
+    "inference": 0.23939661421744543,
+    "d2h": 0.04242746528605213,
+    "postprocess": 0.215758034646492
+  },
+  "total_per_frame": {
+    "n": 300,
+    "p50_ms": 5.170134361833334,
+    "p95_ms": 6.13421384477988,
+    "p99_ms": 9.38689899398013,
+    "mean_ms": 5.332056526094675,
+    "max_ms": 14.676927821710706
+  },
+  "session_run_numpy": {
+    "n": 300,
+    "p50_ms": 1.6646086005493999,
+    "p95_ms": 1.7843295237980783,
+    "p99_ms": 1.8533612275496125,
+    "mean_ms": 1.6539075877517462,
+    "max_ms": 1.8620870541781187
+  },
+  "copies_h2d_plus_d2h_p50_ms": 0.4629070172086358,
+  "throughput_fps_sequential": 187.07060839620965,
+  "detections_per_frame": {
+    "mean": 0.0,
+    "max": 0,
+    "frames_with_any": 0
+  },
+  "thresholds": {
+    "conf": 0.3,
+    "nms": 0.45
+  },
+  "settings": {
+    "ort_allow_spinning": true,
+    "cv2_threads": 24
+  },
+  "telemetry": {
+    "n_samples": 4,
+    "gpu_mem_used_mb": {
+      "p50": 3182.375,
+      "peak": 3196.3125
+    },
+    "gpu_mem_util_pct": {
+      "p50": 2.0,
+      "peak": 3.0
+    },
+    "gpu_util_pct": {
+      "p50": 18.5,
+      "peak": 31.0
+    },
+    "power_gpu_w": {
+      "p50": 109.88550000000001,
+      "peak": 141.868
+    },
+    "sm_clock_mhz": {
+      "p50": 2677.5,
+      "peak": 2685.0
+    },
+    "temp_gpu_c": {
+      "p50": 50.5,
+      "peak": 51.0
+    }
+  },
+  "platform": {
+    "host": "rtx-5090-workstation",
+    "machine": "x86_64",
+    "system": "Linux",
+    "kernel": "6.17.0-22-generic",
+    "python": "3.12.3",
+    "telemetry": "nvml",
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "driver": "580.196.07",
+    "backend": "onnxruntime",
+    "onnxruntime": "1.30.0",
+    "tensorrt": "10.16.1",
+    "cudnn": "9.19.0",
+    "cuda_runtime": "13.0",
+    "provider_active": "TensorrtExecutionProvider",
+    "precision": "fp32",
+    "intra_op_threads": "default",
+    "inter_op_threads": "default",
+    "allow_spinning": true,
+    "git": {
+      "commit": "753f501fc0f90891d5b8520f798870ead3116255",
+      "dirty": false,
+      "root": "~/github/bench2field"
+    }
+  },
+  "background": {
+    "stopped_for_this_run": [],
+    "containers_running": [
+      {
+        "name": "edgewarden-sip-impairment-20261108",
+        "image": "ubuntu:24.04",
+        "status": "Up 2 days"
+      },
+      {
+        "name": "edgewarden-sip-lab-20261108",
+        "image": "ubuntu:24.04",
+        "status": "Up 3 days"
+      }
+    ],
+    "top_processes": [
+      {
+        "pid": 786242,
+        "cpu_pct": 1243.0,
+        "mem_pct": 0.0,
+        "cmd": "<home>/github/edgewarden/.venv/bin/python -u <home>/demo_runs/showcase-20261104/local_detector_server.py"
+      },
+      {
+        "pid": 2002808,
+        "cpu_pct": 95.2,
+        "mem_pct": 0.0,
+        "cmd": "<home>/github/bench2field/.venv/bin/python -c while True: pass"
+      },
+      {
+        "pid": 2002810,
+        "cpu_pct": 94.9,
+        "mem_pct": 0.0,
+        "cmd": "<home>/github/bench2field/.venv/bin/python -c while True: pass"
+      },
+      {
+        "pid": 2002814,
+        "cpu_pct": 94.4,
+        "mem_pct": 0.0,
+        "cmd": "<home>/github/bench2field/.venv/bin/python -c while True: pass"
+      },
+      {
+        "pid": 2002798,
+        "cpu_pct": 93.9,
+        "mem_pct": 0.0,
+        "cmd": "<home>/github/bench2field/.venv/bin/python -c while True: pass"
+      }
+    ],
+    "load_avg_1m": 12.484375
+  },
+  "nvtx": true,
+  "created_at": "2026-11-12T00:01:30.325411+00:00"
+}
